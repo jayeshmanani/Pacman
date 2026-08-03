@@ -10,8 +10,8 @@ CONFIG ?= config.json
 .PHONY: install run debug clean lint lint-strict test check-python-version
 
 install:
-	$(UV) venv $(VENV)
-	$(UV) pip install flake8 flake8-docstrings mypy pytest
+	$(UV) sync
+	git config core.hooksPath .githooks
 
 check-python-version:
 	@$(PYTHON) -c "import sys; exit(0 if sys.version_info >= (3, 10) else 1)" || (echo "[ERROR] Python 3.10 or higher is required!" && exit 1)
