@@ -30,6 +30,10 @@ if [ -f ".venv/bin/python" ]; then
     PYTHON_CMD=".venv/bin/python"
 fi
 
+if ! command -v "$PYTHON_CMD" >/dev/null 2>&1 && [ ! -x "$PYTHON_CMD" ]; then
+    printf "\033[0;31m[FAIL] Python interpreter not found (%s). Install Python or create .venv.\033[0m\n" "$PYTHON_CMD"
+    exit 1
+fi
 # ------------------------------------------------------------------
 # 2. Run pytest suite
 # ------------------------------------------------------------------
