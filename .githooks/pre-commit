@@ -1,0 +1,10 @@
+#!/bin/sh
+
+protected_branch='main'
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$current_branch" = "$protected_branch" ]; then
+    echo "\033[0;31m[ERROR] Direct commits to '$protected_branch' are not allowed!\033[0m"
+    echo "Switch to a feature branch first using: git checkout -b feature/your-feature"
+    exit 1
+fi
