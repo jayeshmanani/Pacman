@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# ------------------------------------------------------------------
+# 1. Branch Protection Check
+# ------------------------------------------------------------------
+protected_ref='refs/heads/main'
+
+# pre-push receives lines on stdin: <local_ref> <local_sha> <remote_ref> <remote_sha>
+while read -r local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "$protected_ref" ]; then
+        echo ""
+        printf "\033[0;31m[ERROR] Direct push to '%s' is blocked!\033[0m\n" "${protected_ref#refs/heads/}"
+        echo "Please create a Pull Request to merge your changes into '${protected_ref#refs/heads/}'."
+        echo ""
+        exit 1
+    fi
+done
+
+echo "=================================================="
+echo " Running Pre-Push Test Suite"
+echo "=================================================="
+
+# Activate virtual environment if available
+if [ -f ".venv/bin/activate" ]; then
+    . .venv/bin/activate
+fi
+
+PYTHON_CMD="python3"
+if [ -f ".venv/bin/python" ]; then
+    PYTHON_CMD=".venv/bin/python"
+fi
+
+if ! command -v "$PYTHON_CMD" >/dev/null 2>&1 && [ ! -x "$PYTHON_CMD" ]; then
+    printf "\033[0;31m[FAIL] Python interpreter not found (%s). Install Python or create .venv.\033[0m\n" "$PYTHON_CMD"
+    exit 1
+fi
+# ------------------------------------------------------------------
+# 2. Run pytest suite
+# ------------------------------------------------------------------
+if $PYTHON_CMD -m pytest --version >/dev/null 2>&1; then
+    echo " -> Running pytest..."
+    $PYTHON_CMD -m pytest tests
+    if [ $? -ne 0 ]; then
+        printf "\033[0;31m[FAIL] Tests failed! Unhandled exceptions or broken tests detected. Fix before pushing.\033[0m\n"
+        exit 1
+    fi
+else
+    printf "\033[0;33m[WARN] pytest not found. Skipping tests.\033[0m\n"
+fi
+
+printf "\033[0;32m[SUCCESS] All pre-push checks passed!\033[0m\n"
