@@ -7,8 +7,10 @@ import pytest
 from pacman.app import (
     GameState,
     GameStateController,
+    RenderFonts,
     StateControls,
     WindowSettings,
+    render_state,
     run_app,
 )
 
@@ -33,9 +35,52 @@ class _FakeEventModule:
 class _FakeSurface:
     def __init__(self) -> None:
         self.fill_colors: list[tuple[int, int, int]] = []
+        self.rendered_texts: list[str] = []
 
     def fill(self, color: tuple[int, int, int]) -> None:
         self.fill_colors.append(color)
+
+    def blit(self, source: object, destination: object) -> object:
+        if isinstance(source, _FakeRenderedText):
+            self.rendered_texts.append(source.text)
+
+        return destination
+
+
+@dataclass(frozen=True)
+class _FakeRenderedText:
+    text: str
+    color: tuple[int, int, int]
+    font_size: int
+
+    def get_rect(self, **kwargs: object) -> dict[str, object]:
+        return kwargs
+
+
+class _FakeFont:
+    def __init__(self, size: int) -> None:
+        self.size = size
+
+    def render(
+        self,
+        text: str,
+        antialias: bool,
+        color: tuple[int, int, int],
+    ) -> _FakeRenderedText:
+        return _FakeRenderedText(
+            text=text,
+            color=color,
+            font_size=self.size,
+        )
+
+
+class _FakeFontModule:
+    def __init__(self) -> None:
+        self.created_fonts: list[tuple[str | None, int]] = []
+
+    def SysFont(self, name: str | None, size: int) -> _FakeFont:
+        self.created_fonts.append((name, size))
+        return _FakeFont(size)
 
 
 class _FakeDisplay:
@@ -98,6 +143,7 @@ class _FakePygame:
         self.surface = _FakeSurface()
         self.display = _FakeDisplay(self.surface)
         self.event = _FakeEventModule(event_batches)
+        self.font = _FakeFontModule()
         self.clock = _FakeClock()
         self.time = _FakeTime(self.clock)
         self.init_calls = 0
@@ -123,6 +169,7 @@ class _FailingPygame:
         self.surface = _FakeSurface()
         self.display = _FailingDisplay()
         self.event = _FakeEventModule([])
+        self.font = _FakeFontModule()
         self.clock = _FakeClock()
         self.time = _FakeTime(self.clock)
         self.init_calls = 0
@@ -216,8 +263,56 @@ def test_run_app_opens_configured_pygame_window() -> None:
     assert pygame.display.size == (320, 240)
     assert pygame.display.caption == "Pacman Test - Main Menu"
     assert pygame.surface.fill_colors == [(16, 24, 72)]
+    assert pygame.surface.rendered_texts == [
+        "PACMAN",
+        "Press Enter or Space to Start",
+    ]
+    assert pygame.font.created_fonts == [(None, 64), (None, 28)]
     assert pygame.display.flip_calls == 1
     assert pygame.clock.framerates == [30]
+
+
+def test_main_menu_renders_expected_text() -> None:
+    """Verify that the main menu placeholder text is rendered."""
+    pygame = _FakePygame([[_FakeEvent(type=_FakePygame.QUIT)]])
+
+    run_app(pygame_module=pygame)
+
+    assert "PACMAN" in pygame.surface.rendered_texts
+    assert "Press Enter or Space to Start" in pygame.surface.rendered_texts
+
+
+def test_playing_renders_expected_placeholder_text() -> None:
+    """Verify that the game view placeholder text is rendered."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "Game View" in pygame.surface.rendered_texts
+    assert "Press E to End" in pygame.surface.rendered_texts
+
+
+def test_rendering_does_not_change_current_game_state() -> None:
+    """Verify that rendering has no effect on state transitions."""
+    controller = GameStateController(GameState.PLAYING)
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+
+    render_state(
+        pygame.surface,
+        fonts,
+        pygame,
+        WindowSettings(),
+        controller.state,
+    )
+
+    assert controller.state is GameState.PLAYING
 
 
 def test_event_loop_applies_state_transitions() -> None:
