@@ -4,12 +4,19 @@ from dataclasses import dataclass
 
 import pytest
 
-from pacman.app import WindowSettings, run_app
+from pacman.app import (
+    GameState,
+    GameStateController,
+    StateControls,
+    WindowSettings,
+    run_app,
+)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class _FakeEvent:
     type: int
+    key: int = 0
 
 
 class _FakeEventModule:
@@ -35,6 +42,7 @@ class _FakeDisplay:
     def __init__(self, surface: _FakeSurface) -> None:
         self.surface = surface
         self.caption = ""
+        self.captions: list[str] = []
         self.size: tuple[int, int] | None = None
         self.flip_calls = 0
 
@@ -44,6 +52,7 @@ class _FakeDisplay:
 
     def set_caption(self, title: str) -> None:
         self.caption = title
+        self.captions.append(title)
 
     def flip(self) -> None:
         self.flip_calls += 1
@@ -79,6 +88,11 @@ class _FakeTime:
 
 class _FakePygame:
     QUIT = 256
+    KEYDOWN = 768
+    K_RETURN = 13
+    K_SPACE = 32
+    K_e = 101
+    K_ESCAPE = 27
 
     def __init__(self, event_batches: list[list[_FakeEvent]]) -> None:
         self.surface = _FakeSurface()
@@ -99,6 +113,11 @@ class _FakePygame:
 
 class _FailingPygame:
     QUIT = 256
+    KEYDOWN = 768
+    K_RETURN = 13
+    K_SPACE = 32
+    K_e = 101
+    K_ESCAPE = 27
 
     def __init__(self) -> None:
         self.surface = _FakeSurface()
@@ -117,9 +136,70 @@ class _FailingPygame:
         self.quit_calls += 1
 
 
+def test_initial_state_is_main_menu() -> None:
+    """Verify that the state controller starts on the main menu."""
+    controller = GameStateController()
+
+    assert controller.state is GameState.MAIN_MENU
+
+
+def test_main_menu_transitions_to_playing() -> None:
+    """Verify that confirm starts the game from the main menu."""
+    controller = GameStateController()
+
+    controller.handle_key(_FakePygame.K_RETURN, _state_controls())
+
+    assert controller.state is GameState.PLAYING
+
+
+def test_playing_transitions_to_end_screen() -> None:
+    """Verify that the temporary end key finishes play."""
+    controller = GameStateController(GameState.PLAYING)
+
+    controller.handle_key(_FakePygame.K_e, _state_controls())
+
+    assert controller.state is GameState.END_SCREEN
+
+
+def test_end_screen_transitions_to_main_menu() -> None:
+    """Verify that confirm returns from the end screen to the main menu."""
+    controller = GameStateController(GameState.END_SCREEN)
+
+    controller.handle_key(_FakePygame.K_SPACE, _state_controls())
+
+    assert controller.state is GameState.MAIN_MENU
+
+
+def test_escape_returns_from_playing_to_main_menu() -> None:
+    """Verify that Escape returns from playing to the main menu."""
+    controller = GameStateController(GameState.PLAYING)
+
+    controller.handle_key(_FakePygame.K_ESCAPE, _state_controls())
+
+    assert controller.state is GameState.MAIN_MENU
+
+
+def test_escape_returns_from_end_screen_to_main_menu() -> None:
+    """Verify that Escape returns from the end screen to the main menu."""
+    controller = GameStateController(GameState.END_SCREEN)
+
+    controller.handle_key(_FakePygame.K_ESCAPE, _state_controls())
+
+    assert controller.state is GameState.MAIN_MENU
+
+
+def test_irrelevant_key_does_not_change_state() -> None:
+    """Verify that irrelevant keys do not trigger transitions."""
+    controller = GameStateController(GameState.PLAYING)
+
+    controller.handle_key(999, _state_controls())
+
+    assert controller.state is GameState.PLAYING
+
+
 def test_run_app_opens_configured_pygame_window() -> None:
     """Verify that the app initializes pygame and configures the window."""
-    pygame = _FakePygame([[_FakeEvent(_FakePygame.QUIT)]])
+    pygame = _FakePygame([[_FakeEvent(type=_FakePygame.QUIT)]])
 
     run_app(
         WindowSettings(
@@ -134,23 +214,47 @@ def test_run_app_opens_configured_pygame_window() -> None:
 
     assert pygame.init_calls == 1
     assert pygame.display.size == (320, 240)
-    assert pygame.display.caption == "Pacman Test"
-    assert pygame.surface.fill_colors == [(1, 2, 3)]
+    assert pygame.display.caption == "Pacman Test - Main Menu"
+    assert pygame.surface.fill_colors == [(16, 24, 72)]
     assert pygame.display.flip_calls == 1
     assert pygame.clock.framerates == [30]
 
 
-def test_event_loop_runs_until_pygame_quit_event() -> None:
-    """Verify that non-quit events do not stop the loop."""
+def test_event_loop_applies_state_transitions() -> None:
+    """Verify that the pygame loop routes key presses to the controller."""
     pygame = _FakePygame([
-        [_FakeEvent(1)],
-        [_FakeEvent(_FakePygame.QUIT)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_SPACE)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
     ])
 
     run_app(pygame_module=pygame)
 
-    assert pygame.display.flip_calls == 2
-    assert pygame.clock.framerates == [60, 60]
+    assert pygame.display.captions == [
+        "Pacman - Playing",
+        "Pacman - End Screen",
+        "Pacman - Main Menu",
+        "Pacman - Main Menu",
+    ]
+    assert pygame.surface.fill_colors == [
+        (0, 0, 0),
+        (72, 16, 24),
+        (16, 24, 72),
+        (16, 24, 72),
+    ]
+    assert pygame.clock.framerates == [60, 60, 60, 60]
+
+
+def test_pygame_quit_event_stops_application() -> None:
+    """Verify that pygame QUIT still exits the loop cleanly."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.flip_calls == 1
     assert pygame.quit_calls == 1
 
 
@@ -163,3 +267,14 @@ def test_pygame_quits_when_window_setup_fails() -> None:
 
     assert pygame.init_calls == 1
     assert pygame.quit_calls == 1
+
+
+def _state_controls() -> StateControls:
+    return StateControls(
+        confirm_keys=frozenset({
+            _FakePygame.K_RETURN,
+            _FakePygame.K_SPACE,
+        }),
+        end_screen_key=_FakePygame.K_e,
+        main_menu_key=_FakePygame.K_ESCAPE,
+    )
