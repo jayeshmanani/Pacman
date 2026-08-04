@@ -1,0 +1,1 @@
+"""Pacman application package."""

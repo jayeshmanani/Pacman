@@ -3,7 +3,9 @@ name = "pacman"
 version = "0.1.0"
 description = "Recreate the famous arcade game Pac-man!"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "pygame>=2.6.1",
+]
 
 [dependency-groups]
 dev = [
@@ -11,4 +13,9 @@ dev = [
     "flake8-docstrings>=1.7.0",
     "mypy>=2.3.0",
     "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    ".",
 ]
