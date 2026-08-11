@@ -6,6 +6,8 @@ from enum import Enum
 import importlib
 from typing import Final, Protocol, cast
 
+from pacman.config import GameConfig
+
 Color = tuple[int, int, int]
 
 
@@ -306,6 +308,7 @@ def render_state(
 def run_app(
     settings: WindowSettings | None = None,
     pygame_module: object | None = None,
+    config: GameConfig | None = None,
 ) -> None:
     """Open the Pacman window and run until the user closes it."""
     window_settings = settings or WindowSettings()
