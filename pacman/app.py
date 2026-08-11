@@ -7,7 +7,8 @@ import importlib
 from typing import Final, Protocol, cast
 
 from pacman.config import GameConfig
-from pacman.context import AppContext
+from pacman.context import AppContext, GameSession
+from pacman.highscore import HighscoreEntry
 
 Color = tuple[int, int, int]
 
@@ -210,10 +211,10 @@ def render_main_menu(
     screen: _Surface,
     fonts: RenderFonts,
     window_settings: WindowSettings,
+    highscores: list[HighscoreEntry] | None = None,
 ) -> None:
-    """Render the placeholder main menu."""
+    """Render the main menu and any loaded highscore entries."""
     center_x = window_settings.width // 2
-    center_y = window_settings.height // 2
 
     screen.fill(_STATE_BACKGROUNDS[GameState.MAIN_MENU])
     _draw_centered_text(
@@ -221,21 +222,39 @@ def render_main_menu(
         fonts.title,
         "PACMAN",
         (255, 230, 0),
-        (center_x, center_y - 40),
+        (center_x, 56),
     )
     _draw_centered_text(
         screen,
         fonts.body,
         "Press Enter or Space to Start",
         (255, 255, 255),
-        (center_x, center_y + 24),
+        (center_x, 118),
     )
+
+    if highscores:
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            "HIGHSCORES",
+            (255, 230, 0),
+            (center_x, 158),
+        )
+        for position, entry in enumerate(highscores, start=1):
+            _draw_centered_text(
+                screen,
+                fonts.body,
+                f"{position}. {entry.name}  {entry.score}",
+                (255, 255, 255),
+                (center_x, 158 + position * 26),
+            )
 
 
 def render_game_view(
     screen: _Surface,
     fonts: RenderFonts,
     window_settings: WindowSettings,
+    session: GameSession | None = None,
 ) -> None:
     """Render the placeholder game view."""
     center_x = window_settings.width // 2
@@ -256,6 +275,14 @@ def render_game_view(
         (255, 230, 0),
         (center_x, center_y + 32),
     )
+    if session is not None:
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            f"Lives: {session.lives} | Score: {session.score}",
+            (255, 255, 255),
+            (center_x, center_y + 64),
+        )
 
 
 def render_end_screen(
@@ -290,14 +317,25 @@ def render_state(
     pygame_module: object,
     window_settings: WindowSettings,
     state: GameState,
+    context: AppContext | None = None,
 ) -> None:
     """Render the minimal visual representation of a state."""
     pygame_instance = cast(_PygameModule, pygame_module)
 
     if state is GameState.MAIN_MENU:
-        render_main_menu(screen, fonts, window_settings)
+        render_main_menu(
+            screen,
+            fonts,
+            window_settings,
+            context.highscores if context is not None else None,
+        )
     elif state is GameState.PLAYING:
-        render_game_view(screen, fonts, window_settings)
+        render_game_view(
+            screen,
+            fonts,
+            window_settings,
+            context.session if context is not None else None,
+        )
     else:
         render_end_screen(screen, fonts, window_settings)
 
@@ -335,7 +373,6 @@ def run_app(
             config=config or GameConfig(),
             state_controller=controller,
         )
-        _ = app_context
         running = True
 
         while running:
@@ -355,6 +392,7 @@ def run_app(
                 pygame_instance,
                 window_settings,
                 controller.state,
+                app_context,
             )
             pygame_instance.display.flip()
             clock.tick(window_settings.frames_per_second)
