@@ -103,3 +103,110 @@ def test_load_discards_entire_file_when_one_entry_is_invalid(
     )
 
     assert HighscoreStorage(str(score_file)).load() == []
+
+
+def test_update_adds_sorts_and_persists_highscores(tmp_path: Path) -> None:
+    """Verify that update stores all entries from highest to lowest score."""
+    score_file = tmp_path / "scores.json"
+    score_file.write_text(
+        json.dumps(
+            [
+                {"name": "Second", "score": 200},
+                {"name": "Third", "score": 100},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    storage = HighscoreStorage(str(score_file))
+
+    updated_entries = storage.update(
+        HighscoreEntry(name="First", score=300)
+    )
+
+    expected_entries = [
+        HighscoreEntry(name="First", score=300),
+        HighscoreEntry(name="Second", score=200),
+        HighscoreEntry(name="Third", score=100),
+    ]
+    assert updated_entries == expected_entries
+    assert storage.load() == expected_entries
+
+
+def test_update_creates_storage_for_first_entry(tmp_path: Path) -> None:
+    """Verify that the first highscore creates the storage file."""
+    score_file = tmp_path / "nested" / "scores.json"
+    storage = HighscoreStorage(str(score_file))
+    entry = HighscoreEntry(name="Maria", score=500)
+
+    assert storage.update(entry) == [entry]
+    assert storage.load() == [entry]
+
+
+def test_update_keeps_only_ten_best_highscores(tmp_path: Path) -> None:
+    """Verify that only the ten highest scores remain persisted."""
+    storage = HighscoreStorage(str(tmp_path / "scores.json"))
+
+    for score in range(12):
+        storage.update(HighscoreEntry(name=f"P{score}", score=score))
+
+    entries = storage.load()
+
+    assert len(entries) == 10
+    assert [entry.score for entry in entries] == list(range(11, 1, -1))
+
+
+def test_update_with_invalid_entry_preserves_stored_data(
+    tmp_path: Path,
+) -> None:
+    """Verify that an invalid new entry cannot overwrite stored highscores."""
+    score_file = tmp_path / "scores.json"
+    score_file.write_text(
+        '[{"name": "Maria", "score": 500}]',
+        encoding="utf-8",
+    )
+    original_contents = score_file.read_text(encoding="utf-8")
+    storage = HighscoreStorage(str(score_file))
+    invalid_entry: object = {"name": "Invalid!", "score": -1}
+
+    result = storage.update(invalid_entry)  # type: ignore[arg-type]
+
+    assert result == [HighscoreEntry(name="Maria", score=500)]
+    assert score_file.read_text(encoding="utf-8") == original_contents
+
+
+def test_update_replaces_corrupted_file_with_valid_data(
+    tmp_path: Path,
+) -> None:
+    """Verify that a valid entry can safely recover corrupted storage."""
+    score_file = tmp_path / "scores.json"
+    score_file.write_text("{broken json", encoding="utf-8")
+    storage = HighscoreStorage(str(score_file))
+    entry = HighscoreEntry(name="Maria", score=500)
+
+    assert storage.update(entry) == [entry]
+    assert storage.load() == [entry]
+
+
+def test_update_preserves_file_when_atomic_replace_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify that a failed write cannot corrupt the existing file."""
+    score_file = tmp_path / "scores.json"
+    score_file.write_text(
+        '[{"name": "Maria", "score": 500}]',
+        encoding="utf-8",
+    )
+    original_contents = score_file.read_text(encoding="utf-8")
+    storage = HighscoreStorage(str(score_file))
+
+    def fail_replace(source: Path, target: Path) -> Path:
+        raise OSError("simulated replace failure")
+
+    monkeypatch.setattr(Path, "replace", fail_replace)
+
+    result = storage.update(HighscoreEntry(name="Player", score=900))
+
+    assert result == [HighscoreEntry(name="Maria", score=500)]
+    assert score_file.read_text(encoding="utf-8") == original_contents
+    assert not (tmp_path / ".scores.json.tmp").exists()
