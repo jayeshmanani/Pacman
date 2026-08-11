@@ -10,15 +10,20 @@ from pacman.config import GameConfig, parse_game_config
 
 
 def load_commented_json(filepath: Path) -> dict[str, Any]:
-    """Read a JSON file while ignoring lines starting with '#' comments."""
+    """Read a JSON file while ignoring comment lines (# or //)."""
     clean_lines = []
     with filepath.open("r", encoding="utf-8") as file:
         for line in file:
             stripped = line.strip()
-            if not stripped.startswith("#"):
+            if not (stripped.startswith("#") or stripped.startswith("//")):
                 clean_lines.append(line)
-    result = cast(dict[str, Any], json.loads("".join(clean_lines)))
-    return result
+    content = "".join(clean_lines)
+    if not content.strip():
+        return {}
+    parsed = json.loads(content)
+    if not isinstance(parsed, dict):
+        raise ValueError("JSON root must be an object (dict)")
+    return cast(dict[str, Any], parsed)
 
 
 def main() -> None:
@@ -49,8 +54,7 @@ def main() -> None:
             file=sys.stderr,
         )
 
-    _ = game_config
-    run_app()
+    run_app(config=game_config)
 
 
 if __name__ == "__main__":

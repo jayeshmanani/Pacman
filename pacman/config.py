@@ -36,10 +36,13 @@ def parse_game_config(data: dict[str, Any]) -> GameConfig:
             if isinstance(lvl, dict):
                 try:
                     w = max(5, int(lvl.get("width", 21)))
-                    h = max(5, int(lvl.get("height", 21)))
-                    levels.append(LevelConfig(width=w, height=h))
                 except (ValueError, TypeError):
-                    levels.append(LevelConfig())
+                    w = 21
+                try:
+                    h = max(5, int(lvl.get("height", 21)))
+                except (ValueError, TypeError):
+                    h = 21
+                levels.append(LevelConfig(width=w, height=h))
     if not levels:
         levels = [LevelConfig()]
 
