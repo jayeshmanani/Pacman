@@ -7,6 +7,7 @@ import importlib
 from typing import Final, Protocol, cast
 
 from pacman.config import GameConfig
+from pacman.context import AppContext
 
 Color = tuple[int, int, int]
 
@@ -330,6 +331,11 @@ def run_app(
         controls = _create_state_controls(pygame_instance)
         fonts = _create_render_fonts(pygame_instance)
         controller = GameStateController()
+        app_context = AppContext(
+            config=config or GameConfig(),
+            state_controller=controller,
+        )
+        _ = app_context
         running = True
 
         while running:
