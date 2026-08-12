@@ -1,5 +1,6 @@
 """Boundary between Pacman and the assigned maze generator package."""
 
+from dataclasses import dataclass
 import importlib
 import random
 from typing import Protocol, cast
@@ -14,6 +15,26 @@ _WEST_WALL = 8
 
 class MazeAdapterError(RuntimeError):
     """Report a failure at the external maze-generator boundary."""
+
+
+@dataclass(frozen=True)
+class MazeGenerationResult:
+    """Return either a generated maze or a user-facing error message."""
+
+    maze: MazeGrid | None = None
+    error_message: str | None = None
+
+    def __post_init__(self) -> None:
+        """Require exactly one success or failure value."""
+        if (self.maze is None) == (self.error_message is None):
+            raise ValueError(
+                "maze generation result must contain a maze or an error"
+            )
+
+    @property
+    def succeeded(self) -> bool:
+        """Return whether maze generation completed successfully."""
+        return self.maze is not None
 
 
 class _ExternalMaze(Protocol):
@@ -72,8 +93,10 @@ def _load_generator_factory() -> _GeneratorFactory:
 
 def _validate_dimension(value: int, name: str) -> None:
     """Reject invalid dimensions before calling the external package."""
-    if type(value) is not int or value < 1:
-        raise ValueError(f"{name} must be a positive integer")
+    if type(value) is not int or value < 2:
+        raise MazeAdapterError(
+            f"Cannot generate maze: {name} must be an integer of at least 2."
+        )
 
 
 def _validate_native_grid(
@@ -99,7 +122,52 @@ def _validate_native_grid(
             )
         frozen_rows.append(tuple(row))
 
-    return tuple(frozen_rows)
+    frozen_grid = tuple(frozen_rows)
+    _validate_wall_connections(frozen_grid)
+    return frozen_grid
+
+
+def _validate_wall_connections(
+    native_grid: tuple[tuple[int, ...], ...],
+) -> None:
+    """Require closed boundaries and matching walls between cells."""
+    height = len(native_grid)
+    width = len(native_grid[0])
+
+    for y, row in enumerate(native_grid):
+        for x, walls in enumerate(row):
+            if y == 0 and walls & _NORTH_WALL == 0:
+                raise MazeAdapterError(
+                    "Maze generator returned an open outer boundary."
+                )
+            if x == 0 and walls & _WEST_WALL == 0:
+                raise MazeAdapterError(
+                    "Maze generator returned an open outer boundary."
+                )
+            if y == height - 1 and walls & _SOUTH_WALL == 0:
+                raise MazeAdapterError(
+                    "Maze generator returned an open outer boundary."
+                )
+            if x == width - 1 and walls & _EAST_WALL == 0:
+                raise MazeAdapterError(
+                    "Maze generator returned an open outer boundary."
+                )
+
+            if x + 1 < width:
+                east_wall = walls & _EAST_WALL != 0
+                west_wall = row[x + 1] & _WEST_WALL != 0
+                if east_wall != west_wall:
+                    raise MazeAdapterError(
+                        "Maze generator returned inconsistent shared walls."
+                    )
+
+            if y + 1 < height:
+                south_wall = walls & _SOUTH_WALL != 0
+                north_wall = native_grid[y + 1][x] & _NORTH_WALL != 0
+                if south_wall != north_wall:
+                    raise MazeAdapterError(
+                        "Maze generator returned inconsistent shared walls."
+                    )
 
 
 def _to_internal_coordinate(coordinate: Coordinate) -> Coordinate:
@@ -136,10 +204,41 @@ def _normalize_grid(
             if walls & _WEST_WALL == 0:
                 rows[tile_y][tile_x - 1] = Tile.CORRIDOR
 
-    return MazeGrid(
+    normalized_grid = MazeGrid(
         tiles=tuple(tuple(row) for row in rows),
         entry=_to_internal_coordinate(entry),
         exit=_to_internal_coordinate(exit),
+    )
+    _validate_exit_is_reachable(normalized_grid)
+    return normalized_grid
+
+
+def _validate_exit_is_reachable(grid: MazeGrid) -> None:
+    """Require at least one corridor path from entry to exit."""
+    pending = [grid.entry]
+    visited = {grid.entry}
+
+    while pending:
+        x, y = pending.pop()
+        if (x, y) == grid.exit:
+            return
+
+        for neighbor in (
+            (x, y - 1),
+            (x + 1, y),
+            (x, y + 1),
+            (x - 1, y),
+        ):
+            if (
+                neighbor not in visited
+                and grid.contains(neighbor)
+                and grid.is_corridor(neighbor)
+            ):
+                visited.add(neighbor)
+                pending.append(neighbor)
+
+    raise MazeAdapterError(
+        "Maze generator returned a maze with no path from entry to exit."
     )
 
 
@@ -189,7 +288,9 @@ class MazeGeneratorAdapter:
         _validate_dimension(width, "width")
         _validate_dimension(height, "height")
         if type(seed) is not int:
-            raise ValueError("seed must be an integer")
+            raise MazeAdapterError(
+                "Cannot generate maze: seed must be an integer."
+            )
 
         factory = self._generator_factory or _load_generator_factory()
         random_state = random.getstate()
@@ -210,17 +311,52 @@ class MazeGeneratorAdapter:
             # random stream so maze creation cannot alter later gameplay.
             random.setstate(random_state)
 
-        native_grid = _validate_native_grid(generated.maze, width, height)
+        native_grid = _validate_native_grid(
+            getattr(generated, "maze", None),
+            width,
+            height,
+        )
         validated_entry = _validate_coordinate(
-            generated.maze_entry,
+            getattr(generated, "maze_entry", None),
             "entry",
             width,
             height,
         )
         validated_exit = _validate_coordinate(
-            generated.maze_exit,
+            getattr(generated, "maze_exit", None),
             "exit",
             width,
             height,
         )
-        return _normalize_grid(native_grid, validated_entry, validated_exit)
+        try:
+            return _normalize_grid(
+                native_grid,
+                validated_entry,
+                validated_exit,
+            )
+        except (IndexError, TypeError, ValueError) as error:
+            raise MazeAdapterError(
+                "Maze generator returned data that could not be used."
+            ) from error
+
+    def generate_safely(
+        self,
+        width: int,
+        height: int,
+        seed: int = 0,
+        entry: Coordinate = (0, 0),
+        exit: Coordinate = (-1, -1),
+    ) -> MazeGenerationResult:
+        """Generate a maze without exposing an exception or traceback."""
+        try:
+            maze = self.generate(width, height, seed, entry, exit)
+        except MazeAdapterError as error:
+            return MazeGenerationResult(error_message=str(error))
+        except Exception:
+            return MazeGenerationResult(
+                error_message=(
+                    "Maze generation failed because the package returned "
+                    "unexpected data."
+                )
+            )
+        return MazeGenerationResult(maze=maze)
