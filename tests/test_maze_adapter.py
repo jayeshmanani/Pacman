@@ -6,10 +6,10 @@ import random
 import pytest
 
 from pacman.maze_adapter import (
-    GeneratedMaze,
     MazeAdapterError,
     MazeGeneratorAdapter,
 )
+from pacman.maze_grid import MazeGrid, Tile
 
 
 class FakeMazeGenerator:
@@ -43,26 +43,52 @@ def test_adapter_calls_generator_with_perfect_false() -> None:
         "exit_cell": (-1, -1),
         "seed": 42,
     }]
-    assert maze == GeneratedMaze(
-        grid=((9, 3), (12, 6)),
-        entry=(0, 0),
-        exit=(1, 1),
+    assert maze == MazeGrid(
+        tiles=(
+            (Tile.WALL,) * 5,
+            (
+                Tile.WALL,
+                Tile.CORRIDOR,
+                Tile.CORRIDOR,
+                Tile.CORRIDOR,
+                Tile.WALL,
+            ),
+            (
+                Tile.WALL,
+                Tile.CORRIDOR,
+                Tile.WALL,
+                Tile.CORRIDOR,
+                Tile.WALL,
+            ),
+            (
+                Tile.WALL,
+                Tile.CORRIDOR,
+                Tile.CORRIDOR,
+                Tile.CORRIDOR,
+                Tile.WALL,
+            ),
+            (Tile.WALL,) * 5,
+        ),
+        entry=(1, 1),
+        exit=(3, 3),
     )
 
 
-def test_adapter_result_is_immutable() -> None:
-    """Verify external mutable rows become immutable Pacman data."""
+def test_adapter_result_does_not_share_mutable_package_data() -> None:
+    """Verify external mutations cannot change the normalized grid."""
     source_grid = [[9, 3], [12, 6]]
 
     def factory(**arguments: object) -> FakeMazeGenerator:
         return FakeMazeGenerator(source_grid)
 
     maze = MazeGeneratorAdapter(factory).generate(2, 2)
+    normalized_tiles = maze.tiles
     source_grid[0][0] = 0
 
-    assert maze.grid == ((9, 3), (12, 6))
-    assert maze.width == 2
-    assert maze.height == 2
+    assert maze.tiles == normalized_tiles
+    assert maze.tile_at((1, 1)) is Tile.CORRIDOR
+    assert maze.width == 5
+    assert maze.height == 5
 
 
 @pytest.mark.parametrize(
@@ -96,10 +122,10 @@ def test_adapter_uses_the_assigned_package() -> None:
     """Verify the bundled wheel generates configured maze dimensions."""
     maze = MazeGeneratorAdapter().generate(21, 21, seed=42)
 
-    assert maze.width == 21
-    assert maze.height == 21
-    assert maze.entry == (0, 0)
-    assert maze.exit == (20, 20)
+    assert maze.width == 43
+    assert maze.height == 43
+    assert maze.entry == (1, 1)
+    assert maze.exit == (41, 41)
 
 
 def test_adapter_preserves_the_application_random_state() -> None:
