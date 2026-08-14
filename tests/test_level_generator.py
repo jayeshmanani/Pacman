@@ -66,6 +66,8 @@ def test_level_zero_uses_configured_fixed_seed() -> None:
     assert level.level_number == 1
     assert level.seed == 1337
     assert level.time_limit == 90
+    assert level.spawns is not None
+    assert level.spawns.player == (1, 1)
     assert fake_adapter.calls[0]["seed"] == 1337
     assert fake_adapter.calls[0]["width"] == 15
     assert fake_adapter.calls[0]["height"] == 15

@@ -7,6 +7,7 @@ from typing import Protocol
 from pacman.config import GameConfig, LevelConfig
 from pacman.maze_adapter import MazeAdapterError, MazeGeneratorAdapter
 from pacman.maze_grid import MazeGrid
+from pacman.spawns import SpawnPositions, find_spawn_positions
 
 
 class LevelGenerationError(RuntimeError):
@@ -21,6 +22,12 @@ class LevelData:
     maze: MazeGrid
     seed: int
     time_limit: int = 90
+    spawns: SpawnPositions | None = None
+
+    def __post_init__(self) -> None:
+        """Resolve spawn positions if not explicitly provided."""
+        if self.spawns is None:
+            object.__setattr__(self, "spawns", find_spawn_positions(self.maze))
 
 
 @dataclass(frozen=True)
@@ -118,11 +125,13 @@ class LevelGenerator:
                 f"unexpected error: {error}"
             ) from error
 
+        spawns = find_spawn_positions(maze)
         return LevelData(
             level_number=level_index + 1,
             maze=maze,
             seed=resolved_seed,
             time_limit=self._config.level_max_time,
+            spawns=spawns,
         )
 
     def generate_level_safely(
