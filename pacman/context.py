@@ -25,7 +25,7 @@ class AppContext:
     state_controller: object | None = None
     storage: HighscoreStorage = field(default_factory=HighscoreStorage)
     session: GameSession = field(default_factory=GameSession)
-level_generator: LevelGenerator = field(init=False)
+    level_generator: LevelGenerator = field(init=False)
     highscores: list[HighscoreEntry] = field(
         default_factory=list,
         init=False,
