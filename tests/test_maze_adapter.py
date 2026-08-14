@@ -45,6 +45,7 @@ def test_adapter_calls_generator_with_perfect_false() -> None:
         "exit_cell": (-1, -1),
         "seed": 42,
     }]
+
     assert maze == MazeGrid(
         tiles=(
             (Tile.WALL,) * 5,
@@ -85,6 +86,7 @@ def test_adapter_result_does_not_share_mutable_package_data() -> None:
 
     maze = MazeGeneratorAdapter(factory).generate(2, 2)
     normalized_tiles = maze.tiles
+
     source_grid[0][0] = 0
 
     assert maze.tiles == normalized_tiles
@@ -110,6 +112,7 @@ def test_adapter_rejects_invalid_package_grid(
 
 def test_adapter_wraps_package_failure() -> None:
     """Verify external exceptions are translated at the boundary."""
+
     def failing_factory(**arguments: object) -> FakeMazeGenerator:
         raise RuntimeError("external implementation detail")
 
@@ -143,10 +146,15 @@ def test_adapter_preserves_the_application_random_state() -> None:
 
 def test_safe_generation_returns_maze_without_error() -> None:
     """Verify callers receive a successful result without exceptions."""
+
     def factory(**arguments: object) -> FakeMazeGenerator:
         return FakeMazeGenerator([[9, 3], [12, 6]])
 
-    result = MazeGeneratorAdapter(factory).generate_safely(2, 2, seed=42)
+    result = MazeGeneratorAdapter(factory).generate_safely(
+        2,
+        2,
+        seed=42,
+    )
 
     assert result.succeeded
     assert result.maze is not None
@@ -174,12 +182,17 @@ def test_safe_generation_handles_invalid_dimensions(
     assert expected_message in str(result.error_message)
 
 
-def test_safe_generation_handles_import_error(
+def test_safe_generation_handles_missing_package(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Verify a missing package produces a clear message without raising."""
+
     def fail_import(name: str) -> object:
-        raise ModuleNotFoundError(name)
+        error = ModuleNotFoundError(
+            "No module named 'mazegenerator'"
+        )
+        error.name = "mazegenerator"
+        raise error
 
     monkeypatch.setattr(
         "pacman.maze_adapter.importlib.import_module",
@@ -194,12 +207,40 @@ def test_safe_generation_handles_import_error(
     )
 
 
+def test_safe_generation_handles_package_dependency_import_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify internal package import failures get a distinct message."""
+
+    def fail_import(name: str) -> object:
+        error = ModuleNotFoundError(
+            "No module named 'missing_dependency'"
+        )
+        error.name = "missing_dependency"
+        raise error
+
+    monkeypatch.setattr(
+        "pacman.maze_adapter.importlib.import_module",
+        fail_import,
+    )
+
+    result = MazeGeneratorAdapter().generate_safely(2, 2)
+
+    assert not result.succeeded
+    assert result.error_message == (
+        "The assigned mazegenerator package could not be imported."
+    )
+
+
 def test_safe_generation_handles_generator_failure() -> None:
     """Verify package failures become messages instead of tracebacks."""
+
     def failing_factory(**arguments: object) -> FakeMazeGenerator:
         raise RuntimeError("external failure")
 
-    result = MazeGeneratorAdapter(failing_factory).generate_safely(2, 2)
+    result = MazeGeneratorAdapter(
+        failing_factory
+    ).generate_safely(2, 2)
 
     assert not result.succeeded
     assert result.error_message == (
@@ -213,8 +254,12 @@ class IncompleteMazeGenerator:
 
 def test_safe_generation_handles_unexpected_result_object() -> None:
     """Verify missing result attributes cannot leak AttributeError."""
+
     def factory(**arguments: object) -> FakeMazeGenerator:
-        return cast(FakeMazeGenerator, IncompleteMazeGenerator())
+        return cast(
+            FakeMazeGenerator,
+            IncompleteMazeGenerator(),
+        )
 
     result = MazeGeneratorAdapter(factory).generate_safely(2, 2)
 
@@ -242,6 +287,7 @@ def test_safe_generation_rejects_invalid_wall_structure(
     expected_message: str,
 ) -> None:
     """Verify broken boundaries and mismatched walls are rejected."""
+
     def factory(**arguments: object) -> FakeMazeGenerator:
         return FakeMazeGenerator(grid)
 
@@ -253,6 +299,7 @@ def test_safe_generation_rejects_invalid_wall_structure(
 
 def test_safe_generation_rejects_unreachable_exit() -> None:
     """Verify a disconnected entry and exit are rejected before use."""
+
     def factory(**arguments: object) -> FakeMazeGenerator:
         return FakeMazeGenerator([[15, 15], [15, 15]])
 
@@ -268,3 +315,24 @@ def test_generation_result_requires_one_outcome() -> None:
     """Verify an ambiguous safe result cannot be constructed."""
     with pytest.raises(ValueError, match="must contain"):
         MazeGenerationResult()
+
+
+def test_safe_generation_handles_generic_import_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify generic import failures get a clear message."""
+
+    def fail_import(name: str) -> object:
+        raise ImportError("broken import inside mazegenerator")
+
+    monkeypatch.setattr(
+        "pacman.maze_adapter.importlib.import_module",
+        fail_import,
+    )
+
+    result = MazeGeneratorAdapter().generate_safely(2, 2)
+
+    assert not result.succeeded
+    assert result.error_message == (
+        "The assigned mazegenerator package could not be imported."
+    )
