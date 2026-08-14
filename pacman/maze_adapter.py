@@ -66,12 +66,20 @@ def _skip_shortest_path(generator: object) -> None:
 
 def _load_generator_factory() -> _GeneratorFactory:
     """Load the package's real class behind the adapter boundary."""
-    try:
-        module = importlib.import_module("mazegenerator.mazegenerator")
-    except ImportError as error:
+try:
+    module = importlib.import_module("mazegenerator.mazegenerator")
+except ModuleNotFoundError as error:
+    if (error.name or "").split(".")[0] == "mazegenerator":
         raise MazeAdapterError(
             "The assigned mazegenerator package is not installed."
         ) from error
+    raise MazeAdapterError(
+        "The assigned mazegenerator package could not be imported."
+    ) from error
+except ImportError as error:
+    raise MazeAdapterError(
+        "The assigned mazegenerator package could not be imported."
+    ) from error
 
     generator_class = getattr(module, "MazeGenerator", None)
     if not isinstance(generator_class, type):
