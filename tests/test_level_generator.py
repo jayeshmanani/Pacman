@@ -44,12 +44,11 @@ class FakeMazeAdapter(MazeGeneratorAdapter):
         })
         if self._should_fail:
             raise MazeAdapterError("Fake maze generation failure")
-        rows = [
-            (Tile.WALL, Tile.WALL, Tile.WALL),
-            (Tile.WALL, Tile.CORRIDOR, Tile.WALL),
-            (Tile.WALL, Tile.WALL, Tile.WALL),
-        ]
-        return MazeGrid(tiles=tuple(rows), entry=(1, 1), exit=(1, 1))
+        rows = tuple(
+            tuple(Tile.CORRIDOR for _ in range(7))
+            for _ in range(7)
+        )
+        return MazeGrid(tiles=rows, entry=(0, 0), exit=(6, 6))
 
 
 def test_level_zero_uses_configured_fixed_seed() -> None:
@@ -67,7 +66,8 @@ def test_level_zero_uses_configured_fixed_seed() -> None:
     assert level.seed == 1337
     assert level.time_limit == 90
     assert level.spawns is not None
-    assert level.spawns.player == (1, 1)
+    assert level.spawns.player == (3, 3)
+    assert level.pellets is not None
     assert fake_adapter.calls[0]["seed"] == 1337
     assert fake_adapter.calls[0]["width"] == 15
     assert fake_adapter.calls[0]["height"] == 15

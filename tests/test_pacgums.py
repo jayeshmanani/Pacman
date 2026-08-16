@@ -1,0 +1,148 @@
+"""Tests for pacgum and super-pacgum placement and consumption."""
+
+import pytest
+
+from pacman.config import GameConfig
+from pacman.level_generator import LevelGenerator
+from pacman.maze_grid import Coordinate, MazeGrid, Tile
+from pacman.pacgums import (
+    PacgumField,
+    PacgumKind,
+    PacgumPlacementError,
+    place_pacgums,
+)
+from pacman.spawns import GhostSpawns, SpawnPositions
+
+
+def _open_grid(
+    width: int = 7,
+    height: int = 7,
+    walls: set[Coordinate] | None = None,
+) -> MazeGrid:
+    """Create a connected test grid with optional wall tiles."""
+    wall_positions = walls or set()
+    rows = tuple(
+        tuple(
+            Tile.WALL if (x, y) in wall_positions else Tile.CORRIDOR
+            for x in range(width)
+        )
+        for y in range(height)
+    )
+    return MazeGrid(tiles=rows, entry=(0, 0), exit=(width - 1, height - 1))
+
+
+def _spawns() -> SpawnPositions:
+    """Return distinct player and ghost spawn coordinates for tests."""
+    return SpawnPositions(
+        player=(3, 3),
+        ghosts=GhostSpawns(
+            top_left=(0, 0),
+            top_right=(6, 0),
+            bottom_left=(0, 6),
+            bottom_right=(6, 6),
+        ),
+    )
+
+
+def test_placement_uses_only_corridors_and_excludes_spawns() -> None:
+    """Verify no normal or super-pacgum occupies a wall or spawn tile."""
+    maze = _open_grid(walls={(2, 2), (4, 4)})
+    spawns = _spawns()
+
+    field = place_pacgums(maze, spawns, normal_count=20)
+
+    all_pacgums = field.pacgums | field.super_pacgums
+    excluded = {spawns.player, *spawns.ghosts.as_tuple()}
+    assert len(field.pacgums) == 20
+    assert len(field.super_pacgums) == 4
+    assert all_pacgums.isdisjoint(excluded)
+    assert all(maze.is_corridor(position) for position in all_pacgums)
+
+
+def test_super_pacgums_are_near_four_corners() -> None:
+    """Verify one unique super-pacgum is placed by each corner."""
+    field = place_pacgums(_open_grid(), _spawns(), normal_count=0)
+
+    assert field.super_pacgums == {
+        (1, 0),
+        (5, 0),
+        (0, 5),
+        (6, 5),
+    }
+
+
+def test_default_placement_fills_all_remaining_reachable_corridors() -> None:
+    """Verify default placement covers every eligible corridor tile."""
+    maze = _open_grid()
+    spawns = _spawns()
+
+    field = place_pacgums(maze, spawns)
+
+    excluded_count = 5
+    assert field.remaining_count == maze.width * maze.height - excluded_count
+    assert len(field.super_pacgums) == 4
+
+
+def test_unreachable_corridors_do_not_receive_pacgums() -> None:
+    """Verify unreachable pockets cannot prevent level completion."""
+    walls = {(3, y) for y in range(7)}
+    maze = _open_grid(walls=walls)
+    spawns = SpawnPositions(
+        player=(1, 3),
+        ghosts=GhostSpawns(
+            top_left=(0, 0),
+            top_right=(2, 0),
+            bottom_left=(0, 6),
+            bottom_right=(2, 6),
+        ),
+    )
+
+    field = place_pacgums(maze, spawns)
+
+    assert all(position[0] < 3 for position in field.pacgums)
+    assert all(position[0] < 3 for position in field.super_pacgums)
+
+
+def test_consumption_exposes_clear_completion_condition() -> None:
+    """Verify consuming every pellet marks the level complete."""
+    field = PacgumField(
+        pacgums={(1, 1)},
+        super_pacgums={(2, 2)},
+    )
+
+    assert field.remaining_count == 2
+    assert not field.is_complete
+    assert field.consume((1, 1)) is PacgumKind.NORMAL
+    assert field.consume((1, 1)) is None
+    assert field.consume((2, 2)) is PacgumKind.SUPER
+    assert field.remaining_count == 0
+    assert field.is_complete
+
+
+def test_placement_requires_space_for_four_super_pacgums() -> None:
+    """Verify an undersized reachable area fails with a clear message."""
+    maze = _open_grid(width=3, height=3, walls={(1, 0)})
+    spawns = SpawnPositions(
+        player=(1, 1),
+        ghosts=GhostSpawns(
+            top_left=(0, 0),
+            top_right=(2, 0),
+            bottom_left=(0, 2),
+            bottom_right=(2, 2),
+        ),
+    )
+
+    with pytest.raises(PacgumPlacementError, match="four super-pacgums"):
+        place_pacgums(maze, spawns)
+
+
+def test_level_generator_adds_configured_pacgum_count() -> None:
+    """Verify generated level data includes configured normal pacgums."""
+    generator = LevelGenerator(config=GameConfig(seed=42, pacgum=12))
+
+    level = generator.generate_level(0)
+
+    assert level.pellets is not None
+    assert len(level.pellets.pacgums) == 12
+    assert len(level.pellets.super_pacgums) == 4
+    assert not level.pellets.is_complete
