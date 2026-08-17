@@ -7,6 +7,7 @@ from typing import Protocol
 from pacman.config import GameConfig, LevelConfig
 from pacman.maze_adapter import MazeAdapterError, MazeGeneratorAdapter
 from pacman.maze_grid import MazeGrid
+from pacman.pacgums import PacgumField, place_pacgums
 from pacman.spawns import SpawnPositions, find_spawn_positions
 
 
@@ -23,6 +24,7 @@ class LevelData:
     seed: int
     time_limit: int = 90
     spawns: SpawnPositions | None = None
+    pellets: PacgumField | None = None
 
     def __post_init__(self) -> None:
         """Resolve spawn positions if not explicitly provided."""
@@ -126,12 +128,18 @@ class LevelGenerator:
             ) from error
 
         spawns = find_spawn_positions(maze)
+        pellets = place_pacgums(
+            maze,
+            spawns,
+            normal_count=self._config.pacgum,
+        )
         return LevelData(
             level_number=level_index + 1,
             maze=maze,
             seed=resolved_seed,
             time_limit=self._config.level_max_time,
             spawns=spawns,
+            pellets=pellets,
         )
 
     def generate_level_safely(
