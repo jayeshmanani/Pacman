@@ -64,7 +64,11 @@ def _skip_shortest_path(generator: object) -> None:
     """Skip the package's optional, slow shortest-path calculation."""
 
 
-def _load_generator_factory() -> _GeneratorFactory:
+def _skip_42_pattern(generator: object) -> None:
+    """Skip the package's fixed 42 wall pattern when it is not requested."""
+
+
+def _load_generator_factory(include_42: bool = True) -> _GeneratorFactory:
     """Load the package's real class behind the adapter boundary."""
     try:
         module = importlib.import_module("mazegenerator.mazegenerator")
@@ -91,10 +95,13 @@ def _load_generator_factory() -> _GeneratorFactory:
     # optional routine becomes extremely slow for configured maze sizes and
     # is not needed by Pacman. A local subclass keeps the wheel unchanged
     # while disabling only that optional calculation.
+    overrides = {"_find_short_path": _skip_shortest_path}
+    if not include_42:
+        overrides["_add_42_to_maze"] = _skip_42_pattern
     pacman_generator_class = type(
         "_PacmanMazeGenerator",
         (generator_class,),
-        {"_find_short_path": _skip_shortest_path},
+        overrides,
     )
     return cast(_GeneratorFactory, pacman_generator_class)
 
@@ -217,19 +224,30 @@ def _normalize_grid(
         entry=_to_internal_coordinate(entry),
         exit=_to_internal_coordinate(exit),
     )
-    _validate_exit_is_reachable(normalized_grid)
-    return normalized_grid
+    reachable = _validate_exit_is_reachable(normalized_grid)
+    reachable_tiles = tuple(
+        tuple(
+            Tile.CORRIDOR if (x, y) in reachable else Tile.WALL
+            for x in range(normalized_grid.width)
+        )
+        for y in range(normalized_grid.height)
+    )
+    return MazeGrid(
+        tiles=reachable_tiles,
+        entry=normalized_grid.entry,
+        exit=normalized_grid.exit,
+    )
 
 
-def _validate_exit_is_reachable(grid: MazeGrid) -> None:
-    """Require at least one corridor path from entry to exit."""
+def _validate_exit_is_reachable(grid: MazeGrid) -> set[Coordinate]:
+    """Require an entry-exit path and return its reachable component."""
     pending = [grid.entry]
     visited = {grid.entry}
 
     while pending:
         x, y = pending.pop()
         if (x, y) == grid.exit:
-            return
+            continue
 
         for neighbor in (
             (x, y - 1),
@@ -245,9 +263,11 @@ def _validate_exit_is_reachable(grid: MazeGrid) -> None:
                 visited.add(neighbor)
                 pending.append(neighbor)
 
-    raise MazeAdapterError(
-        "Maze generator returned a maze with no path from entry to exit."
-    )
+    if grid.exit not in visited:
+        raise MazeAdapterError(
+            "Maze generator returned a maze with no path from entry to exit."
+        )
+    return visited
 
 
 def _validate_coordinate(
@@ -291,6 +311,7 @@ class MazeGeneratorAdapter:
         seed: int = 0,
         entry: Coordinate = (0, 0),
         exit: Coordinate = (-1, -1),
+        include_42: bool = True,
     ) -> MazeGrid:
         """Generate an imperfect maze in Pacman's internal grid format."""
         _validate_dimension(width, "width")
@@ -299,8 +320,14 @@ class MazeGeneratorAdapter:
             raise MazeAdapterError(
                 "Cannot generate maze: seed must be an integer."
             )
+        if type(include_42) is not bool:
+            raise MazeAdapterError(
+                "Cannot generate maze: include_42 must be a boolean."
+            )
 
-        factory = self._generator_factory or _load_generator_factory()
+        factory = self._generator_factory or _load_generator_factory(
+            include_42
+        )
         random_state = random.getstate()
         try:
             generated = factory(
@@ -354,10 +381,18 @@ class MazeGeneratorAdapter:
         seed: int = 0,
         entry: Coordinate = (0, 0),
         exit: Coordinate = (-1, -1),
+        include_42: bool = True,
     ) -> MazeGenerationResult:
         """Generate a maze without exposing an exception or traceback."""
         try:
-            maze = self.generate(width, height, seed, entry, exit)
+            maze = self.generate(
+                width,
+                height,
+                seed,
+                entry,
+                exit,
+                include_42,
+            )
         except MazeAdapterError as error:
             return MazeGenerationResult(error_message=str(error))
         except Exception:

@@ -7,7 +7,7 @@ PYTEST ?= $(UV) run pytest
 MAIN ?= pac_man.py
 CONFIG ?= config.json
 
-.PHONY: install run debug clean lint lint-strict test check-python-version
+.PHONY: install run debug clean lint lint-strict test preview-mazes check-python-version
 
 install:
 	$(UV) sync
@@ -38,3 +38,5 @@ lint-strict: check-python-version
 test: check-python-version
 	$(PYTEST) tests
 
+preview-mazes: check-python-version
+	$(PYTHON) -m scripts.preview_mazes

@@ -116,6 +116,7 @@ class LevelGenerator:
                 width=level_config.width,
                 height=level_config.height,
                 seed=resolved_seed,
+                include_42=level_index == 0,
             )
         except MazeAdapterError as error:
             raise LevelGenerationError(
@@ -128,11 +129,7 @@ class LevelGenerator:
             ) from error
 
         spawns = find_spawn_positions(maze)
-        pellets = place_pacgums(
-            maze,
-            spawns,
-            normal_count=self._config.pacgum,
-        )
+        pellets = place_pacgums(maze, spawns)
         return LevelData(
             level_number=level_index + 1,
             maze=maze,

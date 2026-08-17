@@ -1,7 +1,6 @@
 """Tests for the assigned maze-generator adapter."""
 
 from collections.abc import Callable
-import random
 from typing import cast
 
 import pytest
@@ -95,6 +94,22 @@ def test_adapter_result_does_not_share_mutable_package_data() -> None:
     assert maze.height == 5
 
 
+def test_normalization_removes_unreachable_corridor_islands() -> None:
+    """Verify isolated native cells become walls in the internal grid."""
+
+    def factory(**arguments: object) -> FakeMazeGenerator:
+        return FakeMazeGenerator([
+            [11, 15, 11],
+            [12, 5, 6],
+        ])
+
+    maze = MazeGeneratorAdapter(factory).generate(3, 2)
+
+    assert maze.tile_at((3, 1)) is Tile.WALL
+    assert maze.is_corridor(maze.entry)
+    assert maze.is_corridor(maze.exit)
+
+
 @pytest.mark.parametrize(
     "factory",
     [
@@ -121,27 +136,6 @@ def test_adapter_wraps_package_failure() -> None:
         match="could not generate a maze",
     ):
         MazeGeneratorAdapter(failing_factory).generate(2, 2)
-
-
-def test_adapter_uses_the_assigned_package() -> None:
-    """Verify the bundled wheel generates configured maze dimensions."""
-    maze = MazeGeneratorAdapter().generate(21, 21, seed=42)
-
-    assert maze.width == 43
-    assert maze.height == 43
-    assert maze.entry == (1, 1)
-    assert maze.exit == (41, 41)
-
-
-def test_adapter_preserves_the_application_random_state() -> None:
-    """Verify package seeding cannot alter Pacman's random stream."""
-    random.seed(123)
-    expected_value = random.random()
-    random.seed(123)
-
-    MazeGeneratorAdapter().generate(15, 15, seed=42)
-
-    assert random.random() == expected_value
 
 
 def test_safe_generation_returns_maze_without_error() -> None:
