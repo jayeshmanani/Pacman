@@ -33,6 +33,7 @@ class FakeMazeAdapter(MazeGeneratorAdapter):
         seed: int = 0,
         entry: tuple[int, int] = (0, 0),
         exit: tuple[int, int] = (-1, -1),
+        include_42: bool = True,
     ) -> MazeGrid:
         """Record arguments and return a simple mock grid or fail."""
         self.calls.append({
@@ -41,6 +42,7 @@ class FakeMazeAdapter(MazeGeneratorAdapter):
             "seed": seed,
             "entry": entry,
             "exit": exit,
+            "include_42": include_42,
         })
         if self._should_fail:
             raise MazeAdapterError("Fake maze generation failure")
@@ -71,6 +73,7 @@ def test_level_zero_uses_configured_fixed_seed() -> None:
     assert fake_adapter.calls[0]["seed"] == 1337
     assert fake_adapter.calls[0]["width"] == 15
     assert fake_adapter.calls[0]["height"] == 15
+    assert fake_adapter.calls[0]["include_42"] is True
 
 
 def test_level_zero_is_deterministic_and_reproducible() -> None:
@@ -102,6 +105,8 @@ def test_subsequent_levels_use_random_seeds() -> None:
     assert level_1.seed != 42
     assert level_2.seed != 42
     assert level_1.seed != level_2.seed
+    assert fake_adapter.calls[0]["include_42"] is False
+    assert fake_adapter.calls[1]["include_42"] is False
 
 
 def test_level_dimensions_from_configured_levels_list() -> None:

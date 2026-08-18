@@ -136,13 +136,27 @@ def test_placement_requires_space_for_four_super_pacgums() -> None:
         place_pacgums(maze, spawns)
 
 
-def test_level_generator_adds_configured_pacgum_count() -> None:
-    """Verify generated level data includes configured normal pacgums."""
-    generator = LevelGenerator(config=GameConfig(seed=42, pacgum=12))
+def test_level_generator_fills_all_eligible_corridors() -> None:
+    """Verify generated levels fill every eligible reachable corridor."""
+    generator = LevelGenerator(config=GameConfig(seed=42))
 
     level = generator.generate_level(0)
 
+    assert level.spawns is not None
     assert level.pellets is not None
-    assert len(level.pellets.pacgums) == 12
+    spawn_positions = {
+        level.spawns.player,
+        *level.spawns.ghosts.as_tuple(),
+    }
+    eligible_corridors = {
+        (x, y)
+        for y in range(level.maze.height)
+        for x in range(level.maze.width)
+        if level.maze.is_corridor((x, y))
+    } - spawn_positions
+    placed_pacgums = (
+        level.pellets.pacgums | level.pellets.super_pacgums
+    )
+    assert placed_pacgums == eligible_corridors
     assert len(level.pellets.super_pacgums) == 4
     assert not level.pellets.is_complete
