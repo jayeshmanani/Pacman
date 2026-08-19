@@ -16,4 +16,3 @@ class Direction(Enum):
     def vector(self) -> tuple[float, float]:
         """Return the (dx, dy) direction vector."""
         return self.value
-
