@@ -3,7 +3,8 @@
 from dataclasses import dataclass
 from enum import IntEnum
 
-Coordinate = tuple[int, int]
+TileCoordinate = tuple[int, int]
+Coordinate = TileCoordinate
 
 
 class Tile(IntEnum):

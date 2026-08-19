@@ -1,6 +1,6 @@
 """Deterministic and random level generation services."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import random
 from typing import Protocol
 
@@ -9,6 +9,7 @@ from pacman.maze_adapter import MazeAdapterError, MazeGeneratorAdapter
 from pacman.maze_grid import MazeGrid
 from pacman.pacgums import PacgumField, place_pacgums
 from pacman.spawns import SpawnPositions, find_spawn_positions
+from pacman.world import WorldMap
 
 
 class LevelGenerationError(RuntimeError):
@@ -25,11 +26,13 @@ class LevelData:
     time_limit: int = 90
     spawns: SpawnPositions | None = None
     pellets: PacgumField | None = None
+    world: WorldMap = field(init=False)
 
     def __post_init__(self) -> None:
         """Resolve spawn positions if not explicitly provided."""
         if self.spawns is None:
             object.__setattr__(self, "spawns", find_spawn_positions(self.maze))
+        object.__setattr__(self, "world", WorldMap(self.maze))
 
 
 @dataclass(frozen=True)
