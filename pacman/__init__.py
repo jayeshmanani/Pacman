@@ -16,6 +16,7 @@ from pacman.spawns import (
     find_spawn_positions,
 )
 from pacman.world import WorldMap, WorldPosition, WorldSize
+from pacman.player import Direction, Player, direction_from_key
 
 __all__ = [
     "GhostSpawns",
@@ -32,4 +33,7 @@ __all__ = [
     "find_player_spawn",
     "find_spawn_positions",
     "place_pacgums",
+    "Direction",
+    "Player",
+    "direction_from_key",
 ]

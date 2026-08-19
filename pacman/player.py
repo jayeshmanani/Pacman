@@ -73,3 +73,17 @@ class Player:
                 self.position = target
             else:
                 self.direction = Direction.NONE
+
+
+def direction_from_key(key_name: str) -> Direction | None:
+    """Map WASD and Arrow key names to directional movement."""
+    normalized = key_name.lower()
+    if normalized in ("w", "up"):
+        return Direction.UP
+    if normalized in ("s", "down"):
+        return Direction.DOWN
+    if normalized in ("a", "left"):
+        return Direction.LEFT
+    if normalized in ("d", "right"):
+        return Direction.RIGHT
+    return None
