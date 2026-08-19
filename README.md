@@ -118,6 +118,12 @@ make lint
 make lint-strict
 ```
 
+## Project management
+
+Project planning, task tracking, and sprint progression are managed using Jira (issue keys prefix: `PK-`). Features are broken down into dedicated tickets, developed on jira feature branches, validated via automated test suites, and merged into `main` through peer code reviews.
+
+Project management documentation, timeline tracking, and risk analysis artifacts are maintained in the [project_management](project_management/) directory.
+
 ## Resources and AI usage
 
 - [Python documentation](https://docs.python.org/3/)
