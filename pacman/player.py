@@ -4,7 +4,7 @@ from enum import Enum
 from dataclasses import dataclass
 
 from pacman.maze_grid import TileCoordinate
-from pacman.world import WorldPosition, WorldSize
+from pacman.world import WorldPosition, WorldSize, WorldMap
 
 
 class Direction(Enum):
@@ -48,3 +48,28 @@ class Player:
             speed=speed,
             half_size=half_size,
         )
+
+    def update(self, dt: float, world: WorldMap) -> None:
+        """Update player position and handle turn buffer & wall collisions."""
+        if dt <= 0:
+            return
+
+        if self.queued_direction != Direction.NONE:
+            q_dx, q_dy = self.queued_direction.vector
+            q_target = (
+                self.position[0] + q_dx * self.speed * dt,
+                self.position[1] + q_dy * self.speed * dt,
+            )
+            if world.can_occupy(q_target, self.half_size):
+                self.direction = self.queued_direction
+
+        if self.direction != Direction.NONE:
+            dx, dy = self.direction.vector
+            target = (
+                self.position[0] + dx * self.speed * dt,
+                self.position[1] + dy * self.speed * dt,
+            )
+            if world.can_occupy(target, self.half_size):
+                self.position = target
+            else:
+                self.direction = Direction.NONE
