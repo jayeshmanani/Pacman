@@ -10,6 +10,7 @@ from pacman.pacgums import (
     PacgumKind,
     PacgumPlacementError,
     place_pacgums,
+    collect_pacgum,
 )
 from pacman.spawns import GhostSpawns, SpawnPositions
 
@@ -160,3 +161,34 @@ def test_level_generator_fills_all_eligible_corridors() -> None:
     assert placed_pacgums == eligible_corridors
     assert len(level.pellets.super_pacgums) == 4
     assert not level.pellets.is_complete
+
+
+def test_collect_pacgum_returns_configured_points_once() -> None:
+    """Verify normal pacgums award score once and disappear."""
+    field = PacgumField(
+        pacgums={(1, 1)},
+        super_pacgums=set(),
+    )
+    player_pos = (1.75, 1.25)  # Maps to tile (1, 1)
+
+    # First collection awards points
+    gained = collect_pacgum(player_pos, field, points_per_pacgum=10)
+    assert gained == 10
+    assert (1, 1) not in field.pacgums
+
+    # Second collection on same spot awards 0 points
+    gained_again = collect_pacgum(player_pos, field, points_per_pacgum=10)
+    assert gained_again == 0
+
+
+def test_collect_pacgum_on_empty_tile_returns_zero() -> None:
+    """Verify collecting on a tile without pacgum returns 0."""
+    field = PacgumField(
+        pacgums={(1, 1)},
+        super_pacgums=set(),
+    )
+    empty_pos = (2.5, 2.5)  # Tile (2, 2) has no pacgum
+
+    gained = collect_pacgum(empty_pos, field, points_per_pacgum=10)
+    assert gained == 0
+    assert field.remaining_count == 1
