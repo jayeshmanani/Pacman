@@ -21,6 +21,21 @@ class Direction(Enum):
         """Return the (dx, dy) direction vector."""
         return self.value
 
+    def is_opposite(self, other: "Direction") -> bool:
+        """Return True if other is the 180-degree opposite direction."""
+        dx1, dy1 = self.vector
+        dx2, dy2 = other.vector
+        return ((dx1 + dx2 == 0.0) and
+                (dy1 + dy2 == 0.0) and self != Direction.NONE)
+
+    def is_perpendicular(self, other: "Direction") -> bool:
+        """Return True if other is a 90-degree turn relative to self."""
+        if self == Direction.NONE or other == Direction.NONE:
+            return False
+        dx1, dy1 = self.vector
+        dx2, dy2 = other.vector
+        return (dx1 * dx2 + dy1 * dy2) == 0.0
+
 
 @dataclass
 class Player:
@@ -61,7 +76,17 @@ class Player:
                 self.position[1] + q_dy * self.speed * dt,
             )
             if world.can_occupy(q_target, self.half_size):
+                if self.direction.is_perpendicular(
+                    self.queued_direction
+                ):
+                    curr_x, curr_y = self.position
+                    if q_dx != 0:
+                        curr_y = int(curr_y) + 0.5
+                    elif q_dy != 0:
+                        curr_x = int(curr_x) + 0.5
+                    self.position = (curr_x, curr_y)
                 self.direction = self.queued_direction
+                self.queued_direction = Direction.NONE
 
         if self.direction != Direction.NONE:
             dx, dy = self.direction.vector
