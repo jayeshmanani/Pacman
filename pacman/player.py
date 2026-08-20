@@ -76,7 +76,17 @@ class Player:
                 self.position[1] + q_dy * self.speed * dt,
             )
             if world.can_occupy(q_target, self.half_size):
+                if self.direction.is_perpendicular(
+                    self.queued_direction
+                ):
+                    curr_x, curr_y = self.position
+                    if q_dx != 0:
+                        curr_y = int(curr_y) + 0.5
+                    elif q_dy != 0:
+                        curr_x = int(curr_x) + 0.5
+                    self.position = (curr_x, curr_y)
                 self.direction = self.queued_direction
+                self.queued_direction = Direction.NONE
 
         if self.direction != Direction.NONE:
             dx, dy = self.direction.vector
