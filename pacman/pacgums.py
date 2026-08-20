@@ -151,3 +151,19 @@ def place_pacgums(
         pacgums=pacgums,
         super_pacgums=super_pacgums,
     )
+
+
+def collect_pacgum(
+    player_position: tuple[float, float],
+    field: PacgumField,
+    points_per_pacgum: int = 10,
+) -> int:
+    """Consume a normal pacgum at the player's tile position.
+
+    Returns the score gained.
+    """
+    tile = (int(player_position[0]), int(player_position[1]))
+    kind = field.consume(tile)
+    if kind == PacgumKind.NORMAL:
+        return points_per_pacgum
+    return 0
