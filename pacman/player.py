@@ -21,6 +21,21 @@ class Direction(Enum):
         """Return the (dx, dy) direction vector."""
         return self.value
 
+    def is_opposite(self, other: "Direction") -> bool:
+        """Return True if other is the 180-degree opposite direction."""
+        dx1, dy1 = self.vector
+        dx2, dy2 = other.vector
+        return ((dx1 + dx2 == 0.0) and
+                (dy1 + dy2 == 0.0) and self != Direction.NONE)
+
+    def is_perpendicular(self, other: "Direction") -> bool:
+        """Return True if other is a 90-degree turn relative to self."""
+        if self == Direction.NONE or other == Direction.NONE:
+            return False
+        dx1, dy1 = self.vector
+        dx2, dy2 = other.vector
+        return (dx1 * dx2 + dy1 * dy2) == 0.0
+
 
 @dataclass
 class Player:
