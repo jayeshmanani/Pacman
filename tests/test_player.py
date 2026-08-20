@@ -76,3 +76,42 @@ def test_direction_from_key_mapping() -> None:
     assert direction_from_key("d") == Direction.RIGHT
     assert direction_from_key("Right") == Direction.RIGHT
     assert direction_from_key("x") is None
+
+
+def test_direction_helpers() -> None:
+    """Verify is_opposite and is_perpendicular helper methods."""
+    assert Direction.LEFT.is_opposite(Direction.RIGHT)
+    assert Direction.UP.is_opposite(Direction.DOWN)
+    assert not Direction.LEFT.is_opposite(Direction.UP)
+    assert not Direction.NONE.is_opposite(Direction.RIGHT)
+    assert Direction.LEFT.is_perpendicular(Direction.UP)
+    assert Direction.LEFT.is_perpendicular(Direction.DOWN)
+    assert Direction.RIGHT.is_perpendicular(Direction.UP)
+    assert Direction.RIGHT.is_perpendicular(Direction.DOWN)
+    assert Direction.UP.is_perpendicular(Direction.LEFT)
+    assert Direction.UP.is_perpendicular(Direction.RIGHT)
+    assert not Direction.LEFT.is_perpendicular(Direction.RIGHT)
+    assert not Direction.NONE.is_perpendicular(Direction.UP)
+
+
+def test_player_turn_buffering_clears_queued_direction() -> None:
+    """Verify queued_direction is reset to NONE after executing a turn."""
+    world = _create_test_world()
+    player = Player.from_spawn((1, 1))
+    player.direction = Direction.LEFT
+    player.queued_direction = Direction.DOWN
+    player.update(dt=0.05, world=world)
+    assert player.direction == Direction.DOWN
+    assert player.queued_direction == Direction.NONE
+
+
+def test_player_corner_snapping() -> None:
+    """Verify perpendicular turns snap off-axis position to tile center."""
+    world = _create_test_world()
+    # Spawn at (1.5, 1.5) but slightly off-center on X at (1.52, 1.5)
+    player = Player(position=(1.52, 1.5), direction=Direction.RIGHT)
+    player.queued_direction = Direction.DOWN  # (1, 2) is a clear corridor
+    player.update(dt=0.05, world=world)
+    assert player.direction == Direction.DOWN
+    # X coordinate snapped from 1.52 to tile center 1.5
+    assert player.position[0] == 1.5
