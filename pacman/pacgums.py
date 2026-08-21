@@ -5,6 +5,7 @@ from enum import Enum
 
 from pacman.maze_grid import Coordinate, MazeGrid
 from pacman.spawns import SpawnPositions
+from pacman.power_state import PowerState
 
 
 class PacgumPlacementError(RuntimeError):
@@ -157,6 +158,9 @@ def collect_pacgum(
     player_position: tuple[float, float],
     field: PacgumField,
     points_per_pacgum: int = 10,
+    points_per_super_pacgum: int = 50,
+    power_state: PowerState | None = None,
+    frightened_duration: float = 7.0,
 ) -> int:
     """Consume a normal pacgum at the player's tile position.
 
@@ -166,4 +170,8 @@ def collect_pacgum(
     kind = field.consume(tile)
     if kind == PacgumKind.NORMAL:
         return points_per_pacgum
+    if kind == PacgumKind.SUPER:
+        if power_state is not None:
+            power_state.activate(frightened_duration)
+        return points_per_super_pacgum
     return 0
