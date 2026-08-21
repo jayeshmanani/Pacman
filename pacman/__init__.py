@@ -17,12 +17,14 @@ from pacman.spawns import (
 )
 from pacman.world import WorldMap, WorldPosition, WorldSize
 from pacman.player import Direction, Player, direction_from_key
+from pacman.power_state import PowerState
 
 __all__ = [
     "GhostSpawns",
     "PacgumField",
     "PacgumKind",
     "PacgumPlacementError",
+    "PowerState",
     "SpawnPositions",
     "TileCoordinate",
     "WorldMap",
