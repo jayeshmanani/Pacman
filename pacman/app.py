@@ -198,6 +198,19 @@ def _create_render_fonts(pygame_instance: _PygameModule) -> RenderFonts:
     )
 
 
+def update_active_gameplay(
+    session: GameSession,
+    state_controller: GameStateController,
+    dt: float,
+) -> None:
+    """Advance active gameplay systems for the elapsed frame time."""
+    if state_controller.state is not GameState.PLAYING:
+        return
+
+    if session.update_level_timer(dt):
+        state_controller.end_game()
+
+
 def _draw_centered_text(
     screen: _Surface,
     font: _Font,
@@ -399,6 +412,11 @@ def run_app(
                 app_context,
             )
             pygame_instance.display.flip()
-            clock.tick(window_settings.frames_per_second)
+            elapsed_ms = clock.tick(window_settings.frames_per_second)
+            update_active_gameplay(
+                app_context.session,
+                controller,
+                elapsed_ms / 1000.0,
+            )
     finally:
         pygame_instance.quit()
