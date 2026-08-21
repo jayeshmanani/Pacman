@@ -13,6 +13,7 @@ from pacman.pacgums import (
     collect_pacgum,
 )
 from pacman.spawns import GhostSpawns, SpawnPositions
+from pacman.power_state import PowerState
 
 
 def _open_grid(
@@ -192,3 +193,35 @@ def test_collect_pacgum_on_empty_tile_returns_zero() -> None:
     gained = collect_pacgum(empty_pos, field, points_per_pacgum=10)
     assert gained == 0
     assert field.remaining_count == 1
+
+
+def test_collect_super_pacgum_activates_power_state() -> None:
+    """Verify super-pacgums award super points and activate power mode."""
+    field = PacgumField(
+        pacgums=set(),
+        super_pacgums={(2, 2)},
+    )
+    power_state = PowerState()
+    player_pos = (2.4, 2.6)  # Maps to tile (2, 2)
+    gained = collect_pacgum(
+        player_pos,
+        field,
+        points_per_super_pacgum=50,
+        power_state=power_state,
+        frightened_duration=7.0,
+    )
+    assert gained == 50
+    assert (2, 2) not in field.super_pacgums
+    assert power_state.is_active
+    assert power_state.remaining_time == 7.0
+
+
+def test_collect_super_pacgum_without_power_state_object() -> None:
+    """Verify super-pacgum collection works when power_state is None."""
+    field = PacgumField(
+        pacgums=set(),
+        super_pacgums={(2, 2)},
+    )
+    gained = collect_pacgum((2.1, 2.1), field, points_per_super_pacgum=50)
+    assert gained == 50
+    assert (2, 2) not in field.super_pacgums
