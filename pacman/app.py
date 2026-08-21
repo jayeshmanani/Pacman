@@ -1,6 +1,6 @@
 """Graphical application shell for Pacman."""
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from enum import Enum
 import importlib
@@ -39,6 +39,7 @@ class StateControls:
     confirm_keys: frozenset[int]
     end_screen_key: int
     main_menu_key: int
+    pause_key: int
 
 
 class GameStateController:
@@ -57,22 +58,38 @@ class GameStateController:
         """Move the application to the end screen after game over."""
         self._state = GameState.END_SCREEN
 
-    def handle_key(self, key: int, controls: StateControls) -> None:
+    def handle_key(
+        self,
+        key: int,
+        controls: StateControls,
+        session: GameSession | None = None,
+    ) -> None:
         """Apply a state transition for a pressed key."""
         if self._state is GameState.MAIN_MENU:
             if key in controls.confirm_keys:
+                if session is not None:
+                    session.resume_gameplay()
                 self._state = GameState.PLAYING
             return
 
         if self._state is GameState.PLAYING:
-            if key == controls.end_screen_key:
+            if key == controls.pause_key:
+                if session is not None:
+                    session.toggle_pause()
+            elif key == controls.end_screen_key:
+                if session is not None:
+                    session.resume_gameplay()
                 self._state = GameState.END_SCREEN
             elif key == controls.main_menu_key:
+                if session is not None:
+                    session.resume_gameplay()
                 self._state = GameState.MAIN_MENU
             return
 
         if self._state is GameState.END_SCREEN:
             if key in controls.confirm_keys or key == controls.main_menu_key:
+                if session is not None:
+                    session.resume_gameplay()
                 self._state = GameState.MAIN_MENU
 
 
@@ -161,6 +178,7 @@ class _PygameModule(Protocol):
     K_SPACE: int
     K_e: int
     K_ESCAPE: int
+    K_p: int
     display: _DisplayModule
     event: _EventModule
     font: _FontModule
@@ -187,6 +205,7 @@ def _create_state_controls(pygame_instance: _PygameModule) -> StateControls:
         }),
         end_screen_key=pygame_instance.K_e,
         main_menu_key=pygame_instance.K_ESCAPE,
+        pause_key=pygame_instance.K_p,
     )
 
 
@@ -202,10 +221,14 @@ def update_active_gameplay(
     session: GameSession,
     state_controller: GameStateController,
     dt: float,
+    gameplay_update: Callable[[float], None] | None = None,
 ) -> None:
     """Advance active gameplay systems for the elapsed frame time."""
-    if state_controller.state is not GameState.PLAYING:
+    if state_controller.state is not GameState.PLAYING or session.is_paused:
         return
+
+    if gameplay_update is not None:
+        gameplay_update(dt)
 
     if session.update_level_timer(dt):
         state_controller.end_game()
@@ -401,6 +424,7 @@ def run_app(
                     controller.handle_key(
                         cast(_KeyboardEvent, event).key,
                         controls,
+                        app_context.session,
                     )
 
             render_state(

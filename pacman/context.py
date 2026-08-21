@@ -18,6 +18,7 @@ class GameSession:
     current_level: int = 0
     remaining_level_time: float = 0.0
     level_timed_out: bool = False
+    is_paused: bool = False
 
     @property
     def is_game_over(self) -> bool:
@@ -28,6 +29,19 @@ class GameSession:
         """Remove one life without allowing the count to become negative."""
         self.lives = max(0, self.lives - 1)
         return self.lives
+
+    def pause_gameplay(self) -> None:
+        """Pause active gameplay updates."""
+        self.is_paused = True
+
+    def resume_gameplay(self) -> None:
+        """Resume active gameplay updates."""
+        self.is_paused = False
+
+    def toggle_pause(self) -> bool:
+        """Toggle paused gameplay and return the new paused state."""
+        self.is_paused = not self.is_paused
+        return self.is_paused
 
     def start_level_timer(self, time_limit: float) -> None:
         """Initialize the timer for the active level."""
@@ -41,6 +55,7 @@ class GameSession:
             )
         self.remaining_level_time = float(time_limit)
         self.level_timed_out = False
+        self.is_paused = False
 
     def update_level_timer(self, dt: float) -> bool:
         """Decrease the level timer and return True on first timeout."""
