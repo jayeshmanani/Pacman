@@ -64,6 +64,14 @@ class Player:
             half_size=half_size,
         )
 
+    def respawn(self, spawn_tile: TileCoordinate, world: WorldMap) -> None:
+        """Return the player safely to a walkable spawn tile."""
+        if not world.is_walkable_tile(spawn_tile):
+            raise ValueError("player spawn must be a walkable tile")
+        self.position = world.tile_center(spawn_tile)
+        self.direction = Direction.NONE
+        self.queued_direction = Direction.NONE
+
     def update(self, dt: float, world: WorldMap) -> None:
         """Update player position and handle turn buffer & wall collisions."""
         if dt <= 0:

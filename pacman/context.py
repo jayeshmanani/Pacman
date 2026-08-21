@@ -16,6 +16,16 @@ class GameSession:
     lives: int = 3
     current_level: int = 0
 
+    @property
+    def is_game_over(self) -> bool:
+        """Return whether the player has no lives remaining."""
+        return self.lives == 0
+
+    def lose_life(self) -> int:
+        """Remove one life without allowing the count to become negative."""
+        self.lives = max(0, self.lives - 1)
+        return self.lives
+
 
 @dataclass
 class AppContext:
