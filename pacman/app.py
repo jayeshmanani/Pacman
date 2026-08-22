@@ -53,6 +53,10 @@ class GameStateController:
         """Return the current game state."""
         return self._state
 
+    def end_game(self) -> None:
+        """Move the application to the end screen after game over."""
+        self._state = GameState.END_SCREEN
+
     def handle_key(self, key: int, controls: StateControls) -> None:
         """Apply a state transition for a pressed key."""
         if self._state is GameState.MAIN_MENU:
