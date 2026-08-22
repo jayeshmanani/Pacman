@@ -1,4 +1,4 @@
-"""Tests for level timer countdown and timeout handling."""
+"""Gameplay tests for level-timer countdown and timeout handling."""
 
 import pytest
 

@@ -1,4 +1,4 @@
-"""Tests for the command-line entry point pac_man.py."""
+"""Application tests for the command-line entry point pac_man.py."""
 
 from pathlib import Path
 from unittest.mock import patch

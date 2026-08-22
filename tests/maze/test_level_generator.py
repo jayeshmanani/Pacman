@@ -1,4 +1,4 @@
-"""Tests for deterministic and random level generation."""
+"""Maze tests for deterministic and random level generation."""
 
 import random
 from typing import cast

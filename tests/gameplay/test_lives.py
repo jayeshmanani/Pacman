@@ -1,4 +1,4 @@
-"""Tests for lives, player death, respawn, and game over."""
+"""Gameplay tests for lives, death, respawn, and game over."""
 
 import pytest
 

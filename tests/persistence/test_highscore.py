@@ -1,4 +1,4 @@
-"""Tests for the highscore entry model."""
+"""Persistence tests for the highscore entry model."""
 
 import pytest
 

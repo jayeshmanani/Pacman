@@ -1,4 +1,4 @@
-"""Tests for configuration structures and JSON parsing."""
+"""Persistence tests for configuration structures and JSON parsing."""
 
 from pathlib import Path
 import pytest

@@ -1,4 +1,4 @@
-"""Tests for pacgum and super-pacgum placement and consumption."""
+"""Gameplay tests for pacgum placement and consumption."""
 
 import pytest
 

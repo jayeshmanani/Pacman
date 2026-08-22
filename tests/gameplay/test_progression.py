@@ -1,4 +1,4 @@
-"""Tests for level completion and multi-level progression."""
+"""Gameplay tests for level completion and progression."""
 
 from pacman.app import GameState, GameStateController
 from pacman.config import GameConfig

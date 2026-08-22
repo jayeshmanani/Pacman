@@ -1,4 +1,4 @@
-"""Tests for the assigned maze-generator adapter."""
+"""Maze tests for the assigned generator adapter."""
 
 from collections.abc import Callable
 from typing import cast

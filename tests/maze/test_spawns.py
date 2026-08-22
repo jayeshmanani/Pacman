@@ -1,4 +1,4 @@
-"""Tests for player and ghost spawn positions."""
+"""Maze tests for player and ghost spawn positions."""
 
 import pytest
 

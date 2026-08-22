@@ -1,11 +1,11 @@
-"""Tests for pause and resume gameplay behaviour."""
+"""Gameplay tests for pause and resume behaviour."""
 
 from pacman.app import GameState, GameStateController, update_active_gameplay
 from pacman.context import GameSession
 from pacman.maze_grid import MazeGrid, Tile
 from pacman.player import Direction, Player
 from pacman.world import WorldMap
-from tests.app_fakes import _FakePygame, state_controls
+from tests.support.app_fakes import _FakePygame, state_controls
 
 
 def _open_world() -> WorldMap:

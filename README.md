@@ -5,7 +5,9 @@
 A modular Python implementation of Pac-Man developed as part of the 42
 curriculum. The current codebase provides configuration and highscore services,
 validated maze generation, level construction, pacgum placement, shared world
-coordinates, collision queries, and automated tests.
+coordinates, collision queries, core gameplay mechanics including movement,
+turn buffering, scoring, lives, timing, pause, and level progression, and an
+automated test suite.
 
 ## Requirements
 
@@ -28,6 +30,22 @@ is:
 ```bash
 uv run python pac_man.py config.json
 ```
+
+## Current controls
+
+The current pygame shell supports the application-state controls below:
+
+| Key | Action |
+| --- | --- |
+| `Enter` / `Space` | Start the playing state or return from the end screen |
+| `P` | Pause or resume the active session |
+| `E` | Open the placeholder end screen |
+| `Esc` | Return from the playing state to the main menu |
+| Close window | Quit the application |
+
+The gameplay layer already maps arrow-direction names and `W`, `A`, `S`, `D`
+to Pac-Man movement. Live pygame movement input and the complete visual game
+flow belong to Phase 6 and are not presented as working UI controls yet.
 
 ## Development commands
 
@@ -105,12 +123,17 @@ a guarded persistence layer.
 | `level_generator.py` | Reproducible level construction |
 | `spawns.py`, `pacgums.py` | Spawn and pacgum placement |
 | `world.py` | Shared coordinates, walkability, and collision queries |
-| `context.py`, `app.py` | Application services, loop, and state rendering |
+| `player.py`, `lives.py`, `power_state.py`, `progression.py` | Core movement, life, power-state, and level-progression rules |
+| `context.py` | Shared application services and active session data |
+| `application/` | Application state, rendering, pygame contracts, and runtime orchestration |
+| `app.py` | Stable public facade for the application package |
 
 ## Testing
 
-The suite contains unit tests with controlled fakes and integration tests using
-the real assigned maze-generator package where appropriate.
+The suite is grouped by application, gameplay, maze, persistence, and
+integration responsibilities. Reusable fakes live in `tests/support`.
+Integration tests use the real assigned maze-generator package where
+appropriate.
 
 ```bash
 make test
@@ -120,9 +143,15 @@ make lint-strict
 
 ## Project management
 
-Project planning, task tracking, and sprint progression are managed using Jira (issue keys prefix: `PK-`). Features are broken down into dedicated tickets, developed on jira feature branches, validated via automated test suites, and merged into `main` through peer code reviews.
+Project planning, task tracking, and sprint progression are managed using Jira
+(issue keys prefix: `PK-`). Features are broken down into dedicated tickets,
+developed on Jira-linked feature branches, validated by automated tests, and
+merged into `main` through peer review.
 
-Project management documentation, timeline tracking, and risk analysis artifacts are maintained in the [project_management](project_management/) directory.
+Project management documentation, completed phase history, and shared
+engineering rules are maintained in the
+[project_management](project_management/) directory. Active sprint status and
+planning remain in Jira and the progressive planner.
 
 ## Resources and AI usage
 
@@ -131,4 +160,6 @@ Project management documentation, timeline tracking, and risk analysis artifacts
 - [pytest documentation](https://docs.pytest.org/)
 - [mypy documentation](https://mypy.readthedocs.io/)
 
-AI tools supported test design, code review, and identifying edge cases. The project authors reviewed the suggestions, inspected the changes, and ran the validation suite.
+AI tools supported test design, code review, and identifying edge cases. The
+project authors reviewed the suggestions, inspected the changes, and ran the
+validation suite.
