@@ -19,11 +19,29 @@ class GameSession:
     remaining_level_time: float = 0.0
     level_timed_out: bool = False
     is_paused: bool = False
+    is_victory: bool = False
+    total_levels: int = 10
 
     @property
     def is_game_over(self) -> bool:
         """Return whether the player has no lives remaining."""
-        return self.lives == 0
+        return self.lives == 0 or self.level_timed_out
+
+    @property
+    def is_final_level(self) -> bool:
+        """Return whether the current level is the final level."""
+        return self.current_level >= (self.total_levels - 1)
+
+    def trigger_victory(self) -> None:
+        """Mark the active session as victorious."""
+        self.is_victory = True
+
+    def advance_level(self) -> int:
+        """Advance to the next level while preserving score and lives."""
+        self.current_level += 1
+        self.level_timed_out = False
+        self.is_paused = False
+        return self.current_level
 
     def lose_life(self) -> int:
         """Remove one life without allowing the count to become negative."""
