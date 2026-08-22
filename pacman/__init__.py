@@ -18,6 +18,7 @@ from pacman.spawns import (
 from pacman.world import WorldMap, WorldPosition, WorldSize
 from pacman.player import Direction, Player, direction_from_key
 from pacman.power_state import PowerState
+from pacman.progression import LevelCompletionOutcome, handle_level_completion
 
 __all__ = [
     "GhostSpawns",
@@ -38,4 +39,6 @@ __all__ = [
     "Direction",
     "Player",
     "direction_from_key",
+    "LevelCompletionOutcome",
+    "handle_level_completion",
 ]
