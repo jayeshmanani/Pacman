@@ -1,4 +1,4 @@
-"""Reusable pygame fakes for application tests."""
+"""Shared pygame fakes for application tests."""
 
 from dataclasses import dataclass
 

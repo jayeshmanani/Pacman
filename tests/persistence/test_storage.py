@@ -1,4 +1,4 @@
-"""Tests for highscore persistent storage."""
+"""Persistence tests for highscore storage."""
 
 import json
 from pathlib import Path

@@ -1,4 +1,4 @@
-"""Tests for rendering application states and configured data."""
+"""Application rendering tests for states and configured data."""
 
 import json
 from pathlib import Path
@@ -12,7 +12,7 @@ from pacman.app import (
     run_app,
 )
 from pacman.config import GameConfig
-from tests.app_fakes import _FakeEvent, _FakeFont, _FakePygame
+from tests.support.app_fakes import _FakeEvent, _FakeFont, _FakePygame
 
 
 def test_main_menu_renders_expected_text() -> None:

@@ -1,4 +1,4 @@
-"""End-to-end tests for complete maze and level generation."""
+"""Integration tests for complete maze and level generation."""
 
 from typing import NoReturn
 

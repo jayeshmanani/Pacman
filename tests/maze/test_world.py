@@ -1,4 +1,4 @@
-"""Tests for shared world coordinates and collision queries."""
+"""Maze-world tests for coordinates and collision queries."""
 
 import math
 from typing import cast

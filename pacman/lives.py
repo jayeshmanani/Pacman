@@ -2,7 +2,7 @@
 
 from enum import Enum
 
-from pacman.app import GameStateController
+from pacman.application.state import GameStateController
 from pacman.context import GameSession
 from pacman.maze_grid import TileCoordinate
 from pacman.player import Player

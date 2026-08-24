@@ -1,4 +1,4 @@
-"""Tests for the application context and service integration."""
+"""Application-context and service-integration tests."""
 
 import json
 from pathlib import Path

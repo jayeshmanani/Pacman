@@ -1,9 +1,9 @@
-"""Tests for the pygame window lifecycle and event loop."""
+"""Application tests for the pygame window lifecycle and event loop."""
 
 import pytest
 
 from pacman.app import WindowSettings, run_app
-from tests.app_fakes import (
+from tests.support.app_fakes import (
     _FailingPygame,
     _FakeEvent,
     _FakePygame,

@@ -1,4 +1,4 @@
-"""Tests for player entity movement, turn buffering, and wall collisions."""
+"""Gameplay tests for movement, turn buffering, and wall collisions."""
 
 from pacman.maze_grid import MazeGrid, Tile
 from pacman.player import Direction, Player, direction_from_key

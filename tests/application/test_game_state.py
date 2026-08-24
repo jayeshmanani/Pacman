@@ -1,7 +1,7 @@
-"""Tests for high-level game state transitions."""
+"""Application tests for high-level game-state transitions."""
 
 from pacman.app import GameState, GameStateController
-from tests.app_fakes import _FakePygame, state_controls
+from tests.support.app_fakes import _FakePygame, state_controls
 
 
 def test_initial_state_is_main_menu() -> None:

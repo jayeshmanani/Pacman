@@ -1,4 +1,4 @@
-"""Tests for Pacman's stable internal maze grid."""
+"""Maze tests for the stable internal grid."""
 
 import pytest
 
