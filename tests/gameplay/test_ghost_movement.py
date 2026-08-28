@@ -1,6 +1,10 @@
 """Tests for ghost movement and legal direction query logic."""
 
-from pacman.ghost import get_legal_ghost_directions
+from pacman.ghost import (
+    Ghost,
+    GhostIdentity,
+    get_legal_ghost_directions,
+)
 from pacman.maze_grid import MazeGrid, Tile, TileCoordinate
 from pacman.player import Direction
 from pacman.world import WorldMap
@@ -105,3 +109,64 @@ def test_get_legal_ghost_directions_surrounded_by_walls() -> None:
         world=world,
     )
     assert directions == [Direction.NONE]
+
+
+def test_ghost_update_movement_along_corridor() -> None:
+    """Verify ghost advances position along corridor when updated."""
+    pattern = [
+        "#####",
+        "#...#",
+        "#####",
+    ]
+    world = create_test_world(pattern)
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(1, 1))
+    ghost.direction = Direction.RIGHT
+
+    ghost.update(dt=0.1, world=world, base_speed=4.0)
+
+    # Started at (1.5, 1.5). 1.5 + 4.0 * 0.1 = 1.9
+    assert abs(ghost.position[0] - 1.9) < 1e-6
+    assert abs(ghost.position[1] - 1.5) < 1e-6
+
+
+def test_ghost_update_perpendicular_axis_centering() -> None:
+    """Verify ghost aligns perpendicular axis to tile center when moving."""
+    pattern = [
+        "#####",
+        "#...#",
+        "#####",
+    ]
+    world = create_test_world(pattern)
+    # Slightly off-center y coordinate 1.55
+    ghost = Ghost(
+        identity=GhostIdentity.BLINKY,
+        home_spawn=(1, 1),
+        position=(1.5, 1.55),
+        direction=Direction.RIGHT,
+    )
+
+    ghost.update(dt=0.1, world=world, base_speed=4.0)
+
+    # Y should be snapped back to tile center 1.5
+    assert abs(ghost.position[1] - 1.5) < 1e-6
+
+
+def test_ghost_update_stops_when_frozen_or_respawning() -> None:
+    """Verify ghost does not advance position when frozen or respawning."""
+    pattern = [
+        "#####",
+        "#...#",
+        "#####",
+    ]
+    world = create_test_world(pattern)
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(1, 1))
+    ghost.direction = Direction.RIGHT
+    ghost.freeze()
+
+    ghost.update(dt=0.1, world=world, base_speed=4.0)
+    assert ghost.position == (1.5, 1.5)
+
+    ghost.unfreeze()
+    ghost.start_respawn(delay=2.0)
+    ghost.update(dt=0.1, world=world, base_speed=4.0)
+    assert ghost.position == (1.5, 1.5)

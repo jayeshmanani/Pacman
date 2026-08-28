@@ -121,8 +121,13 @@ class Ghost:
         self.previous_state = None
         return True
 
-    def update(self, dt: float) -> None:
-        """Advance ghost timers and perform automatic state transitions."""
+    def update(
+        self,
+        dt: float,
+        world: WorldMap | None = None,
+        base_speed: float = 4.0,
+    ) -> None:
+        """Advance ghost timers and perform movement if world is provided."""
         if dt <= 0 or self.state == GhostState.FROZEN:
             return
 
@@ -137,6 +142,58 @@ class Ghost:
             if self.respawn_timer <= 0.0:
                 self.respawn_timer = 0.0
                 self.state = GhostState.NORMAL
+
+        if world is not None and self.state != GhostState.RESPAWNING:
+            self._move(dt, world, base_speed)
+
+    def _move(
+        self,
+        dt: float,
+        world: WorldMap,
+        base_speed: float = 4.0,
+    ) -> None:
+        """Advance ghost position along corridors and align to tile axes."""
+        speed = base_speed * self.speed_multiplier
+        if self.state == GhostState.FRIGHTENED:
+            speed *= 0.5
+        elif self.state == GhostState.EATEN:
+            speed *= 1.5
+
+        current_tile = world.world_to_tile(self.position)
+        legal_dirs = get_legal_ghost_directions(
+            tile=current_tile,
+            current_direction=self.direction,
+            world=world,
+            allow_reversal=(self.state == GhostState.FRIGHTENED),
+        )
+
+        if (
+            self.direction == Direction.NONE
+            or self.direction not in legal_dirs
+        ):
+            if legal_dirs and legal_dirs[0] != Direction.NONE:
+                self.direction = legal_dirs[0]
+
+        if self.direction == Direction.NONE:
+            return
+
+        dx, dy = self.direction.vector
+        new_x = self.position[0] + dx * speed * dt
+        new_y = self.position[1] + dy * speed * dt
+
+        if dx != 0:
+            new_y = current_tile[1] + 0.5
+        elif dy != 0:
+            new_x = current_tile[0] + 0.5
+
+        target_position = (new_x, new_y)
+
+        if world.can_occupy(target_position, half_size=(0.35, 0.35)):
+            self.position = target_position
+        else:
+            cx, cy = world.tile_center(current_tile)
+            self.position = (cx, cy)
+            self.direction = Direction.NONE
 
 
 def get_legal_ghost_directions(
