@@ -204,6 +204,43 @@ class Ghost:
             self.direction = Direction.NONE
 
 
+def calculate_ghost_target(
+    identity: GhostIdentity,
+    ghost_tile: TileCoordinate,
+    player_tile: TileCoordinate,
+    player_direction: Direction,
+    home_spawn: TileCoordinate,
+    blinky_tile: TileCoordinate | None = None,
+) -> TileCoordinate:
+    """Calculate target tile for a ghost during NORMAL chase state."""
+    px, py = player_tile
+
+    if identity == GhostIdentity.BLINKY:
+        return (px, py)
+
+    if identity == GhostIdentity.PINKY:
+        p_dx, p_dy = player_direction.vector
+        return (int(px + int(4 * p_dx)), int(py + int(4 * p_dy)))
+
+    if identity == GhostIdentity.INKY:
+        b_tile = blinky_tile if blinky_tile is not None else home_spawn
+        p_dx, p_dy = player_direction.vector
+        pivot_x = px + int(2 * p_dx)
+        pivot_y = py + int(2 * p_dy)
+        target_x = pivot_x + (pivot_x - b_tile[0])
+        target_y = pivot_y + (pivot_y - b_tile[1])
+        return (target_x, target_y)
+
+    if identity == GhostIdentity.CLYDE:
+        gx, gy = ghost_tile
+        dist_sq = (gx - px) ** 2 + (gy - py) ** 2
+        if dist_sq > 64:
+            return (px, py)
+        return home_spawn
+
+    return (px, py)
+
+
 def get_legal_ghost_directions(
     tile: TileCoordinate,
     current_direction: Direction,
