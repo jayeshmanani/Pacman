@@ -1,11 +1,13 @@
 """Ghost state model and state machine definitions."""
 
+import random
 from dataclasses import dataclass
 from enum import Enum, auto
 
 from pacman.maze_grid import TileCoordinate
 from pacman.player import Direction
-from pacman.world import WorldPosition
+from pacman.spawns import GhostSpawns
+from pacman.world import WorldMap, WorldPosition
 
 
 class GhostState(Enum):
@@ -121,8 +123,14 @@ class Ghost:
         self.previous_state = None
         return True
 
-    def update(self, dt: float) -> None:
-        """Advance ghost timers and perform automatic state transitions."""
+    def update(
+        self,
+        dt: float,
+        world: WorldMap | None = None,
+        base_speed: float = 4.0,
+        rng: random.Random | None = None,
+    ) -> None:
+        """Advance ghost timers and perform movement if world is provided."""
         if dt <= 0 or self.state == GhostState.FROZEN:
             return
 
@@ -137,3 +145,130 @@ class Ghost:
             if self.respawn_timer <= 0.0:
                 self.respawn_timer = 0.0
                 self.state = GhostState.NORMAL
+
+        if world is not None and self.state != GhostState.RESPAWNING:
+            self._move(dt, world, base_speed, rng)
+
+    def _move(
+        self,
+        dt: float,
+        world: WorldMap,
+        base_speed: float = 4.0,
+        rng: random.Random | None = None,
+    ) -> None:
+        """Advance ghost position along corridors and align to tile axes."""
+        speed = base_speed * self.speed_multiplier
+        if self.state == GhostState.FRIGHTENED:
+            speed *= 0.5
+        elif self.state == GhostState.EATEN:
+            speed *= 1.5
+
+        current_tile = world.world_to_tile(self.position)
+        legal_dirs = get_legal_ghost_directions(
+            tile=current_tile,
+            current_direction=self.direction,
+            world=world,
+            allow_reversal=(self.state == GhostState.FRIGHTENED),
+        )
+
+        is_blocked = (
+            self.direction == Direction.NONE
+            or self.direction not in legal_dirs
+        )
+        is_intersection = len(legal_dirs) > 1
+
+        if is_blocked or is_intersection:
+            if legal_dirs and legal_dirs[0] != Direction.NONE:
+                chooser = rng if rng is not None else random
+                self.direction = chooser.choice(legal_dirs)
+
+        if self.direction == Direction.NONE:
+            return
+
+        dx, dy = self.direction.vector
+        new_x = self.position[0] + dx * speed * dt
+        new_y = self.position[1] + dy * speed * dt
+
+        if dx != 0:
+            new_y = current_tile[1] + 0.5
+        elif dy != 0:
+            new_x = current_tile[0] + 0.5
+
+        target_position = (new_x, new_y)
+
+        if world.can_occupy(target_position, half_size=(0.35, 0.35)):
+            self.position = target_position
+        else:
+            cx, cy = world.tile_center(current_tile)
+            self.position = (cx, cy)
+            self.direction = Direction.NONE
+
+
+def get_legal_ghost_directions(
+    tile: TileCoordinate,
+    current_direction: Direction,
+    world: WorldMap,
+    allow_reversal: bool = False,
+) -> list[Direction]:
+    """Return valid corridor directions for a ghost at a given tile.
+
+    Enforces wall avoidance and classic ghost movement rules:
+    - Filters out non-corridor/wall tiles.
+    - Prevents 180-degree reversals unless at a dead end or explicitly allowed.
+    """
+    tx, ty = tile
+    cardinal_directions = (
+        Direction.UP,
+        Direction.DOWN,
+        Direction.LEFT,
+        Direction.RIGHT,
+    )
+    walkable_directions: list[Direction] = []
+
+    for direction in cardinal_directions:
+        dx, dy = direction.vector
+        target_tile = (int(tx + dx), int(ty + dy))
+        if world.is_walkable_tile(target_tile):
+            walkable_directions.append(direction)
+
+    if not walkable_directions:
+        return [Direction.NONE]
+
+    if not allow_reversal and current_direction != Direction.NONE:
+        forward_options = [
+            d for d in walkable_directions
+            if not d.is_opposite(current_direction)
+        ]
+        if forward_options:
+            return forward_options
+
+    return walkable_directions
+
+
+def create_ghost_group(
+    spawns: GhostSpawns,
+    speed_multiplier: float = 1.0,
+) -> list[Ghost]:
+    """Create all four ghosts at their assigned corner spawns."""
+    return [
+        Ghost.from_spawn(
+            GhostIdentity.BLINKY,
+            spawns.top_left,
+            speed_multiplier,
+        ),
+        Ghost.from_spawn(
+            GhostIdentity.PINKY,
+            spawns.top_right,
+            speed_multiplier,
+        ),
+        Ghost.from_spawn(
+            GhostIdentity.INKY,
+            spawns.bottom_left,
+            speed_multiplier,
+        ),
+        Ghost.from_spawn(
+            GhostIdentity.CLYDE,
+            spawns.bottom_right,
+            speed_multiplier,
+        ),
+    ]
