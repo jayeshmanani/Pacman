@@ -129,6 +129,9 @@ class Ghost:
         world: WorldMap | None = None,
         base_speed: float = 4.0,
         rng: random.Random | None = None,
+        player_position: WorldPosition | None = None,
+        player_direction: Direction = Direction.NONE,
+        blinky_tile: TileCoordinate | None = None,
     ) -> None:
         """Advance ghost timers and perform movement if world is provided."""
         if dt <= 0 or self.state == GhostState.FROZEN:
@@ -147,7 +150,15 @@ class Ghost:
                 self.state = GhostState.NORMAL
 
         if world is not None and self.state != GhostState.RESPAWNING:
-            self._move(dt, world, base_speed, rng)
+            self._move(
+                dt,
+                world,
+                base_speed,
+                rng,
+                player_position,
+                player_direction,
+                blinky_tile,
+            )
 
     def _move(
         self,
@@ -155,6 +166,9 @@ class Ghost:
         world: WorldMap,
         base_speed: float = 4.0,
         rng: random.Random | None = None,
+        player_position: WorldPosition | None = None,
+        player_direction: Direction = Direction.NONE,
+        blinky_tile: TileCoordinate | None = None,
     ) -> None:
         """Advance ghost position along corridors and align to tile axes."""
         speed = base_speed * self.speed_multiplier
@@ -179,8 +193,30 @@ class Ghost:
 
         if is_blocked or is_intersection:
             if legal_dirs and legal_dirs[0] != Direction.NONE:
-                chooser = rng if rng is not None else random
-                self.direction = chooser.choice(legal_dirs)
+                if rng is not None or self.state == GhostState.FRIGHTENED:
+                    chooser = rng if rng is not None else random
+                    self.direction = chooser.choice(legal_dirs)
+                else:
+                    target_player_pos = (
+                        player_position
+                        if player_position is not None
+                        else self.position
+                    )
+                    player_tile = world.world_to_tile(target_player_pos)
+                    target = calculate_ghost_target(
+                        identity=self.identity,
+                        ghost_tile=current_tile,
+                        player_tile=player_tile,
+                        player_direction=player_direction,
+                        home_spawn=self.home_spawn,
+                        blinky_tile=blinky_tile,
+                    )
+                    self.target_tile = target
+                    self.direction = select_chase_direction(
+                        current_tile=current_tile,
+                        target_tile=target,
+                        legal_directions=legal_dirs,
+                    )
 
         if self.direction == Direction.NONE:
             return
@@ -202,6 +238,86 @@ class Ghost:
             cx, cy = world.tile_center(current_tile)
             self.position = (cx, cy)
             self.direction = Direction.NONE
+
+
+def calculate_ghost_target(
+    identity: GhostIdentity,
+    ghost_tile: TileCoordinate,
+    player_tile: TileCoordinate,
+    player_direction: Direction,
+    home_spawn: TileCoordinate,
+    blinky_tile: TileCoordinate | None = None,
+) -> TileCoordinate:
+    """Calculate target tile for a ghost during NORMAL chase state."""
+    px, py = player_tile
+
+    if identity == GhostIdentity.BLINKY:
+        return (px, py)
+
+    if identity == GhostIdentity.PINKY:
+        p_dx, p_dy = player_direction.vector
+        return (int(px + int(4 * p_dx)), int(py + int(4 * p_dy)))
+
+    if identity == GhostIdentity.INKY:
+        b_tile = blinky_tile if blinky_tile is not None else home_spawn
+        p_dx, p_dy = player_direction.vector
+        pivot_x = px + int(2 * p_dx)
+        pivot_y = py + int(2 * p_dy)
+        target_x = pivot_x + (pivot_x - b_tile[0])
+        target_y = pivot_y + (pivot_y - b_tile[1])
+        return (target_x, target_y)
+
+    if identity == GhostIdentity.CLYDE:
+        gx, gy = ghost_tile
+        dist_sq = (gx - px) ** 2 + (gy - py) ** 2
+        if dist_sq > 64:
+            return (px, py)
+        return home_spawn
+
+    return (px, py)
+
+
+def select_chase_direction(
+    current_tile: TileCoordinate,
+    target_tile: TileCoordinate,
+    legal_directions: list[Direction],
+) -> Direction:
+    """Select direction minimizing distance squared to target."""
+    if not legal_directions or legal_directions == [Direction.NONE]:
+        return Direction.NONE
+
+    if len(legal_directions) == 1:
+        return legal_directions[0]
+
+    priority = {
+        Direction.UP: 0,
+        Direction.LEFT: 1,
+        Direction.DOWN: 2,
+        Direction.RIGHT: 3,
+    }
+
+    best_direction = legal_directions[0]
+    min_dist_sq = float("inf")
+
+    tx, ty = target_tile
+    cx, cy = current_tile
+
+    for direction in legal_directions:
+        if direction == Direction.NONE:
+            continue
+        dx, dy = direction.vector
+        nx = cx + int(dx)
+        ny = cy + int(dy)
+        dist_sq = (nx - tx) ** 2 + (ny - ty) ** 2
+
+        if dist_sq < min_dist_sq:
+            min_dist_sq = dist_sq
+            best_direction = direction
+        elif dist_sq == min_dist_sq:
+            if priority.get(direction, 99) < priority.get(best_direction, 99):
+                best_direction = direction
+
+    return best_direction
 
 
 def get_legal_ghost_directions(
