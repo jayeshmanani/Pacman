@@ -1,11 +1,39 @@
-"""Unit tests for Step 1: Normal ghost chase target calculation."""
+"""Unit tests for normal ghost chase targeting and direction selection."""
 
 from pacman.ghost import (
+    Ghost,
     GhostIdentity,
+    GhostState,
     calculate_ghost_target,
     select_chase_direction,
 )
+from pacman.maze_grid import MazeGrid, Tile
 from pacman.player import Direction
+from pacman.world import WorldMap
+
+
+def create_test_world(grid_pattern: list[str]) -> WorldMap:
+    """Create a WorldMap from a string grid pattern."""
+    rows: list[tuple[Tile, ...]] = []
+    first_corridor = (1, 1)
+    last_corridor = (1, 1)
+
+    for r_idx, line in enumerate(grid_pattern):
+        row_tiles: list[Tile] = []
+        for c_idx, char in enumerate(line):
+            if char == "#":
+                row_tiles.append(Tile.WALL)
+            else:
+                row_tiles.append(Tile.CORRIDOR)
+                last_corridor = (c_idx, r_idx)
+        rows.append(tuple(row_tiles))
+
+    grid = MazeGrid(
+        tiles=tuple(rows),
+        entry=first_corridor,
+        exit=last_corridor,
+    )
+    return WorldMap(maze=grid)
 
 
 def test_calculate_ghost_target_blinky() -> None:
@@ -108,3 +136,30 @@ def test_select_chase_direction_tiebreaker() -> None:
         legal_directions=[Direction.UP, Direction.LEFT],
     )
     assert chosen == Direction.UP
+
+
+def test_ghost_chase_movement_integration() -> None:
+    """Verify Blinky turns toward player at an intersection in a maze."""
+    pattern = [
+        "#######",
+        "#.....#",
+        "#.###.#",
+        "#.....#",
+        "#######",
+    ]
+    world = create_test_world(pattern)
+    blinky = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(1, 1))
+    blinky.direction = Direction.RIGHT
+    blinky.state = GhostState.NORMAL
+
+    # At (3, 1) or (1, 1), when updating towards intersection, Blinky
+    # targets the player position.
+    # Player position = (1.5, 3.5)
+    blinky.update(
+        dt=0.1,
+        world=world,
+        base_speed=4.0,
+        player_position=(1.5, 3.5),
+        player_direction=Direction.RIGHT,
+    )
+    assert blinky.target_tile == (1, 3)
