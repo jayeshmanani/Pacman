@@ -1,5 +1,6 @@
 """Ghost state model and state machine definitions."""
 
+import random
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -126,6 +127,7 @@ class Ghost:
         dt: float,
         world: WorldMap | None = None,
         base_speed: float = 4.0,
+        rng: random.Random | None = None,
     ) -> None:
         """Advance ghost timers and perform movement if world is provided."""
         if dt <= 0 or self.state == GhostState.FROZEN:
@@ -144,13 +146,14 @@ class Ghost:
                 self.state = GhostState.NORMAL
 
         if world is not None and self.state != GhostState.RESPAWNING:
-            self._move(dt, world, base_speed)
+            self._move(dt, world, base_speed, rng)
 
     def _move(
         self,
         dt: float,
         world: WorldMap,
         base_speed: float = 4.0,
+        rng: random.Random | None = None,
     ) -> None:
         """Advance ghost position along corridors and align to tile axes."""
         speed = base_speed * self.speed_multiplier
@@ -167,12 +170,16 @@ class Ghost:
             allow_reversal=(self.state == GhostState.FRIGHTENED),
         )
 
-        if (
+        is_blocked = (
             self.direction == Direction.NONE
             or self.direction not in legal_dirs
-        ):
+        )
+        is_intersection = len(legal_dirs) > 1
+
+        if is_blocked or is_intersection:
             if legal_dirs and legal_dirs[0] != Direction.NONE:
-                self.direction = legal_dirs[0]
+                chooser = rng if rng is not None else random
+                self.direction = chooser.choice(legal_dirs)
 
         if self.direction == Direction.NONE:
             return

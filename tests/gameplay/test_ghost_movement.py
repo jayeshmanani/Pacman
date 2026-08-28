@@ -1,5 +1,7 @@
 """Tests for ghost movement and legal direction query logic."""
 
+import random
+
 from pacman.ghost import (
     Ghost,
     GhostIdentity,
@@ -170,3 +172,41 @@ def test_ghost_update_stops_when_frozen_or_respawning() -> None:
     ghost.start_respawn(delay=2.0)
     ghost.update(dt=0.1, world=world, base_speed=4.0)
     assert ghost.position == (1.5, 1.5)
+
+
+def test_ghost_direction_selection_at_intersection() -> None:
+    """Verify ghost chooses a legal direction at an intersection."""
+    pattern = [
+        "#####",
+        "#...#",
+        "#...#",
+        "#...#",
+        "#####",
+    ]
+    world = create_test_world(pattern)
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(2, 2))
+    ghost.direction = Direction.RIGHT
+    rng = random.Random(42)
+
+    ghost.update(dt=0.1, world=world, base_speed=4.0, rng=rng)
+
+    assert ghost.direction in {Direction.UP, Direction.DOWN, Direction.RIGHT}
+
+
+def test_ghost_recovers_at_dead_end_wall() -> None:
+    """Verify ghost turns around when encountering a dead end."""
+    pattern = [
+        "#####",
+        "#####",
+        "#..##",  # (1, 2) is dead end, (2, 2) is open corridor to right
+        "#####",
+        "#####",
+    ]
+    world = create_test_world(pattern)
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(1, 2))
+    ghost.direction = Direction.LEFT
+
+    ghost.update(dt=0.1, world=world, base_speed=4.0)
+
+    # Must change direction to RIGHT to get out of dead end
+    assert ghost.direction == Direction.RIGHT
