@@ -6,6 +6,7 @@ from enum import Enum, auto
 
 from pacman.maze_grid import TileCoordinate
 from pacman.player import Direction
+from pacman.spawns import GhostSpawns
 from pacman.world import WorldMap, WorldPosition
 
 
@@ -242,3 +243,32 @@ def get_legal_ghost_directions(
             return forward_options
 
     return walkable_directions
+
+
+def create_ghost_group(
+    spawns: GhostSpawns,
+    speed_multiplier: float = 1.0,
+) -> list[Ghost]:
+    """Create all four ghosts at their assigned corner spawns."""
+    return [
+        Ghost.from_spawn(
+            GhostIdentity.BLINKY,
+            spawns.top_left,
+            speed_multiplier,
+        ),
+        Ghost.from_spawn(
+            GhostIdentity.PINKY,
+            spawns.top_right,
+            speed_multiplier,
+        ),
+        Ghost.from_spawn(
+            GhostIdentity.INKY,
+            spawns.bottom_left,
+            speed_multiplier,
+        ),
+        Ghost.from_spawn(
+            GhostIdentity.CLYDE,
+            spawns.bottom_right,
+            speed_multiplier,
+        ),
+    ]

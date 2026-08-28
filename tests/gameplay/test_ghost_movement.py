@@ -5,10 +5,12 @@ import random
 from pacman.ghost import (
     Ghost,
     GhostIdentity,
+    create_ghost_group,
     get_legal_ghost_directions,
 )
 from pacman.maze_grid import MazeGrid, Tile, TileCoordinate
 from pacman.player import Direction
+from pacman.spawns import GhostSpawns
 from pacman.world import WorldMap
 
 
@@ -210,3 +212,31 @@ def test_ghost_recovers_at_dead_end_wall() -> None:
 
     # Must change direction to RIGHT to get out of dead end
     assert ghost.direction == Direction.RIGHT
+
+
+def test_create_ghost_group_and_multi_ghost_update() -> None:
+    """Verify all four ghosts spawn correctly and update position."""
+    pattern = [
+        "#####",
+        "#...#",
+        "#...#",
+        "#...#",
+        "#####",
+    ]
+    world = create_test_world(pattern)
+    spawns = GhostSpawns(
+        top_left=(1, 1),
+        top_right=(3, 1),
+        bottom_left=(1, 3),
+        bottom_right=(3, 3),
+    )
+    ghosts = create_ghost_group(spawns, speed_multiplier=1.0)
+    assert len(ghosts) == 4
+    assert ghosts[0].identity == GhostIdentity.BLINKY
+    assert ghosts[1].identity == GhostIdentity.PINKY
+    assert ghosts[2].identity == GhostIdentity.INKY
+    assert ghosts[3].identity == GhostIdentity.CLYDE
+
+    for ghost in ghosts:
+        ghost.update(dt=0.1, world=world, base_speed=4.0)
+        assert world.contains_world(ghost.position)
