@@ -3,6 +3,7 @@
 from pacman.ghost import (
     GhostIdentity,
     calculate_ghost_target,
+    select_chase_direction,
 )
 from pacman.player import Direction
 
@@ -80,3 +81,30 @@ def test_calculate_ghost_target_clyde() -> None:
         home_spawn=home,
     )
     assert target_close == home
+
+
+def test_select_chase_direction_minimizes_distance() -> None:
+    """Verify direction choice selects neighbor tile closest to target."""
+    # Current tile (2, 2), target (5, 2) [to the right]
+    # Options: UP (2, 1), DOWN (2, 3), RIGHT (3, 2)
+    # RIGHT is closest to (5, 2)
+    chosen = select_chase_direction(
+        current_tile=(2, 2),
+        target_tile=(5, 2),
+        legal_directions=[Direction.UP, Direction.DOWN, Direction.RIGHT],
+    )
+    assert chosen == Direction.RIGHT
+
+
+def test_select_chase_direction_tiebreaker() -> None:
+    """Verify tiebreaking priority order UP > LEFT > DOWN > RIGHT."""
+    # Current tile (2, 2), target (3, 3)
+    # UP -> (2, 1): dist_sq = (2-3)^2 + (1-3)^2 = 1 + 4 = 5
+    # LEFT -> (1, 2): dist_sq = (1-3)^2 + (2-3)^2 = 4 + 1 = 5
+    # Distance is equal (5 vs 5). Tiebreak order UP > LEFT chooses UP.
+    chosen = select_chase_direction(
+        current_tile=(2, 2),
+        target_tile=(3, 3),
+        legal_directions=[Direction.UP, Direction.LEFT],
+    )
+    assert chosen == Direction.UP

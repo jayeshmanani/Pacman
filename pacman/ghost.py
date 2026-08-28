@@ -241,6 +241,49 @@ def calculate_ghost_target(
     return (px, py)
 
 
+def select_chase_direction(
+    current_tile: TileCoordinate,
+    target_tile: TileCoordinate,
+    legal_directions: list[Direction],
+) -> Direction:
+    """Select direction minimizing distance squared to target."""
+    if not legal_directions or legal_directions == [Direction.NONE]:
+        return Direction.NONE
+
+    if len(legal_directions) == 1:
+        return legal_directions[0]
+
+    priority = {
+        Direction.UP: 0,
+        Direction.LEFT: 1,
+        Direction.DOWN: 2,
+        Direction.RIGHT: 3,
+    }
+
+    best_direction = legal_directions[0]
+    min_dist_sq = float("inf")
+
+    tx, ty = target_tile
+    cx, cy = current_tile
+
+    for direction in legal_directions:
+        if direction == Direction.NONE:
+            continue
+        dx, dy = direction.vector
+        nx = cx + int(dx)
+        ny = cy + int(dy)
+        dist_sq = (nx - tx) ** 2 + (ny - ty) ** 2
+
+        if dist_sq < min_dist_sq:
+            min_dist_sq = dist_sq
+            best_direction = direction
+        elif dist_sq == min_dist_sq:
+            if priority.get(direction, 99) < priority.get(best_direction, 99):
+                best_direction = direction
+
+    return best_direction
+
+
 def get_legal_ghost_directions(
     tile: TileCoordinate,
     current_direction: Direction,
