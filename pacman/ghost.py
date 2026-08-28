@@ -5,7 +5,7 @@ from enum import Enum, auto
 
 from pacman.maze_grid import TileCoordinate
 from pacman.player import Direction
-from pacman.world import WorldPosition
+from pacman.world import WorldMap, WorldPosition
 
 
 class GhostState(Enum):
@@ -137,3 +137,44 @@ class Ghost:
             if self.respawn_timer <= 0.0:
                 self.respawn_timer = 0.0
                 self.state = GhostState.NORMAL
+
+
+def get_legal_ghost_directions(
+    tile: TileCoordinate,
+    current_direction: Direction,
+    world: WorldMap,
+    allow_reversal: bool = False,
+) -> list[Direction]:
+    """Return valid corridor directions for a ghost at a given tile.
+
+    Enforces wall avoidance and classic ghost movement rules:
+    - Filters out non-corridor/wall tiles.
+    - Prevents 180-degree reversals unless at a dead end or explicitly allowed.
+    """
+    tx, ty = tile
+    cardinal_directions = (
+        Direction.UP,
+        Direction.DOWN,
+        Direction.LEFT,
+        Direction.RIGHT,
+    )
+    walkable_directions: list[Direction] = []
+
+    for direction in cardinal_directions:
+        dx, dy = direction.vector
+        target_tile = (int(tx + dx), int(ty + dy))
+        if world.is_walkable_tile(target_tile):
+            walkable_directions.append(direction)
+
+    if not walkable_directions:
+        return [Direction.NONE]
+
+    if not allow_reversal and current_direction != Direction.NONE:
+        forward_options = [
+            d for d in walkable_directions
+            if not d.is_opposite(current_direction)
+        ]
+        if forward_options:
+            return forward_options
+
+    return walkable_directions
