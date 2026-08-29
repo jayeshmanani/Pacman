@@ -21,6 +21,18 @@ class Direction(Enum):
         """Return the (dx, dy) direction vector."""
         return self.value
 
+    @property
+    def opposite(self) -> "Direction":
+        """Return the 180-degree opposite direction."""
+        opposites = {
+            Direction.UP: Direction.DOWN,
+            Direction.DOWN: Direction.UP,
+            Direction.LEFT: Direction.RIGHT,
+            Direction.RIGHT: Direction.LEFT,
+            Direction.NONE: Direction.NONE,
+        }
+        return opposites[self]
+
     def is_opposite(self, other: "Direction") -> bool:
         """Return True if other is the 180-degree opposite direction."""
         dx1, dy1 = self.vector

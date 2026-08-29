@@ -62,8 +62,16 @@ class Ghost:
             speed_multiplier=speed_multiplier,
         )
 
-    def frighten(self, duration: float = 7.0) -> bool:
-        """Transition ghost to FRIGHTENED state if currently eligible."""
+    def frighten(
+        self,
+        duration: float = 7.0,
+        reverse_direction: bool = True,
+    ) -> bool:
+        """Transition ghost to FRIGHTENED state if currently eligible.
+
+        When reverse_direction is True and the ghost has an active direction,
+        it immediately turns 180 degrees.
+        """
         if duration < 0:
             raise ValueError("frightened duration cannot be negative")
 
@@ -77,6 +85,8 @@ class Ghost:
 
         self.state = GhostState.FRIGHTENED
         self.frightened_timer = float(duration)
+        if reverse_direction and self.direction != Direction.NONE:
+            self.direction = self.direction.opposite
         return True
 
     def eat(self) -> bool:
@@ -182,7 +192,7 @@ class Ghost:
             tile=current_tile,
             current_direction=self.direction,
             world=world,
-            allow_reversal=(self.state == GhostState.FRIGHTENED),
+            allow_reversal=False,
         )
 
         is_blocked = (
@@ -193,16 +203,22 @@ class Ghost:
 
         if is_blocked or is_intersection:
             if legal_dirs and legal_dirs[0] != Direction.NONE:
-                if rng is not None or self.state == GhostState.FRIGHTENED:
-                    chooser = rng if rng is not None else random
-                    self.direction = chooser.choice(legal_dirs)
-                else:
-                    target_player_pos = (
-                        player_position
-                        if player_position is not None
-                        else self.position
+                target_player_pos = (
+                    player_position
+                    if player_position is not None
+                    else self.position
+                )
+                player_tile = world.world_to_tile(target_player_pos)
+
+                if self.state == GhostState.FRIGHTENED:
+                    self.target_tile = None
+                    self.direction = select_frightened_direction(
+                        current_tile=current_tile,
+                        player_tile=player_tile,
+                        legal_directions=legal_dirs,
+                        rng=rng,
                     )
-                    player_tile = world.world_to_tile(target_player_pos)
+                else:
                     target = calculate_ghost_target(
                         identity=self.identity,
                         ghost_tile=current_tile,
@@ -318,6 +334,62 @@ def select_chase_direction(
                 best_direction = direction
 
     return best_direction
+
+
+def select_frightened_direction(
+    current_tile: TileCoordinate,
+    player_tile: TileCoordinate,
+    legal_directions: list[Direction],
+    rng: random.Random | None = None,
+) -> Direction:
+    """Select direction maximizing distance squared from player.
+
+    When frightened, the ghost evaluates each legal corridor direction and
+    chooses the one that increases its distance from the player.
+    Ties are resolved using standard directional priority
+    (UP, LEFT, DOWN, RIGHT), or pseudo-random choice if an RNG
+    instance is provided.
+    """
+    if not legal_directions or legal_directions == [Direction.NONE]:
+        return Direction.NONE
+
+    if len(legal_directions) == 1:
+        return legal_directions[0]
+
+    valid_directions = [d for d in legal_directions if d != Direction.NONE]
+    if not valid_directions:
+        return Direction.NONE
+
+    px, py = player_tile
+    cx, cy = current_tile
+
+    scored_directions: list[tuple[float, Direction]] = []
+    for direction in valid_directions:
+        dx, dy = direction.vector
+        nx = cx + int(dx)
+        ny = cy + int(dy)
+        dist_sq = float((nx - px) ** 2 + (ny - py) ** 2)
+        scored_directions.append((dist_sq, direction))
+
+    max_dist_sq = max(d[0] for d in scored_directions)
+    best_candidates = [
+        direction for dist, direction in scored_directions
+        if dist == max_dist_sq
+    ]
+
+    if len(best_candidates) == 1:
+        return best_candidates[0]
+
+    if rng is not None:
+        return rng.choice(best_candidates)
+
+    priority = {
+        Direction.UP: 0,
+        Direction.LEFT: 1,
+        Direction.DOWN: 2,
+        Direction.RIGHT: 3,
+    }
+    return min(best_candidates, key=lambda d: priority.get(d, 99))
 
 
 def get_legal_ghost_directions(
