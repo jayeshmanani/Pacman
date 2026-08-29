@@ -192,7 +192,7 @@ class Ghost:
             tile=current_tile,
             current_direction=self.direction,
             world=world,
-            allow_reversal=(self.state == GhostState.FRIGHTENED),
+            allow_reversal=False,
         )
 
         is_blocked = (
@@ -203,16 +203,22 @@ class Ghost:
 
         if is_blocked or is_intersection:
             if legal_dirs and legal_dirs[0] != Direction.NONE:
-                if rng is not None or self.state == GhostState.FRIGHTENED:
-                    chooser = rng if rng is not None else random
-                    self.direction = chooser.choice(legal_dirs)
-                else:
-                    target_player_pos = (
-                        player_position
-                        if player_position is not None
-                        else self.position
+                target_player_pos = (
+                    player_position
+                    if player_position is not None
+                    else self.position
+                )
+                player_tile = world.world_to_tile(target_player_pos)
+
+                if self.state == GhostState.FRIGHTENED:
+                    self.target_tile = None
+                    self.direction = select_frightened_direction(
+                        current_tile=current_tile,
+                        player_tile=player_tile,
+                        legal_directions=legal_dirs,
+                        rng=rng,
                     )
-                    player_tile = world.world_to_tile(target_player_pos)
+                else:
                     target = calculate_ghost_target(
                         identity=self.identity,
                         ghost_tile=current_tile,

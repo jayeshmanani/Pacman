@@ -6,6 +6,7 @@ from pacman.ghost import (
     select_frightened_direction,
 )
 from pacman.player import Direction
+from pacman.world import WorldMap
 
 
 def test_select_frightened_direction_empty_or_none() -> None:
@@ -104,3 +105,104 @@ def test_ghost_frighten_reverses_direction() -> None:
     # If reverse_direction=False, direction is preserved
     assert ghost.frighten(duration=5.0, reverse_direction=False) is True
     assert ghost.direction == Direction.DOWN
+
+
+def _create_test_world(grid_pattern: list[str]) -> WorldMap:
+    """Create a WorldMap from a string grid pattern."""
+    from pacman.maze_grid import MazeGrid, Tile, TileCoordinate
+
+    rows: list[tuple[Tile, ...]] = []
+    first_corridor: TileCoordinate | None = None
+    last_corridor: TileCoordinate | None = None
+
+    for r_idx, line in enumerate(grid_pattern):
+        row_tiles: list[Tile] = []
+        for c_idx, char in enumerate(line):
+            if char == "#":
+                row_tiles.append(Tile.WALL)
+            else:
+                row_tiles.append(Tile.CORRIDOR)
+                coord = (c_idx, r_idx)
+                if first_corridor is None:
+                    first_corridor = coord
+                last_corridor = coord
+        rows.append(tuple(row_tiles))
+
+    entry = first_corridor if first_corridor is not None else (0, 0)
+    exit_tile = last_corridor if last_corridor is not None else (0, 0)
+    grid = MazeGrid(tiles=tuple(rows), entry=entry, exit=exit_tile)
+    return WorldMap(maze=grid)
+
+
+def test_frightened_ghost_movement_flees_from_player() -> None:
+    """Verify frightened ghost turns away from player at intersection."""
+    from pacman.ghost import Ghost, GhostIdentity
+
+    # Maze with 4-way intersection at (2, 2)
+    pattern = [
+        "#####",
+        "#...#",
+        "#...#",
+        "#...#",
+        "#####",
+    ]
+    world = _create_test_world(pattern)
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(2, 2))
+    ghost.direction = Direction.RIGHT
+    ghost.frighten(duration=10.0, reverse_direction=False)
+
+    # Player is at bottom right (3.5, 3.5)
+    # Available from (2, 2) going RIGHT: UP (2, 1), DOWN (2, 3), RIGHT (3, 2)
+    # Distances to player at (3, 3):
+    # UP (2, 1) -> (2-3)^2 + (1-3)^2 = 1 + 4 = 5 (furthest)
+    # DOWN (2, 3) -> (2-3)^2 + (3-3)^2 = 1 + 0 = 1
+    # RIGHT (3, 2) -> (3-3)^2 + (2-3)^2 = 0 + 1 = 1
+    ghost.update(
+        dt=0.1,
+        world=world,
+        base_speed=4.0,
+        player_position=(3.5, 3.5),
+        player_direction=Direction.RIGHT,
+    )
+    assert ghost.direction == Direction.UP
+
+
+def test_frightened_ghost_moves_at_reduced_speed() -> None:
+    """Verify frightened ghost moves at half speed compared to normal."""
+    from pacman.ghost import Ghost, GhostIdentity, GhostState
+
+    pattern = [
+        "#######",
+        "#.....#",
+        "#######",
+    ]
+    world = _create_test_world(pattern)
+
+    # Normal ghost
+    normal_ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(1, 1))
+    normal_ghost.direction = Direction.RIGHT
+    normal_ghost.state = GhostState.NORMAL
+    normal_ghost.update(
+        dt=1.0,
+        world=world,
+        base_speed=2.0,
+        player_position=(5.5, 1.5),
+    )
+
+    # Frightened ghost
+    frightened_ghost = Ghost.from_spawn(
+        GhostIdentity.BLINKY, spawn_tile=(1, 1)
+    )
+    frightened_ghost.direction = Direction.RIGHT
+    frightened_ghost.frighten(duration=10.0, reverse_direction=False)
+    frightened_ghost.update(
+        dt=1.0,
+        world=world,
+        base_speed=2.0,
+        player_position=(5.5, 1.5),
+    )
+
+    # Normal moves 2.0 * 1.0 = 2.0 units -> from 1.5 to 3.5
+    # Frightened moves 2.0 * 0.5 * 1.0 = 1.0 units -> from 1.5 to 2.5
+    assert abs(normal_ghost.position[0] - 3.5) < 1e-3
+    assert abs(frightened_ghost.position[0] - 2.5) < 1e-3
