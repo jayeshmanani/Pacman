@@ -73,7 +73,8 @@ def test_expiry_clears_saved_frightened_state_from_frozen_ghost() -> None:
     assert ghosts[0].state == GhostState.FROZEN
     assert ghosts[0].previous_state == GhostState.NORMAL
     ghosts[0].unfreeze()
-    assert ghosts[0].state == GhostState.NORMAL
+    state_after_unfreeze: GhostState = ghosts[0].state
+    assert state_after_unfreeze == GhostState.NORMAL
 
 
 def test_zero_duration_does_not_leave_frightened_state() -> None:

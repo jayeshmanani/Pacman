@@ -1,5 +1,6 @@
 """Gameplay tests for player and ghost collision outcomes."""
 
+from pacman.config import GameConfig
 from pacman.context import GameSession
 from pacman.ghost import Ghost, GhostIdentity, GhostState
 from pacman.ghost_collision import (
@@ -134,3 +135,33 @@ def test_new_power_activation_resets_ghost_score_chain() -> None:
     handle_ghost_collision(session, second_ghost, power_state)
 
     assert session.score == 400
+
+
+def test_eaten_ghost_returns_after_configured_respawn_delay() -> None:
+    """Verify configured scoring and the complete delayed return lifecycle."""
+    config = GameConfig(points_per_ghost=250, ghost_respawn_delay=3.5)
+    session = GameSession()
+    ghost = _ghost(GhostState.FRIGHTENED)
+    power_state = PowerState(remaining_time=7.0)
+
+    outcome = handle_ghost_collision(
+        session,
+        ghost,
+        power_state,
+        points_per_ghost=config.points_per_ghost,
+        respawn_delay=config.ghost_respawn_delay,
+    )
+
+    assert outcome is GhostCollisionOutcome.GHOST_EATEN
+    assert session.score == 250
+    assert ghost.state is GhostState.RESPAWNING
+    assert ghost.respawn_timer == 3.5
+
+    ghost.update(3.0)
+    assert ghost.state is GhostState.RESPAWNING
+    assert ghost.respawn_timer == 0.5
+
+    ghost.update(0.5)
+    state_after_respawn: GhostState = ghost.state
+    assert state_after_respawn is GhostState.NORMAL
+    assert ghost.respawn_timer == 0.0
