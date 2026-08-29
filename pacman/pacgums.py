@@ -1,11 +1,13 @@
 """Place and track normal pacgums and super-pacgums."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 
 from pacman.maze_grid import Coordinate, MazeGrid
 from pacman.spawns import SpawnPositions
 from pacman.power_state import PowerState
+from pacman.ghost import Ghost
 
 
 class PacgumPlacementError(RuntimeError):
@@ -161,6 +163,7 @@ def collect_pacgum(
     points_per_super_pacgum: int = 50,
     power_state: PowerState | None = None,
     frightened_duration: float = 7.0,
+    ghosts: Iterable[Ghost] = (),
 ) -> int:
     """Consume a normal pacgum at the player's tile position.
 
@@ -172,6 +175,6 @@ def collect_pacgum(
         return points_per_pacgum
     if kind == PacgumKind.SUPER:
         if power_state is not None:
-            power_state.activate(frightened_duration)
+            power_state.activate(frightened_duration, ghosts)
         return points_per_super_pacgum
     return 0
