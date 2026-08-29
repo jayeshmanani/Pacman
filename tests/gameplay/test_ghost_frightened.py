@@ -206,3 +206,104 @@ def test_frightened_ghost_moves_at_reduced_speed() -> None:
     # Frightened moves 2.0 * 0.5 * 1.0 = 1.0 units -> from 1.5 to 2.5
     assert abs(normal_ghost.position[0] - 3.5) < 1e-3
     assert abs(frightened_ghost.position[0] - 2.5) < 1e-3
+
+
+def test_frightened_ghost_recovers_at_dead_end() -> None:
+    """Verify frightened ghost turns around when encountering a dead end."""
+    from pacman.ghost import Ghost, GhostIdentity
+
+    pattern = [
+        "#####",
+        "#####",
+        "#..##",  # (1, 2) is dead end, (2, 2) is corridor to right
+        "#####",
+        "#####",
+    ]
+    world = _create_test_world(pattern)
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(1, 2))
+    ghost.direction = Direction.LEFT
+    ghost.frighten(duration=10.0, reverse_direction=False)
+
+    # Player is at (3.5, 2.5) (to the right)
+    # Ghost is moving LEFT into wall at (1, 2), dead end forces turn to RIGHT
+    ghost.update(
+        dt=0.1,
+        world=world,
+        base_speed=4.0,
+        player_position=(3.5, 2.5),
+    )
+    assert ghost.direction == Direction.RIGHT
+
+
+def test_frightened_state_expiration_resumes_normal_chase() -> None:
+    """Verify ghost transitions to NORMAL on timer expiry and resumes chase."""
+    from pacman.ghost import Ghost, GhostIdentity, GhostState
+
+    pattern = [
+        "#####",
+        "#...#",
+        "#...#",
+        "#...#",
+        "#####",
+    ]
+    world = _create_test_world(pattern)
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, spawn_tile=(2, 2))
+    ghost.direction = Direction.RIGHT
+    ghost.frighten(duration=1.0, reverse_direction=False)
+
+    # First update: timer reduces from 1.0 to 0.5, state is still FRIGHTENED
+    ghost.update(
+        dt=0.5,
+        world=world,
+        base_speed=4.0,
+        player_position=(3.5, 3.5),
+    )
+    state_during_frightened = ghost.state
+    assert state_during_frightened == GhostState.FRIGHTENED
+    assert ghost.target_tile is None
+
+    # Second update: timer elapses by 0.6 (> 0.5), state reverts to NORMAL
+    ghost.update(
+        dt=0.6,
+        world=world,
+        base_speed=4.0,
+        player_position=(3.5, 3.5),
+    )
+    state_after_expiry = ghost.state
+    assert state_after_expiry == GhostState.NORMAL
+    # In NORMAL state, Blinky directly targets Pacman's tile (3, 3)
+    assert ghost.target_tile == (3, 3)
+
+
+def test_multi_ghost_group_frightened_update() -> None:
+    """Verify group of 4 ghosts all update positions when frightened."""
+    from pacman.ghost import create_ghost_group
+    from pacman.spawns import GhostSpawns
+
+    pattern = [
+        "#####",
+        "#...#",
+        "#...#",
+        "#...#",
+        "#####",
+    ]
+    world = _create_test_world(pattern)
+    spawns = GhostSpawns(
+        top_left=(1, 1),
+        top_right=(3, 1),
+        bottom_left=(1, 3),
+        bottom_right=(3, 3),
+    )
+    ghosts = create_ghost_group(spawns, speed_multiplier=1.0)
+    for ghost in ghosts:
+        ghost.frighten(duration=5.0)
+
+    for ghost in ghosts:
+        ghost.update(
+            dt=0.1,
+            world=world,
+            base_speed=4.0,
+            player_position=(2.5, 2.5),
+        )
+        assert world.contains_world(ghost.position)
+        assert ghost.target_tile is None
