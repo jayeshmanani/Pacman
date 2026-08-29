@@ -74,6 +74,7 @@ The JSON configuration supports:
 - first-level seed;
 - scoring values for pacgums, super-pacgums, and ghosts.
 - frightened-state duration after collecting a super-pacgum.
+- ghost respawn delay after a frightened ghost is eaten.
 
 Missing or invalid values use safe defaults, unknown keys are ignored, and
 configuration errors are handled without a Python traceback.
