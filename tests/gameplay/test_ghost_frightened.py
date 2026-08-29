@@ -75,3 +75,32 @@ def test_select_frightened_direction_with_rng() -> None:
     )
     # Furthest candidates are UP and LEFT (dist_sq = 5 vs 1 for DOWN/RIGHT)
     assert chosen in [Direction.UP, Direction.LEFT]
+
+
+def test_direction_opposite_property() -> None:
+    """Verify opposite property for all cardinal directions and NONE."""
+    assert Direction.UP.opposite == Direction.DOWN
+    assert Direction.DOWN.opposite == Direction.UP
+    assert Direction.LEFT.opposite == Direction.RIGHT
+    assert Direction.RIGHT.opposite == Direction.LEFT
+    assert Direction.NONE.opposite == Direction.NONE
+
+
+def test_ghost_frighten_reverses_direction() -> None:
+    """Verify ghost immediately reverses direction when frightened."""
+    from pacman.ghost import Ghost, GhostIdentity
+
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, (2, 2))
+    ghost.direction = Direction.RIGHT
+
+    assert ghost.frighten(duration=5.0) is True
+    assert ghost.direction == Direction.LEFT
+
+    # Reversing when moving UP turns DOWN
+    ghost.direction = Direction.UP
+    assert ghost.frighten(duration=5.0) is True
+    assert ghost.direction == Direction.DOWN
+
+    # If reverse_direction=False, direction is preserved
+    assert ghost.frighten(duration=5.0, reverse_direction=False) is True
+    assert ghost.direction == Direction.DOWN

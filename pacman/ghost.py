@@ -62,8 +62,16 @@ class Ghost:
             speed_multiplier=speed_multiplier,
         )
 
-    def frighten(self, duration: float = 7.0) -> bool:
-        """Transition ghost to FRIGHTENED state if currently eligible."""
+    def frighten(
+        self,
+        duration: float = 7.0,
+        reverse_direction: bool = True,
+    ) -> bool:
+        """Transition ghost to FRIGHTENED state if currently eligible.
+
+        When reverse_direction is True and the ghost has an active direction,
+        it immediately turns 180 degrees.
+        """
         if duration < 0:
             raise ValueError("frightened duration cannot be negative")
 
@@ -77,6 +85,8 @@ class Ghost:
 
         self.state = GhostState.FRIGHTENED
         self.frightened_timer = float(duration)
+        if reverse_direction and self.direction != Direction.NONE:
+            self.direction = self.direction.opposite
         return True
 
     def eat(self) -> bool:
