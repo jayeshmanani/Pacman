@@ -216,6 +216,29 @@ def test_collect_super_pacgum_activates_power_state() -> None:
     assert power_state.remaining_time == 7.0
 
 
+def test_collect_super_pacgum_frightens_all_active_ghosts() -> None:
+    """Verify one collection synchronizes all eligible active ghosts."""
+    from pacman.ghost import Ghost, GhostIdentity, GhostState
+
+    field = PacgumField(pacgums=set(), super_pacgums={(2, 2)})
+    ghosts = [
+        Ghost.from_spawn(GhostIdentity.BLINKY, (1, 1)),
+        Ghost.from_spawn(GhostIdentity.PINKY, (3, 1)),
+    ]
+    power_state = PowerState()
+
+    collect_pacgum(
+        (2.5, 2.5),
+        field,
+        power_state=power_state,
+        frightened_duration=4.5,
+        ghosts=ghosts,
+    )
+
+    assert all(ghost.state == GhostState.FRIGHTENED for ghost in ghosts)
+    assert all(ghost.frightened_timer == 4.5 for ghost in ghosts)
+
+
 def test_collect_super_pacgum_without_power_state_object() -> None:
     """Verify super-pacgum collection works when power_state is None."""
     field = PacgumField(
