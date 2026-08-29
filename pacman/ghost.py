@@ -320,6 +320,62 @@ def select_chase_direction(
     return best_direction
 
 
+def select_frightened_direction(
+    current_tile: TileCoordinate,
+    player_tile: TileCoordinate,
+    legal_directions: list[Direction],
+    rng: random.Random | None = None,
+) -> Direction:
+    """Select direction maximizing distance squared from player.
+
+    When frightened, the ghost evaluates each legal corridor direction and
+    chooses the one that increases its distance from the player.
+    Ties are resolved using standard directional priority
+    (UP, LEFT, DOWN, RIGHT), or pseudo-random choice if an RNG
+    instance is provided.
+    """
+    if not legal_directions or legal_directions == [Direction.NONE]:
+        return Direction.NONE
+
+    if len(legal_directions) == 1:
+        return legal_directions[0]
+
+    valid_directions = [d for d in legal_directions if d != Direction.NONE]
+    if not valid_directions:
+        return Direction.NONE
+
+    px, py = player_tile
+    cx, cy = current_tile
+
+    scored_directions: list[tuple[float, Direction]] = []
+    for direction in valid_directions:
+        dx, dy = direction.vector
+        nx = cx + int(dx)
+        ny = cy + int(dy)
+        dist_sq = float((nx - px) ** 2 + (ny - py) ** 2)
+        scored_directions.append((dist_sq, direction))
+
+    max_dist_sq = max(d[0] for d in scored_directions)
+    best_candidates = [
+        direction for dist, direction in scored_directions
+        if dist == max_dist_sq
+    ]
+
+    if len(best_candidates) == 1:
+        return best_candidates[0]
+
+    if rng is not None:
+        return rng.choice(best_candidates)
+
+    priority = {
+        Direction.UP: 0,
+        Direction.LEFT: 1,
+        Direction.DOWN: 2,
+        Direction.RIGHT: 3,
+    }
+    return min(best_candidates, key=lambda d: priority.get(d, 99))
+
+
 def get_legal_ghost_directions(
     tile: TileCoordinate,
     current_direction: Direction,
