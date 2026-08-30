@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 import random
 
+from pacman.application.state import GameStateController
 from pacman.config import GameConfig
 from pacman.context import GameSession
 from pacman.ghost import Ghost, GhostIdentity, create_ghost_group
@@ -13,10 +14,20 @@ from pacman.ghost_collision import (
     find_colliding_ghosts,
     resolve_ghost_collisions,
 )
+from pacman.lives import PlayerDeathOutcome, handle_normal_ghost_collision
+from pacman.maze_grid import TileCoordinate
 from pacman.player import Direction, Player
 from pacman.power_state import PowerState
 from pacman.spawns import GhostSpawns
 from pacman.world import WorldMap, WorldPosition
+
+
+@dataclass(frozen=True)
+class GhostGameplayCollisionResult:
+    """Combine ghost collision effects with optional player death handling."""
+
+    collision: GhostCollisionFrameResult
+    player_death: PlayerDeathOutcome | None = None
 
 
 @dataclass
@@ -100,6 +111,31 @@ class GhostGameplay:
         """Detect and resolve every ghost touching the player this frame."""
         colliding_ghosts = find_colliding_ghosts(player, self.ghosts)
         return self.resolve_collisions(session, colliding_ghosts)
+
+    def handle_player_collisions(
+        self,
+        session: GameSession,
+        player: Player,
+        player_spawn: TileCoordinate,
+        world: WorldMap,
+        state_controller: GameStateController,
+    ) -> GhostGameplayCollisionResult:
+        """Resolve ghost contact and apply one normal-ghost player death."""
+        collision = self.resolve_player_collisions(session, player)
+        if not collision.player_hit:
+            return GhostGameplayCollisionResult(collision=collision)
+
+        player_death = handle_normal_ghost_collision(
+            session=session,
+            player=player,
+            spawn_tile=player_spawn,
+            world=world,
+            state_controller=state_controller,
+        )
+        return GhostGameplayCollisionResult(
+            collision=collision,
+            player_death=player_death,
+        )
 
     def _blinky_tile(self, world: WorldMap) -> tuple[int, int] | None:
         """Return Blinky's current tile for Inky's chase calculation."""

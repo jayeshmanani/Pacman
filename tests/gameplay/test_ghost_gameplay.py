@@ -1,9 +1,11 @@
 """Integration tests for the complete four-ghost gameplay coordinator."""
 
+from pacman.app import GameState, GameStateController
 from pacman.config import GameConfig
 from pacman.context import GameSession
 from pacman.ghost import GhostIdentity, GhostState
 from pacman.ghost_gameplay import GhostGameplay
+from pacman.lives import PlayerDeathOutcome
 from pacman.player import Direction, Player
 from pacman.spawns import GhostSpawns
 from pacman.world import WorldMap
@@ -159,3 +161,37 @@ def test_all_four_ghosts_complete_position_based_collision_cycle() -> None:
     assert repeated_normal_contact.player_hit is False
     assert session.score == 3000
     assert session.lives == 3
+
+
+def test_normal_overlap_applies_one_life_loss_through_coordinator() -> None:
+    """Verify a continuous normal contact removes only one player life."""
+    gameplay = GhostGameplay.create(_spawns(), GameConfig(seed=42))
+    world = _world()
+    player = Player.from_spawn((3, 3))
+    session = GameSession(lives=3)
+    controller = GameStateController(GameState.PLAYING)
+    normal_ghost = gameplay.ghosts[0]
+    normal_ghost.position = player.position
+
+    first = gameplay.handle_player_collisions(
+        session=session,
+        player=player,
+        player_spawn=(3, 3),
+        world=world,
+        state_controller=controller,
+    )
+    repeated = gameplay.handle_player_collisions(
+        session=session,
+        player=player,
+        player_spawn=(3, 3),
+        world=world,
+        state_controller=controller,
+    )
+
+    assert first.collision.player_hit is True
+    assert first.player_death is PlayerDeathOutcome.RESPAWNED
+    assert repeated.collision.player_hit is False
+    assert repeated.player_death is None
+    assert session.lives == 2
+    assert player.position == (3.5, 3.5)
+    assert controller.state is GameState.PLAYING
