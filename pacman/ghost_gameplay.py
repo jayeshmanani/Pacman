@@ -10,9 +10,10 @@ from pacman.ghost import Ghost, GhostIdentity, create_ghost_group
 from pacman.ghost_collision import (
     GhostCollisionFrameResult,
     GhostCollisionGuard,
+    find_colliding_ghosts,
     resolve_ghost_collisions,
 )
-from pacman.player import Direction
+from pacman.player import Direction, Player
 from pacman.power_state import PowerState
 from pacman.spawns import GhostSpawns
 from pacman.world import WorldMap, WorldPosition
@@ -90,6 +91,15 @@ class GhostGameplay:
             respawn_delay=self.respawn_delay,
             guard=self.collision_guard,
         )
+
+    def resolve_player_collisions(
+        self,
+        session: GameSession,
+        player: Player,
+    ) -> GhostCollisionFrameResult:
+        """Detect and resolve every ghost touching the player this frame."""
+        colliding_ghosts = find_colliding_ghosts(player, self.ghosts)
+        return self.resolve_collisions(session, colliding_ghosts)
 
     def _blinky_tile(self, world: WorldMap) -> tuple[int, int] | None:
         """Return Blinky's current tile for Inky's chase calculation."""

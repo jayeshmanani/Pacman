@@ -4,7 +4,7 @@ from pacman.config import GameConfig
 from pacman.context import GameSession
 from pacman.ghost import GhostIdentity, GhostState
 from pacman.ghost_gameplay import GhostGameplay
-from pacman.player import Direction
+from pacman.player import Direction, Player
 from pacman.spawns import GhostSpawns
 from pacman.world import WorldMap
 from tests.gameplay_fakes import FixedMazeAdapter
@@ -102,3 +102,60 @@ def test_coordinator_applies_collision_score_and_respawn_config() -> None:
 
     assert state_after_respawn is GhostState.NORMAL
     assert collided_ghost.respawn_timer == 0.0
+
+
+def test_all_four_ghosts_complete_position_based_collision_cycle() -> None:
+    """Verify four real overlaps complete eating, respawn, and hit flow."""
+    config = GameConfig(
+        seed=42,
+        points_per_ghost=200,
+        frightened_duration=4.0,
+        ghost_respawn_delay=1.0,
+    )
+    gameplay = GhostGameplay.create(_spawns(), config, base_speed=1.0)
+    player = Player.from_spawn((3, 3))
+    session = GameSession(lives=3)
+
+    for ghost in gameplay.ghosts:
+        ghost.position = player.position
+
+    gameplay.activate_frightened()
+    eaten = gameplay.resolve_player_collisions(session, player)
+    repeated = gameplay.resolve_player_collisions(session, player)
+
+    assert eaten.player_hit is False
+    assert eaten.eaten_ghosts == 4
+    assert eaten.score_gained == 3000
+    assert session.score == 3000
+    assert all(
+        ghost.state is GhostState.RESPAWNING
+        for ghost in gameplay.ghosts
+    )
+    assert repeated.player_hit is False
+    assert repeated.eaten_ghosts == 0
+    assert repeated.score_gained == 0
+
+    gameplay.update(
+        dt=1.0,
+        world=_world(),
+        player_position=player.position,
+    )
+    returned_states: list[GhostState] = [
+        ghost.state for ghost in gameplay.ghosts
+    ]
+    player.position = gameplay.ghosts[0].position
+
+    first_normal_contact = gameplay.resolve_player_collisions(
+        session,
+        player,
+    )
+    repeated_normal_contact = gameplay.resolve_player_collisions(
+        session,
+        player,
+    )
+
+    assert returned_states == [GhostState.NORMAL] * 4
+    assert first_normal_contact.player_hit is True
+    assert repeated_normal_contact.player_hit is False
+    assert session.score == 3000
+    assert session.lives == 3

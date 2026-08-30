@@ -6,6 +6,7 @@ from enum import Enum
 
 from pacman.context import GameSession
 from pacman.ghost import Ghost, GhostState
+from pacman.player import Player
 from pacman.power_state import PowerState
 
 
@@ -43,6 +44,32 @@ class GhostCollisionGuard:
 
         self.normal_contact_active = True
         return True
+
+
+def find_colliding_ghosts(
+    player: Player,
+    ghosts: Iterable[Ghost],
+) -> tuple[Ghost, ...]:
+    """Return ghosts whose bounds overlap the player's bounds."""
+    player_x, player_y = player.position
+    player_half_width, player_half_height = player.half_size
+    colliding: list[Ghost] = []
+
+    for ghost in ghosts:
+        ghost_x, ghost_y = ghost.position
+        ghost_half_width, ghost_half_height = ghost.half_size
+        overlaps_horizontally = (
+            abs(player_x - ghost_x)
+            < player_half_width + ghost_half_width
+        )
+        overlaps_vertically = (
+            abs(player_y - ghost_y)
+            < player_half_height + ghost_half_height
+        )
+        if overlaps_horizontally and overlaps_vertically:
+            colliding.append(ghost)
+
+    return tuple(colliding)
 
 
 def handle_ghost_collision(

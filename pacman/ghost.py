@@ -7,7 +7,7 @@ from enum import Enum, auto
 from pacman.maze_grid import TileCoordinate
 from pacman.player import Direction
 from pacman.spawns import GhostSpawns
-from pacman.world import WorldMap, WorldPosition
+from pacman.world import WorldMap, WorldPosition, WorldSize
 
 
 class GhostState(Enum):
@@ -43,6 +43,7 @@ class Ghost:
     frightened_timer: float = 0.0
     respawn_timer: float = 0.0
     speed_multiplier: float = 1.0
+    half_size: WorldSize = (0.35, 0.35)
 
     @classmethod
     def from_spawn(
@@ -268,7 +269,7 @@ class Ghost:
 
         target_position = (new_x, new_y)
 
-        if world.can_occupy(target_position, half_size=(0.35, 0.35)):
+        if world.can_occupy(target_position, half_size=self.half_size):
             self.position = target_position
         else:
             cx, cy = world.tile_center(current_tile)
