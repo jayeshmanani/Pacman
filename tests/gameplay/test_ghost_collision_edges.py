@@ -2,7 +2,10 @@
 
 from pacman.context import GameSession
 from pacman.ghost import Ghost, GhostIdentity, GhostState
-from pacman.ghost_collision import resolve_ghost_collisions
+from pacman.ghost_collision import (
+    GhostCollisionGuard,
+    resolve_ghost_collisions,
+)
 from pacman.power_state import PowerState
 
 
@@ -98,3 +101,57 @@ def test_inactive_ghost_group_produces_no_collision_effect() -> None:
     assert result.eaten_ghosts == 0
     assert result.score_gained == 0
     assert session.score == 300
+
+
+def test_repeated_normal_overlap_reports_only_first_player_hit() -> None:
+    """Verify continuous contact cannot kill the player every frame."""
+    session = GameSession(lives=3)
+    ghost = _ghost(GhostIdentity.BLINKY, GhostState.NORMAL)
+    guard = GhostCollisionGuard()
+
+    first = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        PowerState(),
+        guard=guard,
+    )
+    repeated = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        PowerState(),
+        guard=guard,
+    )
+
+    assert first.player_hit is True
+    assert repeated.player_hit is False
+    assert session.lives == 3
+
+
+def test_separation_allows_a_later_normal_collision() -> None:
+    """Verify ending contact rearms the guard for a new collision."""
+    session = GameSession(lives=3)
+    ghost = _ghost(GhostIdentity.BLINKY, GhostState.NORMAL)
+    guard = GhostCollisionGuard()
+
+    first = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        PowerState(),
+        guard=guard,
+    )
+    separated = resolve_ghost_collisions(
+        session,
+        (),
+        PowerState(),
+        guard=guard,
+    )
+    later = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        PowerState(),
+        guard=guard,
+    )
+
+    assert first.player_hit is True
+    assert separated.player_hit is False
+    assert later.player_hit is True
