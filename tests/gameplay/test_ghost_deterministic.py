@@ -3,8 +3,14 @@
 import random
 from dataclasses import dataclass
 
+from pacman.context import GameSession
 from pacman.ghost import Ghost, GhostIdentity, GhostState
+from pacman.ghost_collision import (
+    GhostCollisionGuard,
+    resolve_ghost_collisions,
+)
 from pacman.player import Direction
+from pacman.power_state import PowerState
 from pacman.world import WorldMap, WorldPosition
 from tests.gameplay_fakes import FixedMazeAdapter
 
@@ -109,3 +115,96 @@ def test_seeded_frightened_route_is_repeatable_and_legal() -> None:
         and snapshot.target_tile is None
         for snapshot in first_route
     )
+
+
+def test_frightened_expiration_changes_collision_at_exact_boundary() -> None:
+    """Verify an exact timer expiry makes the ghost dangerous again."""
+    session = GameSession()
+    ghost = Ghost.from_spawn(GhostIdentity.PINKY, (3, 3))
+    power_state = PowerState()
+    power_state.activate(duration=0.75, ghosts=(ghost,))
+
+    expired_early = power_state.update(dt=0.5, ghosts=(ghost,))
+
+    assert expired_early is False
+    assert power_state.remaining_time == 0.25
+    assert ghost.state is GhostState.FRIGHTENED
+
+    expired_at_boundary = power_state.update(dt=0.25, ghosts=(ghost,))
+    collision = resolve_ghost_collisions(session, (ghost,), power_state)
+    state_after_expiry: GhostState = ghost.state
+
+    assert expired_at_boundary is True
+    assert power_state.remaining_time == 0.0
+    assert state_after_expiry is GhostState.NORMAL
+    assert collision.player_hit is True
+    assert collision.eaten_ghosts == 0
+    assert collision.score_gained == 0
+    assert session.score == 0
+
+
+def test_eaten_ghost_is_safe_until_delayed_respawn_completes() -> None:
+    """Verify eating, collision safety, and delayed return in one scenario."""
+    session = GameSession()
+    ghost = Ghost.from_spawn(GhostIdentity.INKY, (3, 3))
+    power_state = PowerState()
+    power_state.activate(duration=5.0, ghosts=(ghost,))
+    guard = GhostCollisionGuard()
+
+    eaten = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        power_state,
+        points_per_ghost=200,
+        respawn_delay=1.5,
+        guard=guard,
+    )
+    repeated_while_respawning = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        power_state,
+        guard=guard,
+    )
+
+    assert eaten.player_hit is False
+    assert eaten.eaten_ghosts == 1
+    assert eaten.score_gained == 200
+    assert session.score == 200
+    assert ghost.state is GhostState.RESPAWNING
+    assert ghost.respawn_timer == 1.5
+    assert repeated_while_respawning.player_hit is False
+    assert repeated_while_respawning.eaten_ghosts == 0
+    assert repeated_while_respawning.score_gained == 0
+
+    ghost.update(dt=1.0)
+    collision_before_return = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        power_state,
+        guard=guard,
+    )
+
+    assert ghost.state is GhostState.RESPAWNING
+    assert ghost.respawn_timer == 0.5
+    assert collision_before_return.player_hit is False
+
+    ghost.update(dt=0.5)
+    collision_after_return = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        power_state,
+        guard=guard,
+    )
+    repeated_normal_contact = resolve_ghost_collisions(
+        session,
+        (ghost,),
+        power_state,
+        guard=guard,
+    )
+    state_after_respawn: GhostState = ghost.state
+
+    assert state_after_respawn is GhostState.NORMAL
+    assert ghost.respawn_timer == 0.0
+    assert collision_after_return.player_hit is True
+    assert repeated_normal_contact.player_hit is False
+    assert session.score == 200
