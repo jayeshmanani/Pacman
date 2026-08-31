@@ -73,6 +73,7 @@ The JSON configuration supports:
 - initial lives and level time limit;
 - first-level seed;
 - scoring values for pacgums, super-pacgums, and ghosts.
+- frightened-state duration after collecting a super-pacgum.
 
 Missing or invalid values use safe defaults, unknown keys are ignored, and
 configuration errors are handled without a Python traceback.

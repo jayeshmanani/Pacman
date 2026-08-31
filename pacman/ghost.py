@@ -98,6 +98,27 @@ class Ghost:
         self.frightened_timer = 0.0
         return True
 
+    def recover_from_frightened(self) -> bool:
+        """Clear frightened state without disturbing other ghost states.
+
+        A frozen ghost keeps its frozen state, but its saved frightened state
+        is replaced with NORMAL so unfreezing cannot restore expired power.
+        """
+        if self.state == GhostState.FRIGHTENED:
+            self.state = GhostState.NORMAL
+            self.frightened_timer = 0.0
+            return True
+
+        if (
+            self.state == GhostState.FROZEN
+            and self.previous_state == GhostState.FRIGHTENED
+        ):
+            self.previous_state = GhostState.NORMAL
+            self.frightened_timer = 0.0
+            return True
+
+        return False
+
     def start_respawn(self, delay: float = 5.0) -> None:
         """Return ghost to home spawn and transition to RESPAWNING."""
         if delay < 0:
@@ -150,8 +171,7 @@ class Ghost:
         if self.state == GhostState.FRIGHTENED:
             self.frightened_timer -= dt
             if self.frightened_timer <= 0.0:
-                self.frightened_timer = 0.0
-                self.state = GhostState.NORMAL
+                self.recover_from_frightened()
 
         elif self.state == GhostState.RESPAWNING:
             self.respawn_timer -= dt

@@ -17,6 +17,7 @@ def test_parse_game_config_defaults() -> None:
     assert config.points_per_pacgum == 10
     assert config.points_per_super_pacgum == 50
     assert config.points_per_ghost == 200
+    assert config.frightened_duration == 7.0
     assert config.level_max_time == 90
     assert len(config.levels) == 1
     assert config.levels[0] == LevelConfig(width=21, height=21)
@@ -32,6 +33,7 @@ def test_parse_game_config_valid_custom_values() -> None:
         "points_per_pacgum": 20,
         "points_per_super_pacgum": 100,
         "points_per_ghost": 500,
+        "frightened_duration": 9.5,
         "level_max_time": 120,
         "levels": [
             {"width": 25, "height": 25},
@@ -48,6 +50,7 @@ def test_parse_game_config_valid_custom_values() -> None:
     assert config.points_per_pacgum == 20
     assert config.points_per_super_pacgum == 100
     assert config.points_per_ghost == 500
+    assert config.frightened_duration == 9.5
     assert config.level_max_time == 120
     assert len(config.levels) == 2
     assert config.levels[0] == LevelConfig(width=25, height=25)
@@ -61,6 +64,7 @@ def test_parse_game_config_clamps_invalid_and_negative_values() -> None:
         "lives": 0,
         "points_per_pacgum": -5,
         "level_max_time": "invalid",
+        "frightened_duration": -2,
         "levels": [{"width": 2, "height": "invalid"}],
     }
 
@@ -70,6 +74,7 @@ def test_parse_game_config_clamps_invalid_and_negative_values() -> None:
     assert config.lives == 1
     assert config.points_per_pacgum == 0
     assert config.level_max_time == 90
+    assert config.frightened_duration == 0.0
     assert config.levels[0].width == 5
     assert config.levels[0].height == 21
 

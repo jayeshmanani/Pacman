@@ -1,6 +1,7 @@
 """Configuration structures and parser for Pacman game settings."""
 
 from dataclasses import dataclass, field
+import math
 from typing import Any
 
 
@@ -23,6 +24,7 @@ class GameConfig:
     points_per_pacgum: int = 10
     points_per_super_pacgum: int = 50
     points_per_ghost: int = 200
+    frightened_duration: float = 7.0
     level_max_time: int = 90
     levels: list[LevelConfig] = field(default_factory=lambda: [LevelConfig()])
 
@@ -53,6 +55,19 @@ def parse_game_config(data: dict[str, Any]) -> GameConfig:
         except (ValueError, TypeError):
             return default
 
+    def _safe_float(
+        key: str,
+        default: float,
+        min_val: float | None = None,
+    ) -> float:
+        try:
+            value = float(data.get(key, default))
+            if not math.isfinite(value):
+                return default
+            return max(min_val, value) if min_val is not None else value
+        except (ValueError, TypeError):
+            return default
+
     filename = str(data.get("highscore_filename", "highscores.json"))
     return GameConfig(
         highscore_filename=filename,
@@ -64,6 +79,9 @@ def parse_game_config(data: dict[str, Any]) -> GameConfig:
             "points_per_super_pacgum", 50, min_val=0
         ),
         points_per_ghost=_safe_int("points_per_ghost", 200, min_val=0),
+        frightened_duration=_safe_float(
+            "frightened_duration", 7.0, min_val=0.0
+        ),
         level_max_time=_safe_int("level_max_time", 90, min_val=1),
         levels=levels,
     )

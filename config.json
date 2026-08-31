@@ -6,6 +6,7 @@
     "points_per_pacgum": 10,
     "points_per_super_pacgum": 50,
     "points_per_ghost": 200,
+    "frightened_duration": 7.0,
     "level_max_time": 90,
     "levels": [
         {
