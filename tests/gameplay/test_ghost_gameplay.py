@@ -1,15 +1,15 @@
 """Integration tests for the complete four-ghost gameplay coordinator."""
 
 from pacman.app import GameState, GameStateController
-from pacman.config import GameConfig
-from pacman.context import GameSession
-from pacman.ghost import GhostIdentity, GhostState
-from pacman.ghost_gameplay import GhostGameplay
-from pacman.lives import PlayerDeathOutcome
-from pacman.player import Direction, Player
-from pacman.spawns import GhostSpawns
-from pacman.world import WorldMap
-from tests.gameplay_fakes import FixedMazeAdapter
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import GameSession
+from pacman.gameplay.ghost import GhostIdentity, GhostState
+from pacman.gameplay.ghost_gameplay import GhostGameplay
+from pacman.gameplay.lives import PlayerDeathOutcome
+from pacman.gameplay.player import Direction, Player
+from pacman.maze.spawns import GhostSpawns
+from pacman.maze.world import WorldMap
+from tests.support.gameplay_fakes import FixedMazeAdapter
 
 
 def _world() -> WorldMap:

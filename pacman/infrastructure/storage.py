@@ -1,9 +1,10 @@
 """Storage abstraction boundary for persistent data."""
 
+
 import json
 from pathlib import Path
 
-from pacman.highscore import HighscoreEntry
+from pacman.infrastructure.highscore import HighscoreEntry
 
 _MAX_HIGHSCORES = 10
 

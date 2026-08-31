@@ -2,16 +2,16 @@
 
 import random
 
-from pacman.ghost import (
+from pacman.gameplay.ghost import (
     Ghost,
     GhostIdentity,
     create_ghost_group,
     get_legal_ghost_directions,
 )
-from pacman.maze_grid import MazeGrid, Tile, TileCoordinate
-from pacman.player import Direction
-from pacman.spawns import GhostSpawns
-from pacman.world import WorldMap
+from pacman.maze.grid import MazeGrid, Tile, TileCoordinate
+from pacman.gameplay.player import Direction
+from pacman.maze.spawns import GhostSpawns
+from pacman.maze.world import WorldMap
 
 
 def create_test_world(grid_pattern: list[str]) -> WorldMap:

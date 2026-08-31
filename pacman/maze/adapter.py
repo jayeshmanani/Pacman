@@ -1,11 +1,12 @@
 """Boundary between Pacman and the assigned maze generator package."""
 
+
 from dataclasses import dataclass
 import importlib
 import random
 from typing import Protocol, cast
 
-from pacman.maze_grid import Coordinate, MazeGrid, Tile
+from pacman.maze.grid import Coordinate, MazeGrid, Tile
 
 _NORTH_WALL = 1
 _EAST_WALL = 2

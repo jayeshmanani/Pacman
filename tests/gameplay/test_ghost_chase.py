@@ -1,15 +1,15 @@
 """Unit tests for normal ghost chase targeting and direction selection."""
 
-from pacman.ghost import (
+from pacman.gameplay.ghost import (
     Ghost,
     GhostIdentity,
     GhostState,
     calculate_ghost_target,
     select_chase_direction,
 )
-from pacman.maze_grid import MazeGrid, Tile
-from pacman.player import Direction
-from pacman.world import WorldMap
+from pacman.maze.grid import MazeGrid, Tile
+from pacman.gameplay.player import Direction
+from pacman.maze.world import WorldMap
 
 
 def create_test_world(grid_pattern: list[str]) -> WorldMap:

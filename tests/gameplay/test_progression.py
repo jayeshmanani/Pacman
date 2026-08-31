@@ -1,13 +1,16 @@
 """Gameplay tests for level completion and progression."""
 
 from pacman.app import GameState, GameStateController
-from pacman.config import GameConfig
-from pacman.context import GameSession
-from pacman.level_generator import LevelGenerator
-from pacman.maze_adapter import MazeGeneratorAdapter
-from pacman.maze_grid import MazeGrid, Tile
-from pacman.player import Direction, Player
-from pacman.progression import LevelCompletionOutcome, handle_level_completion
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import GameSession
+from pacman.maze.level_generator import LevelGenerator
+from pacman.maze.adapter import MazeGeneratorAdapter
+from pacman.maze.grid import MazeGrid, Tile
+from pacman.gameplay.player import Direction, Player
+from pacman.gameplay.progression import (
+    LevelCompletionOutcome,
+    handle_level_completion,
+)
 
 
 class _FakeAdapter(MazeGeneratorAdapter):

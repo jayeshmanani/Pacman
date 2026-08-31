@@ -1,12 +1,13 @@
 """Player life-loss, respawn, and game-over handling."""
 
+
 from enum import Enum
 
 from pacman.application.state import GameStateController
-from pacman.context import GameSession
-from pacman.maze_grid import TileCoordinate
-from pacman.player import Player
-from pacman.world import WorldMap
+from pacman.application.context import GameSession
+from pacman.maze.grid import TileCoordinate
+from pacman.gameplay.player import Player
+from pacman.maze.world import WorldMap
 
 
 class PlayerDeathOutcome(Enum):

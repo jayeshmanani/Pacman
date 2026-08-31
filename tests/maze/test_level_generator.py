@@ -5,16 +5,16 @@ from typing import cast
 
 import pytest
 
-from pacman.config import GameConfig, LevelConfig
-from pacman.context import AppContext
-from pacman.level_generator import (
+from pacman.infrastructure.config import GameConfig, LevelConfig
+from pacman.application.context import AppContext
+from pacman.maze.level_generator import (
     LevelData,
     LevelGenerationError,
     LevelGenerationResult,
     LevelGenerator,
 )
-from pacman.maze_adapter import MazeAdapterError, MazeGeneratorAdapter
-from pacman.maze_grid import MazeGrid, Tile
+from pacman.maze.adapter import MazeAdapterError, MazeGeneratorAdapter
+from pacman.maze.grid import MazeGrid, Tile
 
 
 class FakeMazeAdapter(MazeGeneratorAdapter):

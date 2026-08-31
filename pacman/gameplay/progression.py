@@ -1,11 +1,12 @@
 """Level completion and multi-level progression orchestration."""
 
+
 from enum import Enum
 
 from pacman.application.state import GameStateController
-from pacman.context import GameSession
-from pacman.level_generator import LevelData, LevelGenerator
-from pacman.player import Player
+from pacman.application.context import GameSession
+from pacman.maze.level_generator import LevelData, LevelGenerator
+from pacman.gameplay.player import Player
 
 
 class LevelCompletionOutcome(Enum):

@@ -1,13 +1,14 @@
 """Resolve collisions between the player and ghosts by ghost state."""
 
+
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 
-from pacman.context import GameSession
-from pacman.ghost import Ghost, GhostState
-from pacman.player import Player
-from pacman.power_state import PowerState
+from pacman.application.context import GameSession
+from pacman.gameplay.ghost import Ghost, GhostState
+from pacman.gameplay.player import Player
+from pacman.gameplay.power_state import PowerState
 
 
 class GhostCollisionOutcome(Enum):

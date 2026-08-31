@@ -3,8 +3,8 @@
 import pytest
 
 from pacman.app import GameState, GameStateController, update_active_gameplay
-from pacman.config import GameConfig
-from pacman.context import AppContext, GameSession
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import AppContext, GameSession
 
 
 def test_timer_initializes_from_configured_time_limit() -> None:

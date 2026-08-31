@@ -3,16 +3,16 @@
 import random
 from dataclasses import dataclass
 
-from pacman.context import GameSession
-from pacman.ghost import Ghost, GhostIdentity, GhostState
-from pacman.ghost_collision import (
+from pacman.application.context import GameSession
+from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
+from pacman.gameplay.ghost_collision import (
     GhostCollisionGuard,
     resolve_ghost_collisions,
 )
-from pacman.player import Direction
-from pacman.power_state import PowerState
-from pacman.world import WorldMap, WorldPosition
-from tests.gameplay_fakes import FixedMazeAdapter
+from pacman.gameplay.player import Direction
+from pacman.gameplay.power_state import PowerState
+from pacman.maze.world import WorldMap, WorldPosition
+from tests.support.gameplay_fakes import FixedMazeAdapter
 
 
 @dataclass(frozen=True)

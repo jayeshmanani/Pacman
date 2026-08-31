@@ -1,13 +1,14 @@
 """Ghost state model and state machine definitions."""
 
+
 import random
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from pacman.maze_grid import TileCoordinate
-from pacman.player import Direction
-from pacman.spawns import GhostSpawns
-from pacman.world import WorldMap, WorldPosition, WorldSize
+from pacman.maze.grid import TileCoordinate
+from pacman.gameplay.player import Direction
+from pacman.maze.spawns import GhostSpawns
+from pacman.maze.world import WorldMap, WorldPosition, WorldSize
 
 
 class GhostState(Enum):

@@ -1,8 +1,8 @@
 """Gameplay tests for movement, turn buffering, and wall collisions."""
 
-from pacman.maze_grid import MazeGrid, Tile
-from pacman.player import Direction, Player, direction_from_key
-from pacman.world import WorldMap
+from pacman.maze.grid import MazeGrid, Tile
+from pacman.gameplay.player import Direction, Player, direction_from_key
+from pacman.maze.world import WorldMap
 
 
 def _create_test_world() -> WorldMap:

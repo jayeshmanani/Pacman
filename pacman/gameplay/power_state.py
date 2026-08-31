@@ -1,9 +1,10 @@
 """Power state model for super-pacgum frightened mode."""
 
+
 from dataclasses import dataclass
 from collections.abc import Iterable
 
-from pacman.ghost import Ghost
+from pacman.gameplay.ghost import Ghost
 
 
 @dataclass

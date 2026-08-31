@@ -1,16 +1,16 @@
 """Tests for frame-level ghost collision edge cases."""
 
 from pacman.app import GameState, GameStateController
-from pacman.context import GameSession
-from pacman.ghost import Ghost, GhostIdentity, GhostState
-from pacman.ghost_collision import (
+from pacman.application.context import GameSession
+from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
+from pacman.gameplay.ghost_collision import (
     GhostCollisionGuard,
     resolve_ghost_collisions,
 )
-from pacman.lives import handle_normal_ghost_collision
-from pacman.player import Player
-from pacman.power_state import PowerState
-from tests.gameplay_fakes import corridor_world
+from pacman.gameplay.lives import handle_normal_ghost_collision
+from pacman.gameplay.player import Player
+from pacman.gameplay.power_state import PowerState
+from tests.support.gameplay_fakes import corridor_world
 
 
 def _ghost(identity: GhostIdentity, state: GhostState) -> Ghost:

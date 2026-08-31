@@ -1,12 +1,12 @@
-"""Persistence tests for highscore storage."""
+"""Infrastructure tests for highscore storage."""
 
 import json
 from pathlib import Path
 
 import pytest
 
-from pacman.highscore import HighscoreEntry
-from pacman.storage import HighscoreStorage
+from pacman.infrastructure.highscore import HighscoreEntry
+from pacman.infrastructure.storage import HighscoreStorage
 
 
 def test_highscore_storage_path_initialization() -> None:

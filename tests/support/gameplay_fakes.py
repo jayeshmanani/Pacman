@@ -1,8 +1,9 @@
 """Reusable controlled worlds and adapters for gameplay rule tests."""
 
-from pacman.maze_adapter import MazeGeneratorAdapter
-from pacman.maze_grid import MazeGrid, Tile
-from pacman.world import WorldMap
+
+from pacman.maze.adapter import MazeGeneratorAdapter
+from pacman.maze.grid import MazeGrid, Tile
+from pacman.maze.world import WorldMap
 
 
 class FixedMazeAdapter(MazeGeneratorAdapter):

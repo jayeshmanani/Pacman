@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 
-from pacman.context import GameSession
+from pacman.application.context import GameSession
 
 
 class GameState(Enum):

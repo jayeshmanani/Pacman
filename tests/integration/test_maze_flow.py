@@ -4,10 +4,10 @@ from typing import NoReturn
 
 import pytest
 
-from pacman.config import GameConfig, LevelConfig
-from pacman.level_generator import LevelData, LevelGenerator
-from pacman.maze_adapter import MazeGeneratorAdapter
-from pacman.maze_preview import render_level_ascii
+from pacman.infrastructure.config import GameConfig, LevelConfig
+from pacman.maze.level_generator import LevelData, LevelGenerator
+from pacman.maze.adapter import MazeGeneratorAdapter
+from pacman.maze.preview import render_level_ascii
 
 
 @pytest.mark.parametrize(

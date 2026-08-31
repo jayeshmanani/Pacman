@@ -3,9 +3,9 @@
 import json
 from pathlib import Path
 
-from pacman.config import GameConfig
-from pacman.context import AppContext, GameSession
-from pacman.highscore import HighscoreEntry
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import AppContext, GameSession
+from pacman.infrastructure.highscore import HighscoreEntry
 
 
 def test_app_context_baseline_initialization() -> None:

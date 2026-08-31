@@ -11,7 +11,7 @@ from pacman.app import (
     render_state,
     run_app,
 )
-from pacman.config import GameConfig
+from pacman.infrastructure.config import GameConfig
 from tests.support.app_fakes import _FakeEvent, _FakeFont, _FakePygame
 
 

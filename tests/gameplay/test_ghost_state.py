@@ -2,8 +2,8 @@
 
 import pytest
 
-from pacman.ghost import Ghost, GhostIdentity, GhostState
-from pacman.player import Direction
+from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
+from pacman.gameplay.player import Direction
 
 
 def test_ghost_initialization_from_spawn() -> None:

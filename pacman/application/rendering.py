@@ -5,8 +5,8 @@ from typing import Final, cast
 
 from pacman.application.contracts import Color, Font, PygameModule, Surface
 from pacman.application.state import GameState
-from pacman.context import AppContext, GameSession
-from pacman.highscore import HighscoreEntry
+from pacman.application.context import AppContext, GameSession
+from pacman.infrastructure.highscore import HighscoreEntry
 
 
 @dataclass(frozen=True)

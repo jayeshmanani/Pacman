@@ -19,8 +19,8 @@ from pacman.application.state import (
     StateControls,
     update_active_gameplay,
 )
-from pacman.config import GameConfig
-from pacman.context import AppContext
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import AppContext
 
 
 def _load_pygame() -> PygameModule:

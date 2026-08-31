@@ -1,25 +1,29 @@
 """Coordinate ghost movement, power state, and collision rules."""
 
+
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 import random
 
 from pacman.application.state import GameStateController
-from pacman.config import GameConfig
-from pacman.context import GameSession
-from pacman.ghost import Ghost, GhostIdentity, create_ghost_group
-from pacman.ghost_collision import (
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import GameSession
+from pacman.gameplay.ghost import Ghost, GhostIdentity, create_ghost_group
+from pacman.gameplay.ghost_collision import (
     GhostCollisionFrameResult,
     GhostCollisionGuard,
     find_colliding_ghosts,
     resolve_ghost_collisions,
 )
-from pacman.lives import PlayerDeathOutcome, handle_normal_ghost_collision
-from pacman.maze_grid import TileCoordinate
-from pacman.player import Direction, Player
-from pacman.power_state import PowerState
-from pacman.spawns import GhostSpawns
-from pacman.world import WorldMap, WorldPosition
+from pacman.gameplay.lives import (
+    PlayerDeathOutcome,
+    handle_normal_ghost_collision,
+)
+from pacman.maze.grid import TileCoordinate
+from pacman.gameplay.player import Direction, Player
+from pacman.gameplay.power_state import PowerState
+from pacman.maze.spawns import GhostSpawns
+from pacman.maze.world import WorldMap, WorldPosition
 
 
 @dataclass(frozen=True)

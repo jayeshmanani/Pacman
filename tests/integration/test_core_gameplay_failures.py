@@ -1,12 +1,16 @@
 """Integrated gameplay tests for blocked, timeout, and death paths."""
 
+
 import pytest
 
 from pacman.app import GameState, GameStateController, update_active_gameplay
-from pacman.context import GameSession
-from pacman.lives import PlayerDeathOutcome, handle_normal_ghost_collision
-from pacman.player import Direction, Player
-from tests.gameplay_fakes import blocked_world, corridor_world
+from pacman.application.context import GameSession
+from pacman.gameplay.lives import (
+    PlayerDeathOutcome,
+    handle_normal_ghost_collision,
+)
+from pacman.gameplay.player import Direction, Player
+from tests.support.gameplay_fakes import blocked_world, corridor_world
 
 
 def test_wall_collision_and_timeout_preserve_session_data() -> None:
