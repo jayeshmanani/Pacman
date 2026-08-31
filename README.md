@@ -6,8 +6,8 @@ A modular Python implementation of Pac-Man developed as part of the 42
 curriculum. The current codebase provides configuration and highscore services,
 validated maze generation, level construction, pacgum placement, shared world
 coordinates, collision queries, core gameplay mechanics including movement,
-turn buffering, scoring, lives, timing, pause, and level progression, and an
-automated test suite.
+turn buffering, scoring, lives, timing, pause, level progression, and complete
+four-ghost behaviour, together with an automated test suite.
 
 ## Requirements
 
@@ -106,6 +106,30 @@ Gameplay geometry is resolution-independent:
 Each level exposes one `WorldMap` for tile/world conversion, walkability
 queries, boundary checks, and axis-aligned wall collision queries.
 
+## Ghost behaviour
+
+The gameplay layer coordinates Blinky, Pinky, Inky, and Clyde as one complete
+ghost system while preserving the individual chase targets associated with
+each identity.
+
+- Normal ghosts select legal corridor directions and chase Pac-Man.
+- A super-pacgum activates frightened mode for every eligible active ghost.
+- Frightened movement is reproducible when the configured seed is used.
+- Eating consecutive ghosts during one frightened period awards 200, 400,
+  800, and 1600 points by default.
+- Eaten ghosts remain harmless during their configured respawn delay and then
+  return safely to normal behaviour.
+- Position-based collision checks prevent duplicate scores and repeated life
+  loss during continuous contact.
+- Shared power timing and individual ghost state transitions are advanced by
+  one `GhostGameplay` coordinator.
+
+A deterministic 60-second headless playtest on the first configured level
+completed without illegal ghost positions or inconsistent states. Pac-Man
+survived the scenario after two normal ghost collisions, so the current player
+and ghost speed balance remains challenging but playable. Graphical gameplay
+presentation and live input integration belong to Phase 6.
+
 ## Highscores
 
 Highscores are stored as JSON. Missing, empty, corrupted, or invalid files
@@ -117,22 +141,17 @@ a guarded persistence layer.
 
 ## Architecture
 
-| Module | Responsibility |
+| Package | Responsibility |
 | --- | --- |
-| `config.py` | Configuration parsing and defaults |
-| `highscore.py`, `storage.py` | Highscore validation and persistence |
-| `maze_adapter.py`, `maze_grid.py` | External package boundary and internal grid |
-| `level_generator.py` | Reproducible level construction |
-| `spawns.py`, `pacgums.py` | Spawn and pacgum placement |
-| `world.py` | Shared coordinates, walkability, and collision queries |
-| `player.py`, `lives.py`, `power_state.py`, `progression.py` | Core movement, life, power-state, and level-progression rules |
-| `context.py` | Shared application services and active session data |
-| `application/` | Application state, rendering, pygame contracts, and runtime orchestration |
+| `application/` | Application context, state, rendering, pygame contracts, and runtime orchestration |
+| `gameplay/` | Player movement, pacgums, lives, progression, ghost behaviour, power state, and collision coordination |
+| `maze/` | External maze-package adapter, internal grid, world coordinates, spawns, previews, and level generation |
+| `infrastructure/` | Configuration parsing, highscore validation, and persistent storage |
 | `app.py` | Stable public facade for the application package |
 
 ## Testing
 
-The suite is grouped by application, gameplay, maze, persistence, and
+The suite is grouped by application, gameplay, maze, infrastructure, and
 integration responsibilities. Reusable fakes live in `tests/support`.
 Integration tests use the real assigned maze-generator package where
 appropriate.
