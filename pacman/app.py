@@ -5,6 +5,8 @@ from pacman.application.rendering import (
     WindowSettings,
     render_end_screen,
     render_game_view,
+    render_highscores_screen,
+    render_instructions_screen,
     render_main_menu,
     render_state,
 )
@@ -36,6 +38,8 @@ __all__ = [
     "WindowSettings",
     "render_end_screen",
     "render_game_view",
+    "render_highscores_screen",
+    "render_instructions_screen",
     "render_main_menu",
     "render_state",
     "run_app",

@@ -12,6 +12,8 @@ class GameState(Enum):
 
     MAIN_MENU = "Main Menu"
     PLAYING = "Playing"
+    HIGHSCORES = "Highscores"
+    INSTRUCTIONS = "Instructions"
     END_SCREEN = "End Screen"
 
 
@@ -41,6 +43,29 @@ class GameStateController:
         """Move the application to the end screen after game over."""
         self._state = GameState.END_SCREEN
 
+    def start_game(self, session: GameSession | None = None) -> None:
+        """Move the application into active gameplay."""
+        if session is not None:
+            session.resume_gameplay()
+        self._state = GameState.PLAYING
+
+    def show_highscores(self) -> None:
+        """Move the application to the highscores screen."""
+        self._state = GameState.HIGHSCORES
+
+    def show_instructions(self) -> None:
+        """Move the application to the instructions screen."""
+        self._state = GameState.INSTRUCTIONS
+
+    def return_to_main_menu(
+        self,
+        session: GameSession | None = None,
+    ) -> None:
+        """Move the application back to the main menu."""
+        if session is not None:
+            session.resume_gameplay()
+        self._state = GameState.MAIN_MENU
+
     def handle_key(
         self,
         key: int,
@@ -50,9 +75,7 @@ class GameStateController:
         """Apply a state transition for a pressed key."""
         if self._state is GameState.MAIN_MENU:
             if key in controls.confirm_keys:
-                if session is not None:
-                    session.resume_gameplay()
-                self._state = GameState.PLAYING
+                self.start_game(session)
             return
 
         if self._state is GameState.PLAYING:
@@ -64,16 +87,17 @@ class GameStateController:
                     session.resume_gameplay()
                 self._state = GameState.END_SCREEN
             elif key == controls.main_menu_key:
-                if session is not None:
-                    session.resume_gameplay()
-                self._state = GameState.MAIN_MENU
+                self.return_to_main_menu(session)
             return
 
         if self._state is GameState.END_SCREEN:
             if key in controls.confirm_keys or key == controls.main_menu_key:
-                if session is not None:
-                    session.resume_gameplay()
-                self._state = GameState.MAIN_MENU
+                self.return_to_main_menu(session)
+            return
+
+        if self._state in (GameState.HIGHSCORES, GameState.INSTRUCTIONS):
+            if key in controls.confirm_keys or key == controls.main_menu_key:
+                self.return_to_main_menu(session)
 
 
 def update_active_gameplay(

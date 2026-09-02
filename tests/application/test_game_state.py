@@ -20,6 +20,33 @@ def test_main_menu_transitions_to_playing() -> None:
     assert controller.state is GameState.PLAYING
 
 
+def test_start_game_transitions_to_playing() -> None:
+    """Verify that start_game enters active gameplay."""
+    controller = GameStateController()
+
+    controller.start_game()
+
+    assert controller.state is GameState.PLAYING
+
+
+def test_show_highscores_transitions_to_highscores() -> None:
+    """Verify the controller can open the highscores state."""
+    controller = GameStateController()
+
+    controller.show_highscores()
+
+    assert controller.state is GameState.HIGHSCORES
+
+
+def test_show_instructions_transitions_to_instructions() -> None:
+    """Verify the controller can open the instructions state."""
+    controller = GameStateController()
+
+    controller.show_instructions()
+
+    assert controller.state is GameState.INSTRUCTIONS
+
+
 def test_playing_transitions_to_end_screen() -> None:
     """Verify that the temporary end key finishes play."""
     controller = GameStateController(GameState.PLAYING)
@@ -52,6 +79,24 @@ def test_escape_returns_from_end_screen_to_main_menu() -> None:
     controller = GameStateController(GameState.END_SCREEN)
 
     controller.handle_key(_FakePygame.K_ESCAPE, state_controls())
+
+    assert controller.state is GameState.MAIN_MENU
+
+
+def test_escape_returns_from_highscores_to_main_menu() -> None:
+    """Verify Escape returns from highscores to the main menu."""
+    controller = GameStateController(GameState.HIGHSCORES)
+
+    controller.handle_key(_FakePygame.K_ESCAPE, state_controls())
+
+    assert controller.state is GameState.MAIN_MENU
+
+
+def test_confirm_returns_from_instructions_to_main_menu() -> None:
+    """Verify confirm returns from instructions to the main menu."""
+    controller = GameStateController(GameState.INSTRUCTIONS)
+
+    controller.handle_key(_FakePygame.K_RETURN, state_controls())
 
     assert controller.state is GameState.MAIN_MENU
 
