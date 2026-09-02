@@ -25,6 +25,7 @@ class GameConfig:
     points_per_super_pacgum: int = 50
     points_per_ghost: int = 200
     frightened_duration: float = 7.0
+    ghost_respawn_delay: float = 5.0
     level_max_time: int = 90
     levels: list[LevelConfig] = field(default_factory=lambda: [LevelConfig()])
 
@@ -81,6 +82,9 @@ def parse_game_config(data: dict[str, Any]) -> GameConfig:
         points_per_ghost=_safe_int("points_per_ghost", 200, min_val=0),
         frightened_duration=_safe_float(
             "frightened_duration", 7.0, min_val=0.0
+        ),
+        ghost_respawn_delay=_safe_float(
+            "ghost_respawn_delay", 5.0, min_val=0.0
         ),
         level_max_time=_safe_int("level_max_time", 90, min_val=1),
         levels=levels,
