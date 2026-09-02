@@ -169,6 +169,9 @@ def render_highscores_screen(
 ) -> None:
     """Render the ten best stored highscores in descending order."""
     center_x = window_settings.width // 2
+    rank_x = window_settings.width // 6
+    player_x = center_x
+    score_x = window_settings.width * 5 // 6
     ranked_highscores = sorted(
         highscores or (),
         key=lambda entry: entry.score,
@@ -179,14 +182,32 @@ def render_highscores_screen(
         screen, fonts.title, "HIGHSCORES", (255, 230, 0), (center_x, 64)
     )
     if ranked_highscores:
-        for position, entry in enumerate(ranked_highscores, start=1):
+        for label, column_x in (
+            ("RANK", rank_x),
+            ("PLAYER", player_x),
+            ("SCORE", score_x),
+        ):
             _draw_centered_text(
                 screen,
                 fonts.body,
-                f"{position}. {entry.name}  {entry.score}",
-                (255, 255, 255),
-                (center_x, 106 + position * 28),
+                label,
+                (255, 230, 0),
+                (column_x, 112),
             )
+        for position, entry in enumerate(ranked_highscores, start=1):
+            row_y = 116 + position * 28
+            for value, column_x in (
+                (str(position), rank_x),
+                (entry.name, player_x),
+                (str(entry.score), score_x),
+            ):
+                _draw_centered_text(
+                    screen,
+                    fonts.body,
+                    value,
+                    (255, 255, 255),
+                    (column_x, row_y),
+                )
     else:
         _draw_centered_text(
             screen,

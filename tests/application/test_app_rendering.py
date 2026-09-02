@@ -114,23 +114,43 @@ def test_highscores_screen_renders_only_top_ten_in_score_order() -> None:
         highscores,
     )
 
-    rendered_scores = pygame.surface.rendered_texts[1:11]
-    assert rendered_scores == [
-        "1. P120  120",
-        "2. P110  110",
-        "3. P100  100",
-        "4. P90  90",
-        "5. P80  80",
-        "6. P70  70",
-        "7. P60  60",
-        "8. P50  50",
-        "9. P40  40",
-        "10. P30  30",
+    assert pygame.surface.rendered_texts[1:4] == [
+        "RANK",
+        "PLAYER",
+        "SCORE",
     ]
-    assert all(
-        " P20  " not in text and " P10  " not in text
-        for text in pygame.surface.rendered_texts
-    )
+    assert pygame.surface.rendered_texts[4:34] == [
+        "1", "P120", "120",
+        "2", "P110", "110",
+        "3", "P100", "100",
+        "4", "P90", "90",
+        "5", "P80", "80",
+        "6", "P70", "70",
+        "7", "P60", "60",
+        "8", "P50", "50",
+        "9", "P40", "40",
+        "10", "P30", "30",
+    ]
+    assert "P20" not in pygame.surface.rendered_texts
+    assert "P10" not in pygame.surface.rendered_texts
+    assert pygame.surface.blit_destinations[1:4] == [
+        {"center": (74, 112)},
+        {"center": (224, 112)},
+        {"center": (373, 112)},
+    ]
+    assert pygame.surface.blit_destinations[4:7] == [
+        {"center": (74, 144)},
+        {"center": (224, 144)},
+        {"center": (373, 144)},
+    ]
+    assert pygame.surface.blit_destinations[31:34] == [
+        {"center": (74, 396)},
+        {"center": (224, 396)},
+        {"center": (373, 396)},
+    ]
+    assert pygame.surface.blit_destinations[-1] == {
+        "center": (224, 448),
+    }
 
 
 def test_instructions_screen_renders_minimal_content() -> None:
