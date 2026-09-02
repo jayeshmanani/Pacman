@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pacman.app import StateControls
 
 Color = tuple[int, int, int]
+Rectangle = tuple[int, int, int, int]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -32,11 +33,15 @@ class _FakeSurface:
 
     def __init__(self) -> None:
         self.fill_colors: list[Color] = []
+        self.fill_rectangles: list[tuple[Color, Rectangle]] = []
         self.rendered_texts: list[str] = []
         self.blit_destinations: list[object] = []
 
-    def fill(self, color: Color) -> None:
-        self.fill_colors.append(color)
+    def fill(self, color: Color, rectangle: Rectangle | None = None) -> None:
+        if rectangle is None:
+            self.fill_colors.append(color)
+        else:
+            self.fill_rectangles.append((color, rectangle))
 
     def blit(self, source: object, destination: object) -> object:
         if isinstance(source, _FakeRenderedText):

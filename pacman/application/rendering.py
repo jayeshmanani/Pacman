@@ -7,6 +7,7 @@ from pacman.application.contracts import Color, Font, PygameModule, Surface
 from pacman.application.menu import MAIN_MENU_OPTIONS, MainMenu
 from pacman.application.state import GameState
 from pacman.application.context import AppContext, GameSession
+from pacman.infrastructure.config import GameConfig
 from pacman.infrastructure.highscore import HighscoreEntry
 
 
@@ -15,7 +16,7 @@ class WindowSettings:
     """Settings for the initial Pacman window."""
 
     title: str = "Pacman"
-    width: int = 448
+    width: int = 520
     height: int = 496
     frames_per_second: int = 60
     background_color: Color = (0, 0, 0)
@@ -33,7 +34,7 @@ _STATE_BACKGROUNDS: Final = {
     GameState.MAIN_MENU: (16, 24, 72),
     GameState.PLAYING: (0, 0, 0),
     GameState.HIGHSCORES: (20, 62, 50),
-    GameState.INSTRUCTIONS: (64, 48, 18),
+    GameState.INSTRUCTIONS: (16, 24, 72),
     GameState.END_SCREEN: (72, 16, 24),
 }
 _MAX_DISPLAYED_HIGHSCORES: Final = 10
@@ -57,6 +58,19 @@ def _draw_centered_text(
     """Render text centered on the screen."""
     rendered_text = font.render(text, True, color)
     text_rectangle = rendered_text.get_rect(center=center)
+    screen.blit(rendered_text, text_rectangle)
+
+
+def _draw_left_text(
+    screen: Surface,
+    font: Font,
+    text: str,
+    color: Color,
+    midleft: tuple[int, int],
+) -> None:
+    """Render text from a consistent left edge."""
+    rendered_text = font.render(text, True, color)
+    text_rectangle = rendered_text.get_rect(midleft=midleft)
     screen.blit(rendered_text, text_rectangle)
 
 
@@ -220,31 +234,105 @@ def render_instructions_screen(
     screen: Surface,
     fonts: RenderFonts,
     window_settings: WindowSettings,
+    config: GameConfig | None = None,
 ) -> None:
-    """Render the minimal instructions screen."""
+    """Render controls and game rules using the active configuration."""
+    game_config = config or GameConfig()
     center_x = window_settings.width // 2
+    table_left = 24
+    table_right = window_settings.width - 24
+    table_top = 88
+    table_middle_y = 230
+    table_bottom = 370
+    table_middle_x = window_settings.width // 2
+    left_x = table_left + 18
+    right_x = table_middle_x + 18
     screen.fill(_STATE_BACKGROUNDS[GameState.INSTRUCTIONS])
+    line_color = (82, 113, 214)
+    for rectangle in (
+        (table_left, table_top, table_right - table_left, 2),
+        (table_left, table_middle_y, table_right - table_left, 2),
+        (table_left, table_bottom, table_right - table_left, 2),
+        (table_left, table_top, 2, table_bottom - table_top),
+        (table_middle_x, table_top, 2, table_bottom - table_top),
+        (table_right - 2, table_top, 2, table_bottom - table_top),
+    ):
+        screen.fill(line_color, rectangle)
     _draw_centered_text(
         screen,
         fonts.title,
         "Instructions",
         (255, 230, 0),
-        (center_x, 64),
+        (center_x, 52),
     )
-    _draw_centered_text(
-        screen,
-        fonts.body,
-        "Guide Pacman through the maze.",
-        (255, 255, 255),
-        (center_x, 148),
+
+    sections = (
+        (
+            left_x,
+            "CONTROLS",
+            ("Arrows / WASD",),
+            "RULES",
+            (
+                "Clear all pacgums",
+                "Ghost touch: -1 life",
+                f"Starting lives: {game_config.lives}",
+            ),
+        ),
+        (
+            right_x,
+            "SCORING",
+            (
+                f"Pacgum: +{game_config.points_per_pacgum}",
+                f"Power pellet: +{game_config.points_per_super_pacgum}",
+                (
+                    f"Ghost: +{game_config.points_per_ghost} to "
+                    f"+{game_config.points_per_ghost * 8}"
+                ),
+            ),
+            "POWER MODE",
+            (
+                "Ghosts become edible",
+                f"Lasts {game_config.frightened_duration:g} seconds",
+            ),
+        ),
     )
-    _draw_centered_text(
-        screen,
-        fonts.body,
-        "Avoid ghosts and collect pacgums.",
-        (255, 255, 255),
-        (center_x, 184),
-    )
+    for (
+        column_x,
+        first_heading,
+        first_lines,
+        second_heading,
+        second_lines,
+    ) in sections:
+        _draw_left_text(
+            screen,
+            fonts.body,
+            first_heading,
+            (255, 230, 0),
+            (column_x, 108),
+        )
+        for index, line in enumerate(first_lines):
+            _draw_left_text(
+                screen,
+                fonts.body,
+                line,
+                (255, 255, 255),
+                (column_x, 140 + index * 30),
+            )
+        _draw_left_text(
+            screen,
+            fonts.body,
+            second_heading,
+            (255, 230, 0),
+            (column_x, 252),
+        )
+        for index, line in enumerate(second_lines):
+            _draw_left_text(
+                screen,
+                fonts.body,
+                line,
+                (255, 255, 255),
+                (column_x, 284 + index * 30),
+            )
     _draw_centered_text(
         screen,
         fonts.body,
@@ -288,7 +376,12 @@ def render_state(
             context.highscores if context is not None else None,
         )
     elif state is GameState.INSTRUCTIONS:
-        render_instructions_screen(screen, fonts, window_settings)
+        render_instructions_screen(
+            screen,
+            fonts,
+            window_settings,
+            context.config if context is not None else None,
+        )
     elif state is GameState.END_SCREEN:
         render_end_screen(screen, fonts, window_settings)
 

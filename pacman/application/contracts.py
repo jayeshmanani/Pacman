@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from typing import Protocol
 
 Color = tuple[int, int, int]
+Rectangle = tuple[int, int, int, int]
 
 
 class Event(Protocol):
@@ -29,7 +30,7 @@ class EventModule(Protocol):
 class Surface(Protocol):
     """Describe the drawing operations used by the renderers."""
 
-    def fill(self, color: Color) -> None:
+    def fill(self, color: Color, rectangle: Rectangle | None = None) -> None:
         """Fill the window surface."""
 
     def blit(self, source: object, destination: object) -> object:
