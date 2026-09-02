@@ -28,6 +28,13 @@ def test_main_menu_renders_expected_text() -> None:
     assert "View Highscores" in pygame.surface.rendered_texts
     assert "Instructions" in pygame.surface.rendered_texts
     assert "Exit" in pygame.surface.rendered_texts
+    assert pygame.surface.blit_destinations == [
+        {"center": (224, 180)},
+        {"center": (224, 240)},
+        {"center": (224, 272)},
+        {"center": (224, 304)},
+        {"center": (224, 336)},
+    ]
 
 
 def test_menu_selection_highlight_follows_keyboard_navigation() -> None:
@@ -42,10 +49,10 @@ def test_menu_selection_highlight_follows_keyboard_navigation() -> None:
     assert "> View Highscores <" in pygame.surface.rendered_texts
 
 
-def test_main_menu_displays_highscores_from_configured_storage(
+def test_highscores_screen_displays_scores_from_configured_storage(
     tmp_path: Path,
 ) -> None:
-    """Verify that the main menu renders highscores loaded at startup."""
+    """Verify that the highscores screen renders scores loaded at startup."""
     score_file = tmp_path / "scores.json"
     score_file.write_text(
         json.dumps(
@@ -56,7 +63,11 @@ def test_main_menu_displays_highscores_from_configured_storage(
         ),
         encoding="utf-8",
     )
-    pygame = _FakePygame([[_FakeEvent(type=_FakePygame.QUIT)]])
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
 
     run_app(
         pygame_module=pygame,
@@ -64,8 +75,10 @@ def test_main_menu_displays_highscores_from_configured_storage(
     )
 
     assert "HIGHSCORES" in pygame.surface.rendered_texts
-    assert "1. Maria  1200" in pygame.surface.rendered_texts
-    assert "2. Player 2  800" in pygame.surface.rendered_texts
+    assert "Maria" in pygame.surface.rendered_texts
+    assert "1200" in pygame.surface.rendered_texts
+    assert "Player 2" in pygame.surface.rendered_texts
+    assert "800" in pygame.surface.rendered_texts
 
 
 def test_playing_renders_expected_placeholder_text() -> None:

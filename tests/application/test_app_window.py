@@ -103,12 +103,16 @@ def test_menu_instructions_action_transitions_to_instructions() -> None:
     ]
 
 
-def test_highscores_screen_can_return_to_main_menu() -> None:
-    """Verify Escape returns from highscores to the main menu."""
+@pytest.mark.parametrize(
+    "return_key",
+    (_FakePygame.K_ESCAPE, _FakePygame.K_RETURN, _FakePygame.K_SPACE),
+)
+def test_highscores_screen_can_return_to_main_menu(return_key: int) -> None:
+    """Verify supported keys return from highscores to the main menu."""
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=return_key)],
         [_FakeEvent(type=_FakePygame.QUIT)],
     ])
 

@@ -64,14 +64,18 @@ def render_main_menu(
     screen: Surface,
     fonts: RenderFonts,
     window_settings: WindowSettings,
-    highscores: list[HighscoreEntry] | None = None,
     menu: MainMenu | None = None,
 ) -> None:
-    """Render the main menu and any loaded highscore entries."""
+    """Render the main menu centered vertically in the window."""
     center_x = window_settings.width // 2
+    center_y = window_settings.height // 2
     screen.fill(_STATE_BACKGROUNDS[GameState.MAIN_MENU])
     _draw_centered_text(
-        screen, fonts.title, "PACMAN", (255, 230, 0), (center_x, 56)
+        screen,
+        fonts.title,
+        "PACMAN",
+        (255, 230, 0),
+        (center_x, center_y - 68),
     )
 
     menu_options = menu.options if menu is not None else MAIN_MENU_OPTIONS
@@ -85,21 +89,8 @@ def render_main_menu(
             fonts.body,
             label,
             color,
-            (center_x, 116 + index * 32),
+            (center_x, center_y - 8 + index * 32),
         )
-
-    if highscores:
-        _draw_centered_text(
-            screen, fonts.body, "HIGHSCORES", (255, 230, 0), (center_x, 278)
-        )
-        for position, entry in enumerate(highscores, start=1):
-            _draw_centered_text(
-                screen,
-                fonts.body,
-                f"{position}. {entry.name}  {entry.score}",
-                (255, 255, 255),
-                (center_x, 278 + position * 26),
-            )
 
 
 def render_game_view(
@@ -219,7 +210,7 @@ def render_highscores_screen(
     _draw_centered_text(
         screen,
         fonts.body,
-        "Press Escape for Menu",
+        "Press Escape, Enter, or Space for Menu",
         (255, 230, 0),
         (center_x, window_settings.height - 48),
     )
@@ -280,7 +271,6 @@ def render_state(
             screen,
             fonts,
             window_settings,
-            context.highscores if context is not None else None,
             menu,
         )
     elif state is GameState.PLAYING:
