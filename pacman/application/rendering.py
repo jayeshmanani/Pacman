@@ -36,6 +36,7 @@ _STATE_BACKGROUNDS: Final = {
     GameState.INSTRUCTIONS: (64, 48, 18),
     GameState.END_SCREEN: (72, 16, 24),
 }
+_MAX_DISPLAYED_HIGHSCORES: Final = 10
 
 
 def create_render_fonts(pygame_instance: PygameModule) -> RenderFonts:
@@ -166,14 +167,19 @@ def render_highscores_screen(
     window_settings: WindowSettings,
     highscores: list[HighscoreEntry] | None = None,
 ) -> None:
-    """Render the minimal highscores screen."""
+    """Render the ten best stored highscores in descending order."""
     center_x = window_settings.width // 2
+    ranked_highscores = sorted(
+        highscores or (),
+        key=lambda entry: entry.score,
+        reverse=True,
+    )[:_MAX_DISPLAYED_HIGHSCORES]
     screen.fill(_STATE_BACKGROUNDS[GameState.HIGHSCORES])
     _draw_centered_text(
         screen, fonts.title, "HIGHSCORES", (255, 230, 0), (center_x, 64)
     )
-    if highscores:
-        for position, entry in enumerate(highscores, start=1):
+    if ranked_highscores:
+        for position, entry in enumerate(ranked_highscores, start=1):
             _draw_centered_text(
                 screen,
                 fonts.body,

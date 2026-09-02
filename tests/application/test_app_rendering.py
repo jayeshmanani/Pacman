@@ -8,10 +8,12 @@ from pacman.app import (
     GameStateController,
     RenderFonts,
     WindowSettings,
+    render_highscores_screen,
     render_state,
     run_app,
 )
 from pacman.infrastructure.config import GameConfig
+from pacman.infrastructure.highscore import HighscoreEntry
 from tests.support.app_fakes import _FakeEvent, _FakeFont, _FakePygame
 
 
@@ -91,6 +93,44 @@ def test_highscores_screen_renders_loaded_scores() -> None:
 
     assert "HIGHSCORES" in pygame.surface.rendered_texts
     assert "No highscores yet" in pygame.surface.rendered_texts
+
+
+def test_highscores_screen_renders_only_top_ten_in_score_order() -> None:
+    """Verify twelve unordered entries render as a descending Top 10."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+    highscores = [
+        HighscoreEntry(name=f"P{score}", score=score)
+        for score in (40, 110, 20, 90, 70, 10, 120, 50, 100, 30, 80, 60)
+    ]
+
+    render_highscores_screen(
+        pygame.surface,
+        fonts,
+        WindowSettings(),
+        highscores,
+    )
+
+    rendered_scores = pygame.surface.rendered_texts[1:11]
+    assert rendered_scores == [
+        "1. P120  120",
+        "2. P110  110",
+        "3. P100  100",
+        "4. P90  90",
+        "5. P80  80",
+        "6. P70  70",
+        "7. P60  60",
+        "8. P50  50",
+        "9. P40  40",
+        "10. P30  30",
+    ]
+    assert all(
+        " P20  " not in text and " P10  " not in text
+        for text in pygame.surface.rendered_texts
+    )
 
 
 def test_instructions_screen_renders_minimal_content() -> None:
