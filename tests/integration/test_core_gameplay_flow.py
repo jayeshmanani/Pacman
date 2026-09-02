@@ -1,15 +1,19 @@
 """Integrated player-flow tests from movement through game victory."""
 
+
 import pytest
 
 from pacman.app import GameState, GameStateController, update_active_gameplay
-from pacman.config import GameConfig
-from pacman.context import GameSession
-from pacman.level_generator import LevelGenerator
-from pacman.pacgums import PacgumField, collect_pacgum
-from pacman.player import Direction, Player
-from pacman.progression import LevelCompletionOutcome, handle_level_completion
-from tests.gameplay_fakes import FixedMazeAdapter, corridor_world
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import GameSession
+from pacman.maze.level_generator import LevelGenerator
+from pacman.gameplay.pacgums import PacgumField, collect_pacgum
+from pacman.gameplay.player import Direction, Player
+from pacman.gameplay.progression import (
+    LevelCompletionOutcome,
+    handle_level_completion,
+)
+from tests.support.gameplay_fakes import FixedMazeAdapter, corridor_world
 
 
 def test_complete_player_flow_reaches_victory() -> None:

@@ -1,5 +1,6 @@
 """Configuration structures and parser for Pacman game settings."""
 
+
 from dataclasses import dataclass, field
 import math
 from typing import Any

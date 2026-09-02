@@ -1,8 +1,8 @@
-"""Persistence tests for configuration structures and JSON parsing."""
+"""Infrastructure tests for configuration structures and JSON parsing."""
 
 from pathlib import Path
 import pytest
-from pacman.config import LevelConfig, parse_game_config
+from pacman.infrastructure.config import LevelConfig, parse_game_config
 from pac_man import load_commented_json
 
 

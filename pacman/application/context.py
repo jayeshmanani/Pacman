@@ -1,12 +1,13 @@
 """Application context and domain boundary container."""
 
+
 from dataclasses import dataclass, field
 import math
 
-from pacman.config import GameConfig
-from pacman.highscore import HighscoreEntry
-from pacman.level_generator import LevelGenerator
-from pacman.storage import HighscoreStorage
+from pacman.infrastructure.config import GameConfig
+from pacman.infrastructure.highscore import HighscoreEntry
+from pacman.maze.level_generator import LevelGenerator
+from pacman.infrastructure.storage import HighscoreStorage
 
 
 @dataclass

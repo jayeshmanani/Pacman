@@ -1,5 +1,6 @@
 """Stable internal maze representation used by Pacman systems."""
 
+
 from dataclasses import dataclass
 from enum import IntEnum
 

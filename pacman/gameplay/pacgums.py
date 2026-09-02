@@ -1,13 +1,14 @@
 """Place and track normal pacgums and super-pacgums."""
 
+
 from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 
-from pacman.maze_grid import Coordinate, MazeGrid
-from pacman.spawns import SpawnPositions
-from pacman.power_state import PowerState
-from pacman.ghost import Ghost
+from pacman.maze.grid import Coordinate, MazeGrid
+from pacman.maze.spawns import SpawnPositions
+from pacman.gameplay.power_state import PowerState
+from pacman.gameplay.ghost import Ghost
 
 
 class PacgumPlacementError(RuntimeError):

@@ -2,11 +2,11 @@
 
 import pytest
 
-from pacman.config import GameConfig
-from pacman.level_generator import LevelData, LevelGenerator
-from pacman.maze_adapter import MazeGeneratorAdapter
-from pacman.maze_grid import Coordinate, MazeGrid, Tile
-from pacman.spawns import (
+from pacman.infrastructure.config import GameConfig
+from pacman.maze.level_generator import LevelData, LevelGenerator
+from pacman.maze.adapter import MazeGeneratorAdapter
+from pacman.maze.grid import Coordinate, MazeGrid, Tile
+from pacman.maze.spawns import (
     GhostSpawns,
     SpawnPositions,
     find_closest_walkable_tile,

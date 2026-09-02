@@ -1,9 +1,10 @@
 """Find valid walkable spawn positions for player and ghosts."""
 
+
 from dataclasses import dataclass
 import math
 
-from pacman.maze_grid import Coordinate, MazeGrid
+from pacman.maze.grid import Coordinate, MazeGrid
 
 
 @dataclass(frozen=True)

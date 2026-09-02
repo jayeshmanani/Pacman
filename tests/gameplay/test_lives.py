@@ -3,11 +3,14 @@
 import pytest
 
 from pacman.app import GameState, GameStateController
-from pacman.context import GameSession
-from pacman.lives import PlayerDeathOutcome, handle_normal_ghost_collision
-from pacman.maze_grid import MazeGrid, Tile
-from pacman.player import Direction, Player
-from pacman.world import WorldMap
+from pacman.application.context import GameSession
+from pacman.gameplay.lives import (
+    PlayerDeathOutcome,
+    handle_normal_ghost_collision,
+)
+from pacman.maze.grid import MazeGrid, Tile
+from pacman.gameplay.player import Direction, Player
+from pacman.maze.world import WorldMap
 
 
 def _test_world() -> WorldMap:

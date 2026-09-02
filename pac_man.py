@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from pacman.app import run_app
-from pacman.config import GameConfig, parse_game_config
+from pacman.infrastructure.config import GameConfig, parse_game_config
 
 
 def load_commented_json(filepath: Path) -> dict[str, Any]:

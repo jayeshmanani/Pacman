@@ -1,10 +1,11 @@
 """Player entity model and movement logic."""
 
+
 from enum import Enum
 from dataclasses import dataclass
 
-from pacman.maze_grid import TileCoordinate
-from pacman.world import WorldPosition, WorldSize, WorldMap
+from pacman.maze.grid import TileCoordinate
+from pacman.maze.world import WorldPosition, WorldSize, WorldMap
 
 
 class Direction(Enum):

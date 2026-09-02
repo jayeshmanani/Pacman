@@ -53,7 +53,7 @@ The first end-to-end application path was created:
 
 | Owner | Jira tasks | Delivered focus |
 | --- | --- | --- |
-| Shared | PK-40 | Maze-adapter contract |
+| Team | PK-40 | Maze-adapter contract |
 | Mariia | PK-41, PK-42, PK-43, PK-46, PK-47 | Generator adapter; normalized grid; validation and errors; pellet placement; adapter and integration tests |
 | Jayesh | PK-44, PK-45, PK-48 | Deterministic and random level generation; valid spawn positions; maze integration review |
 
@@ -70,7 +70,7 @@ The first end-to-end application path was created:
 | --- | --- | --- |
 | Mariia | PK-50, PK-55, PK-56, PK-57, PK-59 | Shared coordinates and collision queries; lives, death, respawn, game over; timer; pause; core rule tests |
 | Jayesh | PK-51, PK-52, PK-53, PK-54, PK-58 | Player movement; turn buffering; normal and super-pacgum collection; scoring and power activation; level progression |
-| Together | PK-60 | Review and test the complete player-only gameplay flow |
+| Team | PK-60 | Review and test the complete player-only gameplay flow |
 
 * **Core Mechanics:** Supplies a common tile/world coordinate model, wall-safe four-direction movement, and buffered turns.
 * **Game Logic:** Handles one-time pellet collection, configurable scoring, power-state activation, lives and respawn rules, timeout behaviour, and pause/resume.
@@ -112,9 +112,32 @@ The review is supported by focused tests for:
 * Timeout, pause/resume
 * Level progression, victory, and game over
 
+## Phase 5 - Ghost Behaviour
+
+### Ownership
+
+| Owner | Jira tasks | Delivered focus |
+| --- | --- | --- |
+| Team | PK-62 | Ghost state-model foundation |
+| Jayesh | PK-63, PK-64, PK-65 | Autonomous movement, chase behaviour, and frightened movement |
+| Mariia | PK-66, PK-67, PK-68, PK-69 | Frightened timer; edible ghost collision and respawn; state edge cases; deterministic tests |
+| Team | PK-70 | Complete ghost-behaviour review and playtest |
+
+* **Ghost Behaviour:** Blinky, Pinky, Inky, and Clyde use legal autonomous
+  movement with identity-specific chase targets and frightened movement.
+* **Power and Collisions:** Shared frightened timing, arcade score chaining,
+  position-based collisions, delayed respawn, repeated-contact protection,
+  and player life loss cooperate through one gameplay coordinator.
+* **Verification:** Deterministic unit and integration scenarios cover the
+  complete state lifecycle for all four ghosts. A headless playtest confirmed
+  legal positions, consistent states, and a challenging but playable balance.
+* **Architecture:** Production modules are grouped by application, gameplay,
+  maze, and infrastructure responsibilities, with tests organized to mirror
+  those boundaries.
+
 ## Current Status
 
-This history covers delivered work through Phase 4. Future work remains in
+This history covers delivered work through Phase 5. Future work remains in
 Jira and the progressive planner and is added here only after its phase review.
-The next planned stage is Phase 5 - Ghost Behaviour; complete pygame UI and
-player-flow integration remain Phase 6 work.
+The next planned stage is Phase 6 - UI and Full Game Flow, including complete
+pygame presentation and live player-input integration.

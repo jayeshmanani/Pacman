@@ -5,9 +5,9 @@ from typing import cast
 
 import pytest
 
-from pacman.level_generator import LevelData
-from pacman.maze_grid import MazeGrid, Tile
-from pacman.world import WorldMap, WorldPosition, WorldSize
+from pacman.maze.level_generator import LevelData
+from pacman.maze.grid import MazeGrid, Tile
+from pacman.maze.world import WorldMap, WorldPosition, WorldSize
 
 
 def _world() -> WorldMap:

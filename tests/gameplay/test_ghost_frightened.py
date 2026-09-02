@@ -2,11 +2,11 @@
 
 import random
 
-from pacman.ghost import (
+from pacman.gameplay.ghost import (
     select_frightened_direction,
 )
-from pacman.player import Direction
-from pacman.world import WorldMap
+from pacman.gameplay.player import Direction
+from pacman.maze.world import WorldMap
 
 
 def test_select_frightened_direction_empty_or_none() -> None:
@@ -89,7 +89,7 @@ def test_direction_opposite_property() -> None:
 
 def test_ghost_frighten_reverses_direction() -> None:
     """Verify ghost immediately reverses direction when frightened."""
-    from pacman.ghost import Ghost, GhostIdentity
+    from pacman.gameplay.ghost import Ghost, GhostIdentity
 
     ghost = Ghost.from_spawn(GhostIdentity.BLINKY, (2, 2))
     ghost.direction = Direction.RIGHT
@@ -109,7 +109,7 @@ def test_ghost_frighten_reverses_direction() -> None:
 
 def _create_test_world(grid_pattern: list[str]) -> WorldMap:
     """Create a WorldMap from a string grid pattern."""
-    from pacman.maze_grid import MazeGrid, Tile, TileCoordinate
+    from pacman.maze.grid import MazeGrid, Tile, TileCoordinate
 
     rows: list[tuple[Tile, ...]] = []
     first_corridor: TileCoordinate | None = None
@@ -136,7 +136,7 @@ def _create_test_world(grid_pattern: list[str]) -> WorldMap:
 
 def test_frightened_ghost_movement_flees_from_player() -> None:
     """Verify frightened ghost turns away from player at intersection."""
-    from pacman.ghost import Ghost, GhostIdentity
+    from pacman.gameplay.ghost import Ghost, GhostIdentity
 
     # Maze with 4-way intersection at (2, 2)
     pattern = [
@@ -169,7 +169,7 @@ def test_frightened_ghost_movement_flees_from_player() -> None:
 
 def test_frightened_ghost_moves_at_reduced_speed() -> None:
     """Verify frightened ghost moves at half speed compared to normal."""
-    from pacman.ghost import Ghost, GhostIdentity, GhostState
+    from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
 
     pattern = [
         "#######",
@@ -210,7 +210,7 @@ def test_frightened_ghost_moves_at_reduced_speed() -> None:
 
 def test_frightened_ghost_recovers_at_dead_end() -> None:
     """Verify frightened ghost turns around when encountering a dead end."""
-    from pacman.ghost import Ghost, GhostIdentity
+    from pacman.gameplay.ghost import Ghost, GhostIdentity
 
     pattern = [
         "#####",
@@ -237,7 +237,7 @@ def test_frightened_ghost_recovers_at_dead_end() -> None:
 
 def test_frightened_state_expiration_resumes_normal_chase() -> None:
     """Verify ghost transitions to NORMAL on timer expiry and resumes chase."""
-    from pacman.ghost import Ghost, GhostIdentity, GhostState
+    from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
 
     pattern = [
         "#####",
@@ -277,8 +277,8 @@ def test_frightened_state_expiration_resumes_normal_chase() -> None:
 
 def test_multi_ghost_group_frightened_update() -> None:
     """Verify group of 4 ghosts all update positions when frightened."""
-    from pacman.ghost import create_ghost_group
-    from pacman.spawns import GhostSpawns
+    from pacman.gameplay.ghost import create_ghost_group
+    from pacman.maze.spawns import GhostSpawns
 
     pattern = [
         "#####",

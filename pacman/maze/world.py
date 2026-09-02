@@ -1,9 +1,10 @@
 """Shared world coordinates and collision queries for game systems."""
 
+
 from dataclasses import dataclass
 import math
 
-from pacman.maze_grid import MazeGrid, TileCoordinate
+from pacman.maze.grid import MazeGrid, TileCoordinate
 
 WorldPosition = tuple[float, float]
 WorldSize = tuple[float, float]

@@ -5,12 +5,12 @@ from typing import cast
 
 import pytest
 
-from pacman.maze_adapter import (
+from pacman.maze.adapter import (
     MazeAdapterError,
     MazeGenerationResult,
     MazeGeneratorAdapter,
 )
-from pacman.maze_grid import MazeGrid, Tile
+from pacman.maze.grid import MazeGrid, Tile
 
 
 class FakeMazeGenerator:
@@ -189,7 +189,7 @@ def test_safe_generation_handles_missing_package(
         raise error
 
     monkeypatch.setattr(
-        "pacman.maze_adapter.importlib.import_module",
+        "pacman.maze.adapter.importlib.import_module",
         fail_import,
     )
 
@@ -214,7 +214,7 @@ def test_safe_generation_handles_package_dependency_import_error(
         raise error
 
     monkeypatch.setattr(
-        "pacman.maze_adapter.importlib.import_module",
+        "pacman.maze.adapter.importlib.import_module",
         fail_import,
     )
 
@@ -320,7 +320,7 @@ def test_safe_generation_handles_generic_import_error(
         raise ImportError("broken import inside mazegenerator")
 
     monkeypatch.setattr(
-        "pacman.maze_adapter.importlib.import_module",
+        "pacman.maze.adapter.importlib.import_module",
         fail_import,
     )
 

@@ -1,7 +1,8 @@
 """Render generated Pacman levels as compact text previews."""
 
-from pacman.level_generator import LevelData
-from pacman.maze_grid import Coordinate, Tile
+
+from pacman.maze.level_generator import LevelData
+from pacman.maze.grid import Coordinate, Tile
 
 
 def render_level_ascii(level: LevelData) -> str:

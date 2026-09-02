@@ -1,5 +1,6 @@
 """Highscore data model and validation."""
 
+
 from dataclasses import dataclass
 
 

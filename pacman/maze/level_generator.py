@@ -1,15 +1,16 @@
 """Deterministic and random level generation services."""
 
+
 from dataclasses import dataclass, field
 import random
 from typing import Protocol
 
-from pacman.config import GameConfig, LevelConfig
-from pacman.maze_adapter import MazeAdapterError, MazeGeneratorAdapter
-from pacman.maze_grid import MazeGrid
-from pacman.pacgums import PacgumField, place_pacgums
-from pacman.spawns import SpawnPositions, find_spawn_positions
-from pacman.world import WorldMap
+from pacman.infrastructure.config import GameConfig, LevelConfig
+from pacman.maze.adapter import MazeAdapterError, MazeGeneratorAdapter
+from pacman.maze.grid import MazeGrid
+from pacman.gameplay.pacgums import PacgumField, place_pacgums
+from pacman.maze.spawns import SpawnPositions, find_spawn_positions
+from pacman.maze.world import WorldMap
 
 
 class LevelGenerationError(RuntimeError):

@@ -4,8 +4,8 @@ import random
 
 import pytest
 
-from pacman.maze_adapter import MazeGeneratorAdapter
-from pacman.maze_grid import Tile
+from pacman.maze.adapter import MazeGeneratorAdapter
+from pacman.maze.grid import Tile
 
 
 @pytest.mark.parametrize(

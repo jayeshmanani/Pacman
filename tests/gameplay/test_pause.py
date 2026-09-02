@@ -1,10 +1,10 @@
 """Gameplay tests for pause and resume behaviour."""
 
 from pacman.app import GameState, GameStateController, update_active_gameplay
-from pacman.context import GameSession
-from pacman.maze_grid import MazeGrid, Tile
-from pacman.player import Direction, Player
-from pacman.world import WorldMap
+from pacman.application.context import GameSession
+from pacman.maze.grid import MazeGrid, Tile
+from pacman.gameplay.player import Direction, Player
+from pacman.maze.world import WorldMap
 from tests.support.app_fakes import _FakePygame, state_controls
 
 

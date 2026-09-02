@@ -1,13 +1,13 @@
 """Gameplay tests for player and ghost collision outcomes."""
 
-from pacman.config import GameConfig
-from pacman.context import GameSession
-from pacman.ghost import Ghost, GhostIdentity, GhostState
-from pacman.ghost_collision import (
+from pacman.infrastructure.config import GameConfig
+from pacman.application.context import GameSession
+from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
+from pacman.gameplay.ghost_collision import (
     GhostCollisionOutcome,
     handle_ghost_collision,
 )
-from pacman.power_state import PowerState
+from pacman.gameplay.power_state import PowerState
 
 
 def _ghost(state: GhostState) -> Ghost:

@@ -2,18 +2,18 @@
 
 import pytest
 
-from pacman.config import GameConfig
-from pacman.level_generator import LevelGenerator
-from pacman.maze_grid import Coordinate, MazeGrid, Tile
-from pacman.pacgums import (
+from pacman.infrastructure.config import GameConfig
+from pacman.maze.level_generator import LevelGenerator
+from pacman.maze.grid import Coordinate, MazeGrid, Tile
+from pacman.gameplay.pacgums import (
     PacgumField,
     PacgumKind,
     PacgumPlacementError,
     place_pacgums,
     collect_pacgum,
 )
-from pacman.spawns import GhostSpawns, SpawnPositions
-from pacman.power_state import PowerState
+from pacman.maze.spawns import GhostSpawns, SpawnPositions
+from pacman.gameplay.power_state import PowerState
 
 
 def _open_grid(
@@ -218,7 +218,7 @@ def test_collect_super_pacgum_activates_power_state() -> None:
 
 def test_collect_super_pacgum_frightens_all_active_ghosts() -> None:
     """Verify one collection synchronizes all eligible active ghosts."""
-    from pacman.ghost import Ghost, GhostIdentity, GhostState
+    from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
 
     field = PacgumField(pacgums=set(), super_pacgums={(2, 2)})
     ghosts = [

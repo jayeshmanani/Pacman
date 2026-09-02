@@ -1,8 +1,8 @@
-"""Persistence tests for the highscore entry model."""
+"""Infrastructure tests for the highscore entry model."""
 
 import pytest
 
-from pacman.highscore import HighscoreEntry
+from pacman.infrastructure.highscore import HighscoreEntry
 
 
 def test_highscore_entry_accepts_valid_values() -> None:

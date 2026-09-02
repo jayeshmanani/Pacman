@@ -2,7 +2,7 @@
 
 import pytest
 
-from pacman.maze_grid import MazeGrid, Tile
+from pacman.maze.grid import MazeGrid, Tile
 
 
 def test_grid_exposes_dimensions_and_corridor_queries() -> None:

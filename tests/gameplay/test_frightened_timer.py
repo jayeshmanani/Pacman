@@ -1,7 +1,7 @@
 """Tests for synchronized frightened-state timing and recovery."""
 
-from pacman.ghost import Ghost, GhostIdentity, GhostState
-from pacman.power_state import PowerState
+from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
+from pacman.gameplay.power_state import PowerState
 
 
 def _ghosts() -> list[Ghost]:
