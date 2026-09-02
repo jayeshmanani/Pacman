@@ -1,5 +1,7 @@
 """Resolve collisions between the player and ghosts by ghost state."""
 
+from collections.abc import Iterable
+from dataclasses import dataclass
 from enum import Enum
 
 from pacman.context import GameSession
@@ -13,6 +15,34 @@ class GhostCollisionOutcome(Enum):
     PLAYER_HIT = "player_hit"
     GHOST_EATEN = "ghost_eaten"
     IGNORED = "ignored"
+
+
+@dataclass(frozen=True)
+class GhostCollisionFrameResult:
+    """Summarize all ghost collision effects resolved for one frame."""
+
+    player_hit: bool = False
+    eaten_ghosts: int = 0
+    score_gained: int = 0
+
+
+@dataclass
+class GhostCollisionGuard:
+    """Suppress repeated player hits during one continuous overlap."""
+
+    normal_contact_active: bool = False
+
+    def register_normal_contact(self, is_contacting: bool) -> bool:
+        """Return True only when a new normal-ghost contact begins."""
+        if not is_contacting:
+            self.normal_contact_active = False
+            return False
+
+        if self.normal_contact_active:
+            return False
+
+        self.normal_contact_active = True
+        return True
 
 
 def handle_ghost_collision(
@@ -35,3 +65,47 @@ def handle_ghost_collision(
     session.score += power_state.claim_ghost_score(points_per_ghost)
     ghost.start_respawn(respawn_delay)
     return GhostCollisionOutcome.GHOST_EATEN
+
+
+def resolve_ghost_collisions(
+    session: GameSession,
+    ghosts: Iterable[Ghost],
+    power_state: PowerState,
+    points_per_ghost: int = 200,
+    respawn_delay: float = 5.0,
+    guard: GhostCollisionGuard | None = None,
+) -> GhostCollisionFrameResult:
+    """Resolve every overlapping ghost deterministically for one frame."""
+    colliding_ghosts = tuple(ghosts)
+    has_normal_contact = any(
+        ghost.state is GhostState.NORMAL
+        for ghost in colliding_ghosts
+    )
+    if has_normal_contact:
+        is_new_contact = (
+            guard.register_normal_contact(True)
+            if guard is not None
+            else True
+        )
+        return GhostCollisionFrameResult(player_hit=is_new_contact)
+
+    if guard is not None:
+        guard.register_normal_contact(False)
+
+    score_before = session.score
+    eaten_ghosts = 0
+    for ghost in colliding_ghosts:
+        outcome = handle_ghost_collision(
+            session,
+            ghost,
+            power_state,
+            points_per_ghost,
+            respawn_delay,
+        )
+        if outcome is GhostCollisionOutcome.GHOST_EATEN:
+            eaten_ghosts += 1
+
+    return GhostCollisionFrameResult(
+        eaten_ghosts=eaten_ghosts,
+        score_gained=session.score - score_before,
+    )
