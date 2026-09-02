@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Final, cast
 
 from pacman.application.contracts import Color, Font, PygameModule, Surface
+from pacman.application.menu import MAIN_MENU_OPTIONS, MainMenu
 from pacman.application.state import GameState
 from pacman.application.context import AppContext, GameSession
 from pacman.infrastructure.highscore import HighscoreEntry
@@ -31,6 +32,8 @@ class RenderFonts:
 _STATE_BACKGROUNDS: Final = {
     GameState.MAIN_MENU: (16, 24, 72),
     GameState.PLAYING: (0, 0, 0),
+    GameState.HIGHSCORES: (20, 62, 50),
+    GameState.INSTRUCTIONS: (64, 48, 18),
     GameState.END_SCREEN: (72, 16, 24),
 }
 
@@ -61,6 +64,7 @@ def render_main_menu(
     fonts: RenderFonts,
     window_settings: WindowSettings,
     highscores: list[HighscoreEntry] | None = None,
+    menu: MainMenu | None = None,
 ) -> None:
     """Render the main menu and any loaded highscore entries."""
     center_x = window_settings.width // 2
@@ -68,17 +72,24 @@ def render_main_menu(
     _draw_centered_text(
         screen, fonts.title, "PACMAN", (255, 230, 0), (center_x, 56)
     )
-    _draw_centered_text(
-        screen,
-        fonts.body,
-        "Press Enter or Space to Start",
-        (255, 255, 255),
-        (center_x, 118),
-    )
+
+    menu_options = menu.options if menu is not None else MAIN_MENU_OPTIONS
+    selected_index = menu.selected_index if menu is not None else 0
+    for index, option in enumerate(menu_options):
+        is_selected = index == selected_index
+        label = f"> {option.label} <" if is_selected else option.label
+        color = (255, 230, 0) if is_selected else (255, 255, 255)
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            label,
+            color,
+            (center_x, 116 + index * 32),
+        )
 
     if highscores:
         _draw_centered_text(
-            screen, fonts.body, "HIGHSCORES", (255, 230, 0), (center_x, 158)
+            screen, fonts.body, "HIGHSCORES", (255, 230, 0), (center_x, 278)
         )
         for position, entry in enumerate(highscores, start=1):
             _draw_centered_text(
@@ -86,7 +97,7 @@ def render_main_menu(
                 fonts.body,
                 f"{position}. {entry.name}  {entry.score}",
                 (255, 255, 255),
-                (center_x, 158 + position * 26),
+                (center_x, 278 + position * 26),
             )
 
 
@@ -149,6 +160,82 @@ def render_end_screen(
     )
 
 
+def render_highscores_screen(
+    screen: Surface,
+    fonts: RenderFonts,
+    window_settings: WindowSettings,
+    highscores: list[HighscoreEntry] | None = None,
+) -> None:
+    """Render the minimal highscores screen."""
+    center_x = window_settings.width // 2
+    screen.fill(_STATE_BACKGROUNDS[GameState.HIGHSCORES])
+    _draw_centered_text(
+        screen, fonts.title, "HIGHSCORES", (255, 230, 0), (center_x, 64)
+    )
+    if highscores:
+        for position, entry in enumerate(highscores, start=1):
+            _draw_centered_text(
+                screen,
+                fonts.body,
+                f"{position}. {entry.name}  {entry.score}",
+                (255, 255, 255),
+                (center_x, 106 + position * 28),
+            )
+    else:
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            "No highscores yet",
+            (255, 255, 255),
+            (center_x, 148),
+        )
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Press Escape for Menu",
+        (255, 230, 0),
+        (center_x, window_settings.height - 48),
+    )
+
+
+def render_instructions_screen(
+    screen: Surface,
+    fonts: RenderFonts,
+    window_settings: WindowSettings,
+) -> None:
+    """Render the minimal instructions screen."""
+    center_x = window_settings.width // 2
+    screen.fill(_STATE_BACKGROUNDS[GameState.INSTRUCTIONS])
+    _draw_centered_text(
+        screen,
+        fonts.title,
+        "Instructions",
+        (255, 230, 0),
+        (center_x, 64),
+    )
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Guide Pacman through the maze.",
+        (255, 255, 255),
+        (center_x, 148),
+    )
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Avoid ghosts and collect pacgums.",
+        (255, 255, 255),
+        (center_x, 184),
+    )
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Press Escape for Menu",
+        (255, 230, 0),
+        (center_x, window_settings.height - 48),
+    )
+
+
 def render_state(
     screen: Surface,
     fonts: RenderFonts,
@@ -156,6 +243,7 @@ def render_state(
     window_settings: WindowSettings,
     state: GameState,
     context: AppContext | None = None,
+    menu: MainMenu | None = None,
 ) -> None:
     """Render the minimal visual representation of a state."""
     pygame_instance = cast(PygameModule, pygame_module)
@@ -166,6 +254,7 @@ def render_state(
             fonts,
             window_settings,
             context.highscores if context is not None else None,
+            menu,
         )
     elif state is GameState.PLAYING:
         render_game_view(
@@ -174,7 +263,16 @@ def render_state(
             window_settings,
             context.session if context is not None else None,
         )
-    else:
+    elif state is GameState.HIGHSCORES:
+        render_highscores_screen(
+            screen,
+            fonts,
+            window_settings,
+            context.highscores if context is not None else None,
+        )
+    elif state is GameState.INSTRUCTIONS:
+        render_instructions_screen(screen, fonts, window_settings)
+    elif state is GameState.END_SCREEN:
         render_end_screen(screen, fonts, window_settings)
 
     pygame_instance.display.set_caption(

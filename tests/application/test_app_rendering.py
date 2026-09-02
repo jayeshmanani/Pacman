@@ -16,13 +16,28 @@ from tests.support.app_fakes import _FakeEvent, _FakeFont, _FakePygame
 
 
 def test_main_menu_renders_expected_text() -> None:
-    """Verify that the main menu placeholder text is rendered."""
+    """Verify that the main menu options are rendered."""
     pygame = _FakePygame([[_FakeEvent(type=_FakePygame.QUIT)]])
 
     run_app(pygame_module=pygame)
 
     assert "PACMAN" in pygame.surface.rendered_texts
-    assert "Press Enter or Space to Start" in pygame.surface.rendered_texts
+    assert "> Start Game <" in pygame.surface.rendered_texts
+    assert "View Highscores" in pygame.surface.rendered_texts
+    assert "Instructions" in pygame.surface.rendered_texts
+    assert "Exit" in pygame.surface.rendered_texts
+
+
+def test_menu_selection_highlight_follows_keyboard_navigation() -> None:
+    """Verify that keyboard navigation updates the rendered menu selection."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "> View Highscores <" in pygame.surface.rendered_texts
 
 
 def test_main_menu_displays_highscores_from_configured_storage(
@@ -62,6 +77,35 @@ def test_playing_renders_expected_placeholder_text() -> None:
 
     assert "Game View" in pygame.surface.rendered_texts
     assert "Press E to End" in pygame.surface.rendered_texts
+
+
+def test_highscores_screen_renders_loaded_scores() -> None:
+    """Verify that the highscores state renders the loaded score entries."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "HIGHSCORES" in pygame.surface.rendered_texts
+    assert "No highscores yet" in pygame.surface.rendered_texts
+
+
+def test_instructions_screen_renders_minimal_content() -> None:
+    """Verify that the instructions state renders minimal valid content."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "Instructions" in pygame.surface.rendered_texts
+    assert "Guide Pacman through the maze." in pygame.surface.rendered_texts
 
 
 def test_game_view_uses_configured_starting_lives() -> None:

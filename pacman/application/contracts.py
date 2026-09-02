@@ -96,6 +96,8 @@ class PygameModule(Protocol):
     KEYDOWN: int
     K_RETURN: int
     K_SPACE: int
+    K_UP: int
+    K_DOWN: int
     K_e: int
     K_ESCAPE: int
     K_p: int

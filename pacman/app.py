@@ -5,10 +5,19 @@ from pacman.application.rendering import (
     WindowSettings,
     render_end_screen,
     render_game_view,
+    render_highscores_screen,
+    render_instructions_screen,
     render_main_menu,
     render_state,
 )
 from pacman.application.runtime import run_app
+from pacman.application.menu import (
+    MAIN_MENU_OPTIONS,
+    MainMenu,
+    MainMenuAction,
+    MainMenuOption,
+    MenuControls,
+)
 from pacman.application.state import (
     GameState,
     GameStateController,
@@ -19,11 +28,18 @@ from pacman.application.state import (
 __all__ = [
     "GameState",
     "GameStateController",
+    "MAIN_MENU_OPTIONS",
+    "MainMenu",
+    "MainMenuAction",
+    "MainMenuOption",
+    "MenuControls",
     "RenderFonts",
     "StateControls",
     "WindowSettings",
     "render_end_screen",
     "render_game_view",
+    "render_highscores_screen",
+    "render_instructions_screen",
     "render_main_menu",
     "render_state",
     "run_app",

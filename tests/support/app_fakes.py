@@ -148,6 +148,8 @@ class _FakePygame:
     KEYDOWN = 768
     K_RETURN = 13
     K_SPACE = 32
+    K_UP = 273
+    K_DOWN = 274
     K_e = 101
     K_ESCAPE = 27
     K_p = 112
@@ -177,6 +179,8 @@ class _FailingPygame:
     KEYDOWN = 768
     K_RETURN = 13
     K_SPACE = 32
+    K_UP = 273
+    K_DOWN = 274
     K_e = 101
     K_ESCAPE = 27
     K_p = 112

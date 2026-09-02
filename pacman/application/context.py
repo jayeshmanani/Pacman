@@ -114,6 +114,16 @@ class AppContext:
         if self.config.highscore_filename:
             self.storage = HighscoreStorage(self.config.highscore_filename)
         self.level_generator = LevelGenerator(config=self.config)
-        self.session.lives = self.config.lives
-        self.session.start_level_timer(self.config.level_max_time)
+        self._configure_session(self.session)
         self.highscores = self.storage.load()
+
+    def _configure_session(self, session: GameSession) -> GameSession:
+        """Apply configured gameplay defaults to a session."""
+        session.lives = self.config.lives
+        session.start_level_timer(self.config.level_max_time)
+        return session
+
+    def start_new_game(self) -> GameSession:
+        """Create a fresh configured gameplay session."""
+        self.session = self._configure_session(GameSession())
+        return self.session

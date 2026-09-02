@@ -43,3 +43,26 @@ def test_app_context_loads_highscores_from_configured_storage(
     assert context.highscores == [
         HighscoreEntry(name="Maria", score=1200)
     ]
+
+
+def test_start_new_game_resets_session_with_configured_defaults() -> None:
+    """Verify starting a game replaces stale session state."""
+    context = AppContext(config=GameConfig(lives=7, level_max_time=45))
+    context.session.score = 900
+    context.session.lives = 1
+    context.session.current_level = 4
+    context.session.remaining_level_time = 3.0
+    context.session.level_timed_out = True
+    context.session.is_paused = True
+    context.session.is_victory = True
+
+    session = context.start_new_game()
+
+    assert session is context.session
+    assert session.score == 0
+    assert session.lives == 7
+    assert session.current_level == 0
+    assert session.remaining_level_time == 45.0
+    assert not session.level_timed_out
+    assert not session.is_paused
+    assert not session.is_victory
