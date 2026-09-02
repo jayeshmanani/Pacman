@@ -77,7 +77,7 @@ def test_menu_navigation_wraps_at_boundaries() -> None:
 
     menu.handle_key(DOWN_KEY, menu_controls())
     assert menu.selected_index == 0
-    assert menu.selected_option.action is MainMenuAction.START_GAME
+    assert menu.selected_option.label == "Start Game"
 
 
 @pytest.mark.parametrize(
