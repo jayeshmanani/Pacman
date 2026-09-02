@@ -186,10 +186,11 @@ def test_instructions_screen_renders_controls_and_configured_rules() -> None:
         ),
     )
 
-    assert pygame.surface.rendered_texts[-15:] == [
+    assert pygame.surface.rendered_texts[-16:] == [
         "Instructions",
         "CONTROLS",
         "Arrows / WASD",
+        "P: Pause / Resume",
         "RULES",
         "Clear all pacgums",
         "Ghost touch: -1 life",
@@ -201,12 +202,13 @@ def test_instructions_screen_renders_controls_and_configured_rules() -> None:
         "POWER MODE",
         "Ghosts become edible",
         "Lasts 8 seconds",
-        "Press Escape for Menu",
+        "Esc / Enter / Space: Main Menu",
     ]
-    assert pygame.surface.blit_destinations[-15:] == [
+    assert pygame.surface.blit_destinations[-16:] == [
         {"center": (260, 52)},
         {"midleft": (42, 108)},
         {"midleft": (42, 140)},
+        {"midleft": (42, 170)},
         {"midleft": (42, 252)},
         {"midleft": (42, 284)},
         {"midleft": (42, 314)},

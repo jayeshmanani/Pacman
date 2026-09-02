@@ -107,6 +107,31 @@ def test_menu_instructions_action_transitions_to_instructions() -> None:
     "return_key",
     (_FakePygame.K_ESCAPE, _FakePygame.K_RETURN, _FakePygame.K_SPACE),
 )
+def test_instructions_screen_can_return_to_main_menu(return_key: int) -> None:
+    """Verify supported keys return from instructions to the main menu."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=return_key)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.captions == [
+        "Pacman - Main Menu",
+        "Pacman - Main Menu",
+        "Pacman - Instructions",
+        "Pacman - Main Menu",
+        "Pacman - Main Menu",
+    ]
+
+
+@pytest.mark.parametrize(
+    "return_key",
+    (_FakePygame.K_ESCAPE, _FakePygame.K_RETURN, _FakePygame.K_SPACE),
+)
 def test_highscores_screen_can_return_to_main_menu(return_key: int) -> None:
     """Verify supported keys return from highscores to the main menu."""
     pygame = _FakePygame([

@@ -270,7 +270,7 @@ def render_instructions_screen(
         (
             left_x,
             "CONTROLS",
-            ("Arrows / WASD",),
+            ("Arrows / WASD", "P: Pause / Resume"),
             "RULES",
             (
                 "Clear all pacgums",
@@ -336,7 +336,7 @@ def render_instructions_screen(
     _draw_centered_text(
         screen,
         fonts.body,
-        "Press Escape for Menu",
+        "Esc / Enter / Space: Main Menu",
         (255, 230, 0),
         (center_x, window_settings.height - 48),
     )
