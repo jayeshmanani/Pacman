@@ -32,13 +32,13 @@ def test_gameplay_can_enter_paused_state() -> None:
     controller.handle_key(_FakePygame.K_p, state_controls(), session)
 
     assert session.is_paused
-    assert controller.state is GameState.PLAYING
+    assert controller.state is GameState.PAUSED
 
 
 def test_gameplay_can_resume_from_paused_state() -> None:
     """Verify pressing pause again resumes active gameplay."""
     session = GameSession(is_paused=True)
-    controller = GameStateController(GameState.PLAYING)
+    controller = GameStateController(GameState.PAUSED)
 
     controller.handle_key(_FakePygame.K_p, state_controls(), session)
 

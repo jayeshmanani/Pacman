@@ -14,10 +14,16 @@ from pacman.application.rendering import (
 from pacman.application.runtime import run_app
 from pacman.application.menu import (
     MAIN_MENU_OPTIONS,
+    PAUSE_MENU_OPTIONS,
+    BaseMenu,
     MainMenu,
     MainMenuAction,
     MainMenuOption,
     MenuControls,
+    MenuOption,
+    PauseMenu,
+    PauseMenuAction,
+    PauseMenuOption,
 )
 from pacman.application.state import (
     GameState,
@@ -27,13 +33,19 @@ from pacman.application.state import (
 )
 
 __all__ = [
+    "BaseMenu",
     "GameState",
     "GameStateController",
     "MAIN_MENU_OPTIONS",
+    "PAUSE_MENU_OPTIONS",
     "MainMenu",
     "MainMenuAction",
     "MainMenuOption",
     "MenuControls",
+    "MenuOption",
+    "PauseMenu",
+    "PauseMenuAction",
+    "PauseMenuOption",
     "RenderFonts",
     "StateControls",
     "WindowSettings",

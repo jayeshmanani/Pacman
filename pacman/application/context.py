@@ -125,5 +125,9 @@ class AppContext:
 
     def start_new_game(self) -> GameSession:
         """Create a fresh configured gameplay session."""
+        return self.reset_session()
+
+    def reset_session(self) -> GameSession:
+        """Reset session defaults, preventing stale gameplay state."""
         self.session = self._configure_session(GameSession())
         return self.session
