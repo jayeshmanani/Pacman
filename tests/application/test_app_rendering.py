@@ -29,11 +29,11 @@ def test_main_menu_renders_expected_text() -> None:
     assert "Instructions" in pygame.surface.rendered_texts
     assert "Exit" in pygame.surface.rendered_texts
     assert pygame.surface.blit_destinations == [
-        {"center": (224, 180)},
-        {"center": (224, 240)},
-        {"center": (224, 272)},
-        {"center": (224, 304)},
-        {"center": (224, 336)},
+        {"center": (260, 180)},
+        {"center": (260, 240)},
+        {"center": (260, 272)},
+        {"center": (260, 304)},
+        {"center": (260, 336)},
     ]
 
 
@@ -147,27 +147,27 @@ def test_highscores_screen_renders_only_top_ten_in_score_order() -> None:
     assert "P20" not in pygame.surface.rendered_texts
     assert "P10" not in pygame.surface.rendered_texts
     assert pygame.surface.blit_destinations[1:4] == [
-        {"center": (74, 112)},
-        {"center": (224, 112)},
-        {"center": (373, 112)},
+        {"center": (86, 112)},
+        {"center": (260, 112)},
+        {"center": (433, 112)},
     ]
     assert pygame.surface.blit_destinations[4:7] == [
-        {"center": (74, 144)},
-        {"center": (224, 144)},
-        {"center": (373, 144)},
+        {"center": (86, 144)},
+        {"center": (260, 144)},
+        {"center": (433, 144)},
     ]
     assert pygame.surface.blit_destinations[31:34] == [
-        {"center": (74, 396)},
-        {"center": (224, 396)},
-        {"center": (373, 396)},
+        {"center": (86, 396)},
+        {"center": (260, 396)},
+        {"center": (433, 396)},
     ]
     assert pygame.surface.blit_destinations[-1] == {
-        "center": (224, 448),
+        "center": (260, 448),
     }
 
 
-def test_instructions_screen_renders_minimal_content() -> None:
-    """Verify that the instructions state renders minimal valid content."""
+def test_instructions_screen_renders_controls_and_configured_rules() -> None:
+    """Verify instructions use supported controls and configured game rules."""
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
@@ -175,10 +175,62 @@ def test_instructions_screen_renders_minimal_content() -> None:
         [_FakeEvent(type=_FakePygame.QUIT)],
     ])
 
-    run_app(pygame_module=pygame)
+    run_app(
+        pygame_module=pygame,
+        config=GameConfig(
+            lives=5,
+            points_per_pacgum=12,
+            points_per_super_pacgum=60,
+            points_per_ghost=250,
+            frightened_duration=8.0,
+        ),
+    )
 
-    assert "Instructions" in pygame.surface.rendered_texts
-    assert "Guide Pacman through the maze." in pygame.surface.rendered_texts
+    assert pygame.surface.rendered_texts[-16:] == [
+        "Instructions",
+        "CONTROLS",
+        "Arrows / WASD",
+        "P: Pause / Resume",
+        "RULES",
+        "Clear all pacgums",
+        "Ghost touch: -1 life",
+        "Starting lives: 5",
+        "SCORING",
+        "Pacgum: +12",
+        "Power pellet: +60",
+        "Ghost: +250 to +2000",
+        "POWER MODE",
+        "Ghosts become edible",
+        "Lasts 8 seconds",
+        "Esc / Enter / Space: Main Menu",
+    ]
+    assert pygame.surface.blit_destinations[-16:] == [
+        {"center": (260, 52)},
+        {"midleft": (42, 108)},
+        {"midleft": (42, 140)},
+        {"midleft": (42, 170)},
+        {"midleft": (42, 252)},
+        {"midleft": (42, 284)},
+        {"midleft": (42, 314)},
+        {"midleft": (42, 344)},
+        {"midleft": (278, 108)},
+        {"midleft": (278, 140)},
+        {"midleft": (278, 170)},
+        {"midleft": (278, 200)},
+        {"midleft": (278, 252)},
+        {"midleft": (278, 284)},
+        {"midleft": (278, 314)},
+        {"center": (260, 448)},
+    ]
+    assert pygame.surface.fill_colors[-1] == (16, 24, 72)
+    assert pygame.surface.fill_rectangles[-6:] == [
+        ((82, 113, 214), (24, 88, 472, 2)),
+        ((82, 113, 214), (24, 230, 472, 2)),
+        ((82, 113, 214), (24, 370, 472, 2)),
+        ((82, 113, 214), (24, 88, 2, 282)),
+        ((82, 113, 214), (260, 88, 2, 282)),
+        ((82, 113, 214), (494, 88, 2, 282)),
+    ]
 
 
 def test_game_view_uses_configured_starting_lives() -> None:
