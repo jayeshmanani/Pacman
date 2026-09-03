@@ -12,6 +12,7 @@ class GameState(Enum):
 
     MAIN_MENU = "Main Menu"
     PLAYING = "Playing"
+    PAUSED = "Paused"
     HIGHSCORES = "Highscores"
     INSTRUCTIONS = "Instructions"
     END_SCREEN = "End Screen"
@@ -49,6 +50,18 @@ class GameStateController:
             session.resume_gameplay()
         self._state = GameState.PLAYING
 
+    def pause_game(self, session: GameSession | None = None) -> None:
+        """Move the application to the pause state."""
+        if session is not None:
+            session.pause_gameplay()
+        self._state = GameState.PAUSED
+
+    def resume_game(self, session: GameSession | None = None) -> None:
+        """Return the application to active gameplay."""
+        if session is not None:
+            session.resume_gameplay()
+        self._state = GameState.PLAYING
+
     def show_highscores(self) -> None:
         """Move the application to the highscores screen."""
         self._state = GameState.HIGHSCORES
@@ -80,12 +93,18 @@ class GameStateController:
 
         if self._state is GameState.PLAYING:
             if key == controls.pause_key:
-                if session is not None:
-                    session.toggle_pause()
+                self.pause_game(session)
             elif key == controls.end_screen_key:
                 if session is not None:
                     session.resume_gameplay()
                 self._state = GameState.END_SCREEN
+            elif key == controls.main_menu_key:
+                self.return_to_main_menu(session)
+            return
+
+        if self._state is GameState.PAUSED:
+            if key == controls.pause_key:
+                self.resume_game(session)
             elif key == controls.main_menu_key:
                 self.return_to_main_menu(session)
             return

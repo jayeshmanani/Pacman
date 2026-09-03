@@ -190,3 +190,81 @@ def test_pygame_quits_when_window_setup_fails() -> None:
 
     assert pygame.init_calls == 1
     assert pygame.quit_calls == 1
+
+
+def test_pause_menu_opens_and_resumes_via_pause_key() -> None:
+    """Verify pressing P pauses and pressing P again resumes."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_p)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_p)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.captions == [
+        "Pacman - Playing",
+        "Pacman - Paused",
+        "Pacman - Playing",
+        "Pacman - Playing",
+    ]
+
+
+def test_pause_menu_resumes_via_resume_menu_action() -> None:
+    """Verify confirming Resume returns to gameplay."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_p)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.captions == [
+        "Pacman - Playing",
+        "Pacman - Paused",
+        "Pacman - Playing",
+        "Pacman - Playing",
+    ]
+
+
+def test_pause_menu_returns_to_main_menu_safely() -> None:
+    """Verify selecting Return to Main Menu safely transitions back."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_p)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.captions == [
+        "Pacman - Playing",
+        "Pacman - Paused",
+        "Pacman - Paused",
+        "Pacman - Main Menu",
+        "Pacman - Main Menu",
+    ]
+
+
+def test_pause_menu_returns_to_main_menu_via_escape() -> None:
+    """Verify pressing Escape in pause menu returns to main menu."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_p)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.captions == [
+        "Pacman - Playing",
+        "Pacman - Paused",
+        "Pacman - Main Menu",
+        "Pacman - Main Menu",
+    ]
