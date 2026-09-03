@@ -102,15 +102,20 @@ def test_playing_renders_expected_placeholder_text() -> None:
     assert "TIME: 90s" in pygame.surface.rendered_texts
 
 
-def test_highscores_screen_renders_loaded_scores() -> None:
-    """Verify that the highscores state renders the loaded score entries."""
+def test_highscores_screen_renders_empty_storage(tmp_path: Path) -> None:
+    """Verify that the highscores state renders an empty storage message."""
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
         [_FakeEvent(type=_FakePygame.QUIT)],
     ])
 
-    run_app(pygame_module=pygame)
+    run_app(
+        pygame_module=pygame,
+        config=GameConfig(
+            highscore_filename=str(tmp_path / "missing-scores.json")
+        ),
+    )
 
     assert "HIGHSCORES" in pygame.surface.rendered_texts
     assert "No highscores yet" in pygame.surface.rendered_texts
