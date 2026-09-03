@@ -6,10 +6,12 @@ from pathlib import Path
 from pacman.app import (
     GameState,
     GameStateController,
+    PauseMenu,
     RenderFonts,
     WindowSettings,
     render_highscores_screen,
     render_hud,
+    render_pause_menu,
     render_state,
     run_app,
 )
@@ -320,3 +322,43 @@ def test_hud_renders_active_session_values() -> None:
     assert "LIVES: 2" in pygame.surface.rendered_texts
     assert "LEVEL: 4" in pygame.surface.rendered_texts
     assert "TIME: 43s" in pygame.surface.rendered_texts
+
+
+def test_render_pause_menu_displays_expected_elements() -> None:
+    """Verify that render_pause_menu renders the title, options, and HUD."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+    window_settings = WindowSettings()
+    session = GameSession(score=100, lives=3, current_level=0)
+    pause_menu = PauseMenu()
+
+    render_pause_menu(
+        pygame.surface, fonts, window_settings, pause_menu, session
+    )
+
+    assert "PAUSED" in pygame.surface.rendered_texts
+    assert "> Resume <" in pygame.surface.rendered_texts
+    assert "Return to Main Menu" in pygame.surface.rendered_texts
+    assert "P: Resume | Esc: Main Menu" in pygame.surface.rendered_texts
+    assert "SCORE: 100" in pygame.surface.rendered_texts
+    assert "LIVES: 3" in pygame.surface.rendered_texts
+
+
+def test_render_pause_menu_highlights_return_to_main_menu() -> None:
+    """Verify that moving selection highlights Return to Main Menu."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+    window_settings = WindowSettings()
+    pause_menu = PauseMenu()
+    pause_menu.move_next()
+
+    render_pause_menu(pygame.surface, fonts, window_settings, pause_menu)
+
+    assert "Resume" in pygame.surface.rendered_texts
+    assert "> Return to Main Menu <" in pygame.surface.rendered_texts

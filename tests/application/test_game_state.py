@@ -108,3 +108,48 @@ def test_irrelevant_key_does_not_change_state() -> None:
     controller.handle_key(999, state_controls())
 
     assert controller.state is GameState.PLAYING
+
+
+def test_pause_game_moves_to_paused_state() -> None:
+    """Verify that pause_game transitions to PAUSED."""
+    controller = GameStateController(GameState.PLAYING)
+
+    controller.pause_game()
+
+    assert controller.state is GameState.PAUSED
+
+
+def test_resume_game_moves_to_playing_state() -> None:
+    """Verify that resume_game returns to PLAYING."""
+    controller = GameStateController(GameState.PAUSED)
+
+    controller.resume_game()
+
+    assert controller.state is GameState.PLAYING
+
+
+def test_playing_transitions_to_paused_on_pause_key() -> None:
+    """Verify pressing P while playing enters PAUSED."""
+    controller = GameStateController(GameState.PLAYING)
+
+    controller.handle_key(_FakePygame.K_p, state_controls())
+
+    assert controller.state is GameState.PAUSED
+
+
+def test_paused_transitions_to_playing_on_pause_key() -> None:
+    """Verify pressing P while paused resumes to PLAYING."""
+    controller = GameStateController(GameState.PAUSED)
+
+    controller.handle_key(_FakePygame.K_p, state_controls())
+
+    assert controller.state is GameState.PLAYING
+
+
+def test_paused_transitions_to_main_menu_on_escape() -> None:
+    """Verify pressing Escape while paused returns to MAIN_MENU."""
+    controller = GameStateController(GameState.PAUSED)
+
+    controller.handle_key(_FakePygame.K_ESCAPE, state_controls())
+
+    assert controller.state is GameState.MAIN_MENU
