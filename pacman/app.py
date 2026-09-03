@@ -9,6 +9,7 @@ from pacman.application.rendering import (
     render_hud,
     render_instructions_screen,
     render_main_menu,
+    render_pause_menu,
     render_state,
 )
 from pacman.application.runtime import run_app
@@ -55,6 +56,7 @@ __all__ = [
     "render_hud",
     "render_instructions_screen",
     "render_main_menu",
+    "render_pause_menu",
     "render_state",
     "run_app",
     "update_active_gameplay",

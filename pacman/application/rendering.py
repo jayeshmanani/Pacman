@@ -5,7 +5,12 @@ import math
 from typing import Final, cast
 
 from pacman.application.contracts import Color, Font, PygameModule, Surface
-from pacman.application.menu import MAIN_MENU_OPTIONS, MainMenu
+from pacman.application.menu import (
+    MAIN_MENU_OPTIONS,
+    PAUSE_MENU_OPTIONS,
+    MainMenu,
+    PauseMenu,
+)
 from pacman.application.state import GameState
 from pacman.application.context import AppContext, GameSession
 from pacman.infrastructure.config import GameConfig
@@ -34,6 +39,7 @@ class RenderFonts:
 _STATE_BACKGROUNDS: Final = {
     GameState.MAIN_MENU: (16, 24, 72),
     GameState.PLAYING: (0, 0, 0),
+    GameState.PAUSED: (16, 24, 72),
     GameState.HIGHSCORES: (20, 62, 50),
     GameState.INSTRUCTIONS: (16, 24, 72),
     GameState.END_SCREEN: (72, 16, 24),
@@ -181,6 +187,49 @@ def render_game_view(
             (255, 255, 255),
             (center_x, center_y + 64),
         )
+
+
+def render_pause_menu(
+    screen: Surface,
+    fonts: RenderFonts,
+    window_settings: WindowSettings,
+    menu: PauseMenu | None = None,
+    session: GameSession | None = None,
+) -> None:
+    """Render the pause menu with active HUD and selectable options."""
+    center_x = window_settings.width // 2
+    center_y = window_settings.height // 2
+    screen.fill(_STATE_BACKGROUNDS[GameState.PAUSED])
+    render_hud(screen, fonts, window_settings, session)
+    _draw_centered_text(
+        screen,
+        fonts.title,
+        "PAUSED",
+        (255, 230, 0),
+        (center_x, center_y - 68),
+    )
+
+    menu_options = menu.options if menu is not None else PAUSE_MENU_OPTIONS
+    selected_index = menu.selected_index if menu is not None else 0
+    for index, option in enumerate(menu_options):
+        is_selected = index == selected_index
+        label = f"> {option.label} <" if is_selected else option.label
+        color = (255, 230, 0) if is_selected else (255, 255, 255)
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            label,
+            color,
+            (center_x, center_y - 8 + index * 32),
+        )
+
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "P: Resume | Esc: Main Menu",
+        (255, 230, 0),
+        (center_x, window_settings.height - 48),
+    )
 
 
 def render_end_screen(
@@ -392,6 +441,7 @@ def render_state(
     state: GameState,
     context: AppContext | None = None,
     menu: MainMenu | None = None,
+    pause_menu: PauseMenu | None = None,
 ) -> None:
     """Render the minimal visual representation of a state."""
     pygame_instance = cast(PygameModule, pygame_module)
@@ -408,6 +458,14 @@ def render_state(
             screen,
             fonts,
             window_settings,
+            context.session if context is not None else None,
+        )
+    elif state is GameState.PAUSED:
+        render_pause_menu(
+            screen,
+            fonts,
+            window_settings,
+            pause_menu,
             context.session if context is not None else None,
         )
     elif state is GameState.HIGHSCORES:

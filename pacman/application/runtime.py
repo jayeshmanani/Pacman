@@ -9,7 +9,12 @@ from pacman.application.contracts import (
     PygameModule,
     Surface,
 )
-from pacman.application.menu import MainMenu, MainMenuAction, MenuControls
+from pacman.application.menu import (
+    MainMenu,
+    MainMenuAction,
+    MenuControls,
+    PauseMenu,
+)
 from pacman.application.rendering import (
     WindowSettings,
     create_render_fonts,
@@ -99,6 +104,7 @@ def run_app(
         fonts = create_render_fonts(pygame_instance)
         controller = GameStateController()
         main_menu = MainMenu()
+        pause_menu = PauseMenu()
         app_context = AppContext(
             config=config or GameConfig(),
             state_controller=controller,
@@ -135,6 +141,7 @@ def run_app(
                 controller.state,
                 app_context,
                 main_menu,
+                pause_menu,
             )
             pygame_instance.display.flip()
             elapsed_ms = clock.tick(window_settings.frames_per_second)
