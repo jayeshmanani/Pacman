@@ -28,7 +28,7 @@ def handle_normal_ghost_collision(
     session.lose_life()
 
     if session.is_game_over:
-        state_controller.end_game()
+        state_controller.end_game(session)
         return PlayerDeathOutcome.GAME_OVER
 
     player.respawn(spawn_tile, world)

@@ -102,4 +102,4 @@ def test_complete_player_flow_reaches_victory() -> None:
     assert generated_level is None
     assert session.is_victory
     assert session.lives == 3
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.VICTORY

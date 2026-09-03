@@ -53,7 +53,7 @@ def test_playing_transitions_to_end_screen() -> None:
 
     controller.handle_key(_FakePygame.K_e, state_controls())
 
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 def test_end_screen_transitions_to_main_menu() -> None:

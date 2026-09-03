@@ -54,7 +54,7 @@ def test_event_loop_applies_state_transitions() -> None:
 
     assert pygame.display.captions == [
         "Pacman - Playing",
-        "Pacman - End Screen",
+        "Pacman - Game Over",
         "Pacman - Main Menu",
         "Pacman - Main Menu",
     ]
