@@ -36,7 +36,7 @@ def test_timer_reaches_exactly_zero_and_never_negative() -> None:
 
     assert session.remaining_level_time == 0.0
     assert session.level_timed_out
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 def test_timeout_flow_triggers_only_once() -> None:
@@ -49,7 +49,7 @@ def test_timeout_flow_triggers_only_once() -> None:
 
     assert session.remaining_level_time == 0.0
     assert session.level_timed_out
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 def test_timeout_leaves_session_state_consistent() -> None:
@@ -69,7 +69,7 @@ def test_timeout_leaves_session_state_consistent() -> None:
     assert session.current_level == 1
     assert session.remaining_level_time == 0.0
     assert session.level_timed_out
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 def test_timer_does_not_decrease_outside_playing_state() -> None:

@@ -74,7 +74,7 @@ def test_last_life_ends_game_without_respawning() -> None:
     assert outcome is PlayerDeathOutcome.GAME_OVER
     assert session.lives == 0
     assert player.position == (4.5, 2.5)
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 def test_lives_never_become_negative() -> None:
@@ -94,7 +94,7 @@ def test_lives_never_become_negative() -> None:
 
     assert outcome is PlayerDeathOutcome.GAME_OVER
     assert session.lives == 0
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 def test_respawn_rejects_wall_tile() -> None:

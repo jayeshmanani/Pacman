@@ -39,7 +39,7 @@ def test_wall_collision_and_timeout_preserve_session_data() -> None:
     assert session.is_game_over
     assert session.score == 120
     assert session.lives == 2
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 def test_repeated_normal_collisions_lead_to_game_over() -> None:
@@ -89,7 +89,7 @@ def test_repeated_normal_collisions_lead_to_game_over() -> None:
     assert session.is_game_over
     assert session.score == 75
     assert player.position == final_position
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.GAME_OVER
 
 
 @pytest.mark.parametrize("paused", [True, False])

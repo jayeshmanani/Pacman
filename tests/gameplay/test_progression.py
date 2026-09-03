@@ -92,7 +92,7 @@ def test_final_level_completion_triggers_game_victory() -> None:
     assert next_level is None
     assert session.is_victory is True
     assert session.score == 1500
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.VICTORY
 
 
 def test_progression_supports_at_least_ten_consecutive_levels() -> None:
@@ -125,4 +125,4 @@ def test_progression_supports_at_least_ten_consecutive_levels() -> None:
     assert outcome is LevelCompletionOutcome.VICTORY
     assert next_level is None
     assert session.is_victory is True
-    assert controller.state is GameState.END_SCREEN
+    assert controller.state is GameState.VICTORY

@@ -16,6 +16,8 @@ class GameState(Enum):
     HIGHSCORES = "Highscores"
     INSTRUCTIONS = "Instructions"
     END_SCREEN = "End Screen"
+    GAME_OVER = "Game Over"
+    VICTORY = "Victory"
 
 
 @dataclass(frozen=True)
@@ -40,9 +42,20 @@ class GameStateController:
         """Return the current game state."""
         return self._state
 
-    def end_game(self) -> None:
-        """Move the application to the end screen after game over."""
-        self._state = GameState.END_SCREEN
+    def end_game(self, session: GameSession | None = None) -> None:
+        """Move application to end screen based on session state."""
+        if session is not None and session.is_victory:
+            self._state = GameState.VICTORY
+        else:
+            self._state = GameState.GAME_OVER
+
+    def trigger_game_over(self) -> None:
+        """Move the application explicitly to the Game Over screen."""
+        self._state = GameState.GAME_OVER
+
+    def trigger_victory(self) -> None:
+        """Move the application explicitly to the Victory screen."""
+        self._state = GameState.VICTORY
 
     def start_game(self, session: GameSession | None = None) -> None:
         """Move the application into active gameplay."""
@@ -97,7 +110,7 @@ class GameStateController:
             elif key == controls.end_screen_key:
                 if session is not None:
                     session.resume_gameplay()
-                self._state = GameState.END_SCREEN
+                self.end_game(session)
             elif key == controls.main_menu_key:
                 self.return_to_main_menu(session)
             return
@@ -109,7 +122,11 @@ class GameStateController:
                 self.return_to_main_menu(session)
             return
 
-        if self._state is GameState.END_SCREEN:
+        if self._state in (
+            GameState.END_SCREEN,
+            GameState.GAME_OVER,
+            GameState.VICTORY,
+        ):
             if key in controls.confirm_keys or key == controls.main_menu_key:
                 self.return_to_main_menu(session)
             return
@@ -133,4 +150,4 @@ def update_active_gameplay(
         gameplay_update(dt)
 
     if session.update_level_timer(dt):
-        state_controller.end_game()
+        state_controller.end_game(session)

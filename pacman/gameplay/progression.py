@@ -25,7 +25,7 @@ def handle_level_completion(
     """Complete current level and advance to the next or trigger victory."""
     if session.is_final_level:
         session.trigger_victory()
-        state_controller.end_game()
+        state_controller.end_game(session)
         return LevelCompletionOutcome.VICTORY, None
 
     next_level_index = session.advance_level()

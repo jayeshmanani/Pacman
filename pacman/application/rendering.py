@@ -43,6 +43,8 @@ _STATE_BACKGROUNDS: Final = {
     GameState.HIGHSCORES: (20, 62, 50),
     GameState.INSTRUCTIONS: (16, 24, 72),
     GameState.END_SCREEN: (72, 16, 24),
+    GameState.GAME_OVER: (72, 16, 24),
+    GameState.VICTORY: (16, 72, 40),
 }
 _MAX_DISPLAYED_HIGHSCORES: Final = 10
 
@@ -482,7 +484,11 @@ def render_state(
             window_settings,
             context.config if context is not None else None,
         )
-    elif state is GameState.END_SCREEN:
+    elif state in (
+        GameState.END_SCREEN,
+        GameState.GAME_OVER,
+        GameState.VICTORY,
+    ):
         render_end_screen(screen, fonts, window_settings)
 
     pygame_instance.display.set_caption(
