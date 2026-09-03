@@ -1,6 +1,7 @@
 """Rendering functions for the current application states."""
 
 from dataclasses import dataclass
+import math
 from typing import Final, cast
 
 from pacman.application.contracts import Color, Font, PygameModule, Surface
@@ -74,6 +75,46 @@ def _draw_left_text(
     screen.blit(rendered_text, text_rectangle)
 
 
+def render_hud(
+    screen: Surface,
+    fonts: RenderFonts,
+    window_settings: WindowSettings,
+    session: GameSession | None = None,
+) -> None:
+    """Render the always-visible in-game HUD bar across the top."""
+    hud_height = 40
+    screen.fill((12, 16, 36), (0, 0, window_settings.width, hud_height))
+    screen.fill((82, 113, 214), (0, hud_height - 2, window_settings.width, 2))
+
+    score = session.score if session is not None else 0
+    lives = session.lives if session is not None else 3
+    level = (session.current_level + 1) if session is not None else 1
+    remaining_time = (
+        max(0, int(math.ceil(session.remaining_level_time)))
+        if session is not None
+        else 90
+    )
+
+    center_y = hud_height // 2
+    quarter_w = window_settings.width // 4
+
+    hud_items = (
+        (f"SCORE: {score}", quarter_w // 2),
+        (f"LIVES: {lives}", quarter_w + quarter_w // 2),
+        (f"LEVEL: {level}", quarter_w * 2 + quarter_w // 2),
+        (f"TIME: {remaining_time}s", quarter_w * 3 + quarter_w // 2),
+    )
+
+    for text, center_x in hud_items:
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            text,
+            (255, 230, 0),
+            (center_x, center_y),
+        )
+
+
 def render_main_menu(
     screen: Surface,
     fonts: RenderFonts,
@@ -113,10 +154,11 @@ def render_game_view(
     window_settings: WindowSettings,
     session: GameSession | None = None,
 ) -> None:
-    """Render the placeholder game view."""
+    """Render the placeholder game view with the HUD."""
     center_x = window_settings.width // 2
     center_y = window_settings.height // 2
     screen.fill(window_settings.background_color)
+    render_hud(screen, fonts, window_settings, session)
     _draw_centered_text(
         screen,
         fonts.title,

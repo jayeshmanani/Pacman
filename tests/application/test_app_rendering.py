@@ -9,9 +9,11 @@ from pacman.app import (
     RenderFonts,
     WindowSettings,
     render_highscores_screen,
+    render_hud,
     render_state,
     run_app,
 )
+from pacman.application.context import GameSession
 from pacman.infrastructure.config import GameConfig
 from pacman.infrastructure.highscore import HighscoreEntry
 from tests.support.app_fakes import _FakeEvent, _FakeFont, _FakePygame
@@ -82,7 +84,7 @@ def test_highscores_screen_displays_scores_from_configured_storage(
 
 
 def test_playing_renders_expected_placeholder_text() -> None:
-    """Verify that the game view placeholder text is rendered."""
+    """Verify that the game view placeholder text and HUD are rendered."""
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
         [_FakeEvent(type=_FakePygame.QUIT)],
@@ -92,6 +94,10 @@ def test_playing_renders_expected_placeholder_text() -> None:
 
     assert "Game View" in pygame.surface.rendered_texts
     assert "Press E to End" in pygame.surface.rendered_texts
+    assert "SCORE: 0" in pygame.surface.rendered_texts
+    assert "LIVES: 3" in pygame.surface.rendered_texts
+    assert "LEVEL: 1" in pygame.surface.rendered_texts
+    assert "TIME: 90s" in pygame.surface.rendered_texts
 
 
 def test_highscores_screen_renders_loaded_scores() -> None:
@@ -266,3 +272,51 @@ def test_rendering_does_not_change_current_game_state() -> None:
     )
 
     assert controller.state is GameState.PLAYING
+
+
+def test_hud_renders_default_metrics_and_background() -> None:
+    """Verify that HUD renders default metrics and its top background bar."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+    window_settings = WindowSettings(width=520, height=496)
+
+    render_hud(pygame.surface, fonts, window_settings, None)
+
+    assert ((12, 16, 36), (0, 0, 520, 40)) in pygame.surface.fill_rectangles
+    assert ((82, 113, 214), (0, 38, 520, 2)) in pygame.surface.fill_rectangles
+    assert "SCORE: 0" in pygame.surface.rendered_texts
+    assert "LIVES: 3" in pygame.surface.rendered_texts
+    assert "LEVEL: 1" in pygame.surface.rendered_texts
+    assert "TIME: 90s" in pygame.surface.rendered_texts
+    assert pygame.surface.blit_destinations == [
+        {"center": (65, 20)},
+        {"center": (195, 20)},
+        {"center": (325, 20)},
+        {"center": (455, 20)},
+    ]
+
+
+def test_hud_renders_active_session_values() -> None:
+    """Verify that HUD displays dynamic metrics from the active session."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+    window_settings = WindowSettings(width=520, height=496)
+    session = GameSession(
+        score=1450,
+        lives=2,
+        current_level=3,
+        remaining_level_time=42.1,
+    )
+
+    render_hud(pygame.surface, fonts, window_settings, session)
+
+    assert "SCORE: 1450" in pygame.surface.rendered_texts
+    assert "LIVES: 2" in pygame.surface.rendered_texts
+    assert "LEVEL: 4" in pygame.surface.rendered_texts
+    assert "TIME: 43s" in pygame.surface.rendered_texts
