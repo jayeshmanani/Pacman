@@ -33,6 +33,7 @@ class _FakeSurface:
     def __init__(self) -> None:
         self.fill_colors: list[Color] = []
         self.rendered_texts: list[str] = []
+        self.blit_destinations: list[object] = []
 
     def fill(self, color: Color) -> None:
         self.fill_colors.append(color)
@@ -40,6 +41,7 @@ class _FakeSurface:
     def blit(self, source: object, destination: object) -> object:
         if isinstance(source, _FakeRenderedText):
             self.rendered_texts.append(source.text)
+            self.blit_destinations.append(destination)
         return destination
 
 

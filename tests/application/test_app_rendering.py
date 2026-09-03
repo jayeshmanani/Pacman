@@ -8,10 +8,12 @@ from pacman.app import (
     GameStateController,
     RenderFonts,
     WindowSettings,
+    render_highscores_screen,
     render_state,
     run_app,
 )
 from pacman.infrastructure.config import GameConfig
+from pacman.infrastructure.highscore import HighscoreEntry
 from tests.support.app_fakes import _FakeEvent, _FakeFont, _FakePygame
 
 
@@ -26,6 +28,13 @@ def test_main_menu_renders_expected_text() -> None:
     assert "View Highscores" in pygame.surface.rendered_texts
     assert "Instructions" in pygame.surface.rendered_texts
     assert "Exit" in pygame.surface.rendered_texts
+    assert pygame.surface.blit_destinations == [
+        {"center": (224, 180)},
+        {"center": (224, 240)},
+        {"center": (224, 272)},
+        {"center": (224, 304)},
+        {"center": (224, 336)},
+    ]
 
 
 def test_menu_selection_highlight_follows_keyboard_navigation() -> None:
@@ -40,10 +49,10 @@ def test_menu_selection_highlight_follows_keyboard_navigation() -> None:
     assert "> View Highscores <" in pygame.surface.rendered_texts
 
 
-def test_main_menu_displays_highscores_from_configured_storage(
+def test_highscores_screen_displays_scores_from_configured_storage(
     tmp_path: Path,
 ) -> None:
-    """Verify that the main menu renders highscores loaded at startup."""
+    """Verify that the highscores screen renders scores loaded at startup."""
     score_file = tmp_path / "scores.json"
     score_file.write_text(
         json.dumps(
@@ -54,7 +63,11 @@ def test_main_menu_displays_highscores_from_configured_storage(
         ),
         encoding="utf-8",
     )
-    pygame = _FakePygame([[_FakeEvent(type=_FakePygame.QUIT)]])
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
 
     run_app(
         pygame_module=pygame,
@@ -62,8 +75,10 @@ def test_main_menu_displays_highscores_from_configured_storage(
     )
 
     assert "HIGHSCORES" in pygame.surface.rendered_texts
-    assert "1. Maria  1200" in pygame.surface.rendered_texts
-    assert "2. Player 2  800" in pygame.surface.rendered_texts
+    assert "Maria" in pygame.surface.rendered_texts
+    assert "1200" in pygame.surface.rendered_texts
+    assert "Player 2" in pygame.surface.rendered_texts
+    assert "800" in pygame.surface.rendered_texts
 
 
 def test_playing_renders_expected_placeholder_text() -> None:
@@ -91,6 +106,64 @@ def test_highscores_screen_renders_loaded_scores() -> None:
 
     assert "HIGHSCORES" in pygame.surface.rendered_texts
     assert "No highscores yet" in pygame.surface.rendered_texts
+
+
+def test_highscores_screen_renders_only_top_ten_in_score_order() -> None:
+    """Verify twelve unordered entries render as a descending Top 10."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+    highscores = [
+        HighscoreEntry(name=f"P{score}", score=score)
+        for score in (40, 110, 20, 90, 70, 10, 120, 50, 100, 30, 80, 60)
+    ]
+
+    render_highscores_screen(
+        pygame.surface,
+        fonts,
+        WindowSettings(),
+        highscores,
+    )
+
+    assert pygame.surface.rendered_texts[1:4] == [
+        "RANK",
+        "PLAYER",
+        "SCORE",
+    ]
+    assert pygame.surface.rendered_texts[4:34] == [
+        "1", "P120", "120",
+        "2", "P110", "110",
+        "3", "P100", "100",
+        "4", "P90", "90",
+        "5", "P80", "80",
+        "6", "P70", "70",
+        "7", "P60", "60",
+        "8", "P50", "50",
+        "9", "P40", "40",
+        "10", "P30", "30",
+    ]
+    assert "P20" not in pygame.surface.rendered_texts
+    assert "P10" not in pygame.surface.rendered_texts
+    assert pygame.surface.blit_destinations[1:4] == [
+        {"center": (74, 112)},
+        {"center": (224, 112)},
+        {"center": (373, 112)},
+    ]
+    assert pygame.surface.blit_destinations[4:7] == [
+        {"center": (74, 144)},
+        {"center": (224, 144)},
+        {"center": (373, 144)},
+    ]
+    assert pygame.surface.blit_destinations[31:34] == [
+        {"center": (74, 396)},
+        {"center": (224, 396)},
+        {"center": (373, 396)},
+    ]
+    assert pygame.surface.blit_destinations[-1] == {
+        "center": (224, 448),
+    }
 
 
 def test_instructions_screen_renders_minimal_content() -> None:

@@ -36,6 +36,7 @@ _STATE_BACKGROUNDS: Final = {
     GameState.INSTRUCTIONS: (64, 48, 18),
     GameState.END_SCREEN: (72, 16, 24),
 }
+_MAX_DISPLAYED_HIGHSCORES: Final = 10
 
 
 def create_render_fonts(pygame_instance: PygameModule) -> RenderFonts:
@@ -63,14 +64,18 @@ def render_main_menu(
     screen: Surface,
     fonts: RenderFonts,
     window_settings: WindowSettings,
-    highscores: list[HighscoreEntry] | None = None,
     menu: MainMenu | None = None,
 ) -> None:
-    """Render the main menu and any loaded highscore entries."""
+    """Render the main menu centered vertically in the window."""
     center_x = window_settings.width // 2
+    center_y = window_settings.height // 2
     screen.fill(_STATE_BACKGROUNDS[GameState.MAIN_MENU])
     _draw_centered_text(
-        screen, fonts.title, "PACMAN", (255, 230, 0), (center_x, 56)
+        screen,
+        fonts.title,
+        "PACMAN",
+        (255, 230, 0),
+        (center_x, center_y - 68),
     )
 
     menu_options = menu.options if menu is not None else MAIN_MENU_OPTIONS
@@ -84,21 +89,8 @@ def render_main_menu(
             fonts.body,
             label,
             color,
-            (center_x, 116 + index * 32),
+            (center_x, center_y - 8 + index * 32),
         )
-
-    if highscores:
-        _draw_centered_text(
-            screen, fonts.body, "HIGHSCORES", (255, 230, 0), (center_x, 278)
-        )
-        for position, entry in enumerate(highscores, start=1):
-            _draw_centered_text(
-                screen,
-                fonts.body,
-                f"{position}. {entry.name}  {entry.score}",
-                (255, 255, 255),
-                (center_x, 278 + position * 26),
-            )
 
 
 def render_game_view(
@@ -166,21 +158,47 @@ def render_highscores_screen(
     window_settings: WindowSettings,
     highscores: list[HighscoreEntry] | None = None,
 ) -> None:
-    """Render the minimal highscores screen."""
+    """Render the ten best stored highscores in descending order."""
     center_x = window_settings.width // 2
+    rank_x = window_settings.width // 6
+    player_x = center_x
+    score_x = window_settings.width * 5 // 6
+    ranked_highscores = sorted(
+        highscores or (),
+        key=lambda entry: entry.score,
+        reverse=True,
+    )[:_MAX_DISPLAYED_HIGHSCORES]
     screen.fill(_STATE_BACKGROUNDS[GameState.HIGHSCORES])
     _draw_centered_text(
         screen, fonts.title, "HIGHSCORES", (255, 230, 0), (center_x, 64)
     )
-    if highscores:
-        for position, entry in enumerate(highscores, start=1):
+    if ranked_highscores:
+        for label, column_x in (
+            ("RANK", rank_x),
+            ("PLAYER", player_x),
+            ("SCORE", score_x),
+        ):
             _draw_centered_text(
                 screen,
                 fonts.body,
-                f"{position}. {entry.name}  {entry.score}",
-                (255, 255, 255),
-                (center_x, 106 + position * 28),
+                label,
+                (255, 230, 0),
+                (column_x, 112),
             )
+        for position, entry in enumerate(ranked_highscores, start=1):
+            row_y = 116 + position * 28
+            for value, column_x in (
+                (str(position), rank_x),
+                (entry.name, player_x),
+                (str(entry.score), score_x),
+            ):
+                _draw_centered_text(
+                    screen,
+                    fonts.body,
+                    value,
+                    (255, 255, 255),
+                    (column_x, row_y),
+                )
     else:
         _draw_centered_text(
             screen,
@@ -192,7 +210,7 @@ def render_highscores_screen(
     _draw_centered_text(
         screen,
         fonts.body,
-        "Press Escape for Menu",
+        "Press Escape, Enter, or Space for Menu",
         (255, 230, 0),
         (center_x, window_settings.height - 48),
     )
@@ -253,7 +271,6 @@ def render_state(
             screen,
             fonts,
             window_settings,
-            context.highscores if context is not None else None,
             menu,
         )
     elif state is GameState.PLAYING:
