@@ -14,6 +14,7 @@ from pacman.application.menu import (
     MainMenuAction,
     MenuControls,
     PauseMenu,
+    PauseMenuAction,
 )
 from pacman.application.rendering import (
     WindowSettings,
@@ -77,6 +78,21 @@ def _handle_menu_action(
     return True
 
 
+def _handle_pause_menu_action(
+    action: PauseMenuAction,
+    controller: GameStateController,
+    context: AppContext,
+    pause_menu: PauseMenu,
+) -> None:
+    """Apply a pause-menu action."""
+    pause_menu.reset_selection()
+    if action is PauseMenuAction.RESUME:
+        controller.resume_game(context.session)
+    elif action is PauseMenuAction.RETURN_TO_MAIN_MENU:
+        context.reset_session()
+        controller.return_to_main_menu(context.session)
+
+
 def run_app(
     settings: WindowSettings | None = None,
     pygame_module: object | None = None,
@@ -126,7 +142,36 @@ def run_app(
                                 controller,
                                 app_context,
                             )
+                    elif controller.state is GameState.PAUSED:
+                        if key == controls.pause_key:
+                            pause_menu.reset_selection()
+                            controller.resume_game(app_context.session)
+                        elif key == controls.main_menu_key:
+                            pause_menu.reset_selection()
+                            app_context.reset_session()
+                            controller.return_to_main_menu(app_context.session)
+                        else:
+                            pause_action = pause_menu.handle_key(
+                                key, menu_controls
+                            )
+                            if pause_action is not None:
+                                _handle_pause_menu_action(
+                                    pause_action,
+                                    controller,
+                                    app_context,
+                                    pause_menu,
+                                )
                     else:
+                        if (
+                            controller.state is GameState.PLAYING
+                            and key == controls.pause_key
+                        ):
+                            pause_menu.reset_selection()
+                        elif (
+                            controller.state is GameState.PLAYING
+                            and key == controls.main_menu_key
+                        ):
+                            app_context.reset_session()
                         controller.handle_key(
                             key,
                             controls,
