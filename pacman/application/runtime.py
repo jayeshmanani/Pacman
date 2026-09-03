@@ -142,6 +142,23 @@ def run_app(
                                 controller,
                                 app_context,
                             )
+                    elif controller.state in (
+                        GameState.GAME_OVER,
+                        GameState.VICTORY,
+                    ):
+                        keyboard_event = cast(KeyboardEvent, event)
+                        if key == pygame_instance.K_BACKSPACE:
+                            app_context.player_name_input.backspace()
+                        elif key == pygame_instance.K_RETURN:
+                            if app_context.save_completed_game_score():
+                                app_context.reset_session()
+                                controller.return_to_main_menu(
+                                    app_context.session
+                                )
+                        elif keyboard_event.unicode:
+                            app_context.player_name_input.add_character(
+                                keyboard_event.unicode
+                            )
                     elif controller.state is GameState.PAUSED:
                         if key == controls.pause_key:
                             pause_menu.reset_selection()

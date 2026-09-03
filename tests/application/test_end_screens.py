@@ -35,7 +35,8 @@ def test_render_game_over_screen_out_of_lives() -> None:
         "GAME OVER",
         "OUT OF LIVES!",
         "FINAL SCORE: 1250",
-        "Press Enter or Space to Continue",
+        "NAME: _",
+        "Enter: Save score and return to menu",
     ]
 
 
@@ -53,7 +54,8 @@ def test_render_game_over_screen_time_expired() -> None:
         "GAME OVER",
         "TIME EXPIRED!",
         "FINAL SCORE: 450",
-        "Press Enter or Space to Continue",
+        "NAME: _",
+        "Enter: Save score and return to menu",
     ]
 
 
@@ -71,7 +73,8 @@ def test_render_victory_screen() -> None:
         "VICTORY!",
         "YOU CLEARED ALL LEVELS!",
         "FINAL SCORE: 9900",
-        "Press Enter or Space to Continue",
+        "NAME: _",
+        "Enter: Save score and return to menu",
     ]
 
 

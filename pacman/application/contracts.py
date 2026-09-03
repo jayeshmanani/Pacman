@@ -18,6 +18,7 @@ class KeyboardEvent(Protocol):
 
     type: int
     key: int
+    unicode: str
 
 
 class EventModule(Protocol):
@@ -99,6 +100,7 @@ class PygameModule(Protocol):
     K_SPACE: int
     K_UP: int
     K_DOWN: int
+    K_BACKSPACE: int
     K_e: int
     K_ESCAPE: int
     K_p: int
