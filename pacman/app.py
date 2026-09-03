@@ -4,6 +4,7 @@ from pacman.application.rendering import (
     RenderFonts,
     WindowSettings,
     render_end_screen,
+    render_game_over_screen,
     render_game_view,
     render_highscores_screen,
     render_hud,
@@ -11,6 +12,7 @@ from pacman.application.rendering import (
     render_main_menu,
     render_pause_menu,
     render_state,
+    render_victory_screen,
 )
 from pacman.application.runtime import run_app
 from pacman.application.menu import (
@@ -51,6 +53,7 @@ __all__ = [
     "StateControls",
     "WindowSettings",
     "render_end_screen",
+    "render_game_over_screen",
     "render_game_view",
     "render_highscores_screen",
     "render_hud",
@@ -58,6 +61,7 @@ __all__ = [
     "render_main_menu",
     "render_pause_menu",
     "render_state",
+    "render_victory_screen",
     "run_app",
     "update_active_gameplay",
 ]

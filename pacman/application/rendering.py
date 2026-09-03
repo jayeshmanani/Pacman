@@ -234,29 +234,111 @@ def render_pause_menu(
     )
 
 
+def render_game_over_screen(
+    screen: Surface,
+    fonts: RenderFonts,
+    window_settings: WindowSettings,
+    session: GameSession | None = None,
+) -> None:
+    """Render Game Over screen with final score and continuation prompt."""
+    center_x = window_settings.width // 2
+    center_y = window_settings.height // 2
+    screen.fill(_STATE_BACKGROUNDS[GameState.GAME_OVER])
+
+    _draw_centered_text(
+        screen,
+        fonts.title,
+        "GAME OVER",
+        (255, 230, 0),
+        (center_x, center_y - 68),
+    )
+
+    reason = "OUT OF LIVES!"
+    if session is not None and session.level_timed_out:
+        reason = "TIME EXPIRED!"
+
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        reason,
+        (255, 100, 100),
+        (center_x, center_y - 16),
+    )
+
+    score = session.score if session is not None else 0
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        f"FINAL SCORE: {score}",
+        (255, 255, 255),
+        (center_x, center_y + 24),
+    )
+
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Press Enter or Space to Continue",
+        (255, 230, 0),
+        (center_x, window_settings.height - 48),
+    )
+
+
+def render_victory_screen(
+    screen: Surface,
+    fonts: RenderFonts,
+    window_settings: WindowSettings,
+    session: GameSession | None = None,
+) -> None:
+    """Render Victory screen with celebratory message and final score."""
+    center_x = window_settings.width // 2
+    center_y = window_settings.height // 2
+    screen.fill(_STATE_BACKGROUNDS[GameState.VICTORY])
+
+    _draw_centered_text(
+        screen,
+        fonts.title,
+        "VICTORY!",
+        (255, 230, 0),
+        (center_x, center_y - 68),
+    )
+
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "YOU CLEARED ALL LEVELS!",
+        (100, 255, 100),
+        (center_x, center_y - 16),
+    )
+
+    score = session.score if session is not None else 0
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        f"FINAL SCORE: {score}",
+        (255, 255, 255),
+        (center_x, center_y + 24),
+    )
+
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Press Enter or Space to Continue",
+        (255, 230, 0),
+        (center_x, window_settings.height - 48),
+    )
+
+
 def render_end_screen(
     screen: Surface,
     fonts: RenderFonts,
     window_settings: WindowSettings,
+    session: GameSession | None = None,
 ) -> None:
-    """Render the minimal end screen placeholder."""
-    center_x = window_settings.width // 2
-    center_y = window_settings.height // 2
-    screen.fill(_STATE_BACKGROUNDS[GameState.END_SCREEN])
-    _draw_centered_text(
-        screen,
-        fonts.title,
-        "End Screen",
-        (255, 255, 255),
-        (center_x, center_y - 24),
-    )
-    _draw_centered_text(
-        screen,
-        fonts.body,
-        "Press Enter or Space for Menu",
-        (255, 230, 0),
-        (center_x, center_y + 32),
-    )
+    """Render either victory or game over screen based on session state."""
+    if session is not None and session.is_victory:
+        render_victory_screen(screen, fonts, window_settings, session)
+    else:
+        render_game_over_screen(screen, fonts, window_settings, session)
 
 
 def render_highscores_screen(
@@ -484,12 +566,27 @@ def render_state(
             window_settings,
             context.config if context is not None else None,
         )
-    elif state in (
-        GameState.END_SCREEN,
-        GameState.GAME_OVER,
-        GameState.VICTORY,
-    ):
-        render_end_screen(screen, fonts, window_settings)
+    elif state is GameState.GAME_OVER:
+        render_game_over_screen(
+            screen,
+            fonts,
+            window_settings,
+            context.session if context is not None else None,
+        )
+    elif state is GameState.VICTORY:
+        render_victory_screen(
+            screen,
+            fonts,
+            window_settings,
+            context.session if context is not None else None,
+        )
+    elif state is GameState.END_SCREEN:
+        render_end_screen(
+            screen,
+            fonts,
+            window_settings,
+            context.session if context is not None else None,
+        )
 
     pygame_instance.display.set_caption(
         f"{window_settings.title} - {state.value}"
