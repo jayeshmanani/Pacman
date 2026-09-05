@@ -27,6 +27,13 @@ def test_highscore_entry_rejects_name_longer_than_ten_characters() -> None:
         HighscoreEntry(name="Player 1234", score=100)
 
 
+@pytest.mark.parametrize("name", ["", "   "])
+def test_highscore_entry_rejects_empty_name(name: str) -> None:
+    """Verify empty and whitespace-only names are rejected."""
+    with pytest.raises(ValueError, match="must not be empty"):
+        HighscoreEntry(name=name, score=100)
+
+
 @pytest.mark.parametrize("name", ["Player!", "Pac_Man", "Name-"])
 def test_highscore_entry_rejects_invalid_name_characters(name: str) -> None:
     """Verify that punctuation and symbols are rejected in names."""

@@ -1,8 +1,12 @@
 """Application tests for the pygame window lifecycle and event loop."""
 
+import json
+from pathlib import Path
+
 import pytest
 
 from pacman.app import WindowSettings, run_app
+from pacman.infrastructure.config import GameConfig
 from tests.support.app_fakes import (
     _FailingPygame,
     _FakeEvent,
@@ -46,7 +50,6 @@ def test_event_loop_applies_state_transitions() -> None:
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
-        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_SPACE)],
         [_FakeEvent(type=_FakePygame.QUIT)],
     ])
 
@@ -55,16 +58,83 @@ def test_event_loop_applies_state_transitions() -> None:
     assert pygame.display.captions == [
         "Pacman - Playing",
         "Pacman - Game Over",
-        "Pacman - Main Menu",
-        "Pacman - Main Menu",
+        "Pacman - Game Over",
     ]
     assert pygame.surface.fill_colors == [
         (0, 0, 0),
         (72, 16, 24),
-        (16, 24, 72),
-        (16, 24, 72),
+        (72, 16, 24),
     ]
-    assert pygame.clock.framerates == [60, 60, 60, 60]
+    assert pygame.clock.framerates == [60, 60, 60]
+
+
+def test_game_over_screen_accepts_text_and_backspace() -> None:
+    """Verify end-screen keyboard input updates the visible player name."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=109, unicode="M")],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=97, unicode="a")],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_BACKSPACE)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=114, unicode="r")],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "NAME: M" in pygame.surface.rendered_texts
+    assert "NAME: Ma" in pygame.surface.rendered_texts
+    assert "NAME: Mr" in pygame.surface.rendered_texts
+
+
+def test_game_over_saves_name_and_returns_to_main_menu(
+    tmp_path: Path,
+) -> None:
+    """Verify valid end-screen input persists before returning to menu."""
+    score_file = tmp_path / "scores.json"
+    name_events = [
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=ord(character),
+                    unicode=character)]
+        for character in "Maria"
+    ]
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
+        *name_events,
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(
+        pygame_module=pygame,
+        config=GameConfig(highscore_filename=str(score_file)),
+    )
+
+    assert pygame.display.captions[-2:] == [
+        "Pacman - Main Menu",
+        "Pacman - Main Menu",
+    ]
+    assert json.loads(score_file.read_text(encoding="utf-8")) == [
+        {"name": "Maria", "score": 0}
+    ]
+
+
+def test_empty_name_stays_on_game_over_with_validation_message() -> None:
+    """Verify Enter cannot leave the end screen without a valid name."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.captions[-2:] == [
+        "Pacman - Game Over",
+        "Pacman - Game Over",
+    ]
+    assert "Enter a player name" in pygame.surface.rendered_texts
 
 
 def test_menu_highscores_action_transitions_to_highscores() -> None:

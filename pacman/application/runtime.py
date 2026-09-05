@@ -29,6 +29,7 @@ from pacman.application.state import (
 )
 from pacman.infrastructure.config import GameConfig
 from pacman.application.context import AppContext
+from pacman.application.highscore_flow import handle_completed_game_input
 
 
 def _load_pygame() -> PygameModule:
@@ -142,6 +143,19 @@ def run_app(
                                 controller,
                                 app_context,
                             )
+                    elif controller.state in (
+                        GameState.GAME_OVER,
+                        GameState.VICTORY,
+                    ):
+                        keyboard_event = cast(KeyboardEvent, event)
+                        handle_completed_game_input(
+                            key=key,
+                            character=keyboard_event.unicode,
+                            backspace_key=pygame_instance.K_BACKSPACE,
+                            submit_key=pygame_instance.K_RETURN,
+                            controller=controller,
+                            context=app_context,
+                        )
                     elif controller.state is GameState.PAUSED:
                         if key == controls.pause_key:
                             pause_menu.reset_selection()

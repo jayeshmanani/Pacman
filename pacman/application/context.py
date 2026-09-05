@@ -8,6 +8,7 @@ from pacman.infrastructure.config import GameConfig
 from pacman.infrastructure.highscore import HighscoreEntry
 from pacman.maze.level_generator import LevelGenerator
 from pacman.infrastructure.storage import HighscoreStorage
+from pacman.application.player_name_input import PlayerNameInput
 
 
 @dataclass
@@ -103,6 +104,7 @@ class AppContext:
     state_controller: object | None = None
     storage: HighscoreStorage = field(default_factory=HighscoreStorage)
     session: GameSession = field(default_factory=GameSession)
+    player_name_input: PlayerNameInput = field(default_factory=PlayerNameInput)
     level_generator: LevelGenerator = field(init=False)
     highscores: list[HighscoreEntry] = field(
         default_factory=list,
@@ -125,9 +127,20 @@ class AppContext:
 
     def start_new_game(self) -> GameSession:
         """Create a fresh configured gameplay session."""
+        self.player_name_input.reset()
         return self.reset_session()
 
     def reset_session(self) -> GameSession:
         """Reset session defaults, preventing stale gameplay state."""
         self.session = self._configure_session(GameSession())
         return self.session
+
+    def save_completed_game_score(self) -> bool:
+        """Validate and persist the completed session score."""
+        entry = self.player_name_input.create_entry(self.session.score)
+        if entry is None:
+            return False
+
+        self.highscores = self.storage.update(entry)
+        self.player_name_input.reset()
+        return True

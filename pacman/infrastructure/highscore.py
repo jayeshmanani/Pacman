@@ -15,6 +15,8 @@ class HighscoreEntry:
         """Validate the player name and score."""
         if not isinstance(self.name, str):
             raise TypeError("name must be a string")
+        if not self.name.strip():
+            raise ValueError("name must not be empty")
         if len(self.name) > 10:
             raise ValueError("name must be no longer than 10 characters")
         if not all(

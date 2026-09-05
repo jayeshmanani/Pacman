@@ -15,6 +15,7 @@ from pacman.application.state import GameState
 from pacman.application.context import AppContext, GameSession
 from pacman.infrastructure.config import GameConfig
 from pacman.infrastructure.highscore import HighscoreEntry
+from pacman.application.player_name_input import PlayerNameInput
 
 
 @dataclass(frozen=True)
@@ -239,6 +240,7 @@ def render_game_over_screen(
     fonts: RenderFonts,
     window_settings: WindowSettings,
     session: GameSession | None = None,
+    player_name_input: PlayerNameInput | None = None,
 ) -> None:
     """Render Game Over screen with final score and continuation prompt."""
     center_x = window_settings.width // 2
@@ -274,10 +276,46 @@ def render_game_over_screen(
         (center_x, center_y + 24),
     )
 
+    _render_player_name_prompt(
+        screen,
+        fonts,
+        window_settings,
+        player_name_input,
+    )
+
+
+def _render_player_name_prompt(
+    screen: Surface,
+    fonts: RenderFonts,
+    window_settings: WindowSettings,
+    player_name_input: PlayerNameInput | None,
+) -> None:
+    """Render the shared name-entry field for either completion path."""
+    input_state = player_name_input or PlayerNameInput()
+    center_x = window_settings.width // 2
+    center_y = window_settings.height // 2
+    visible_name = input_state.value or "_"
     _draw_centered_text(
         screen,
         fonts.body,
-        "Press Enter or Space to Continue",
+        f"NAME: {visible_name}",
+        (255, 255, 255),
+        (center_x, center_y + 72),
+    )
+
+    if input_state.error_message is not None:
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            input_state.error_message,
+            (255, 100, 100),
+            (center_x, center_y + 108),
+        )
+
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Enter: Save score and return to menu",
         (255, 230, 0),
         (center_x, window_settings.height - 48),
     )
@@ -288,6 +326,7 @@ def render_victory_screen(
     fonts: RenderFonts,
     window_settings: WindowSettings,
     session: GameSession | None = None,
+    player_name_input: PlayerNameInput | None = None,
 ) -> None:
     """Render Victory screen with celebratory message and final score."""
     center_x = window_settings.width // 2
@@ -319,12 +358,11 @@ def render_victory_screen(
         (center_x, center_y + 24),
     )
 
-    _draw_centered_text(
+    _render_player_name_prompt(
         screen,
-        fonts.body,
-        "Press Enter or Space to Continue",
-        (255, 230, 0),
-        (center_x, window_settings.height - 48),
+        fonts,
+        window_settings,
+        player_name_input,
     )
 
 
@@ -572,6 +610,7 @@ def render_state(
             fonts,
             window_settings,
             context.session if context is not None else None,
+            context.player_name_input if context is not None else None,
         )
     elif state is GameState.VICTORY:
         render_victory_screen(
@@ -579,6 +618,7 @@ def render_state(
             fonts,
             window_settings,
             context.session if context is not None else None,
+            context.player_name_input if context is not None else None,
         )
     elif state is GameState.END_SCREEN:
         render_end_screen(
