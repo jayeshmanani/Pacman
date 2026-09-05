@@ -6,6 +6,56 @@ from pacman.app import StateControls
 
 Color = tuple[int, int, int]
 Rectangle = tuple[int, int, int, int]
+Coordinate = tuple[int, int]
+
+
+class _FakeDrawModule:
+    """Record drawing operations performed by pygame.draw."""
+
+    def __init__(self) -> None:
+        self.circles: list[tuple[Color, Coordinate, float, int]] = []
+        self.rectangles: list[tuple[Color, Rectangle, int, int]] = []
+        self.polygons: list[tuple[Color, list[Coordinate], int]] = []
+        self.lines: list[tuple[Color, Coordinate, Coordinate, int]] = []
+
+    def circle(
+        self,
+        surface: object,
+        color: Color,
+        center: Coordinate,
+        radius: float,
+        width: int = 0,
+    ) -> None:
+        self.circles.append((color, center, radius, width))
+
+    def rect(
+        self,
+        surface: object,
+        color: Color,
+        rect: Rectangle,
+        width: int = 0,
+        border_radius: int = 0,
+    ) -> None:
+        self.rectangles.append((color, rect, width, border_radius))
+
+    def polygon(
+        self,
+        surface: object,
+        color: Color,
+        points: list[Coordinate],
+        width: int = 0,
+    ) -> None:
+        self.polygons.append((color, points, width))
+
+    def line(
+        self,
+        surface: object,
+        color: Color,
+        start_pos: Coordinate,
+        end_pos: Coordinate,
+        width: int = 1,
+    ) -> None:
+        self.lines.append((color, start_pos, end_pos, width))
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -166,6 +216,7 @@ class _FakePygame:
     def __init__(self, event_batches: list[list[_FakeEvent]]) -> None:
         self.surface = _FakeSurface()
         self.display = _FakeDisplay(self.surface)
+        self.draw = _FakeDrawModule()
         self.event = _FakeEventModule(event_batches)
         self.font = _FakeFontModule()
         self.clock = _FakeClock()
@@ -198,6 +249,7 @@ class _FailingPygame:
     def __init__(self) -> None:
         self.surface = _FakeSurface()
         self.display = _FailingDisplay()
+        self.draw = _FakeDrawModule()
         self.event = _FakeEventModule([])
         self.font = _FakeFontModule()
         self.clock = _FakeClock()

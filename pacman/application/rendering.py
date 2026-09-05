@@ -107,19 +107,31 @@ def render_hud(
     center_y = hud_height // 2
     quarter_w = window_settings.width // 4
 
+    time_color: Color = (255, 230, 0)
+    if remaining_time <= 10:
+        time_color = (255, 70, 70)
+    elif remaining_time <= 20:
+        time_color = (255, 170, 0)
+
+    lives_color: Color = (255, 70, 70) if lives <= 1 else (255, 230, 0)
+
     hud_items = (
-        (f"SCORE: {score}", quarter_w // 2),
-        (f"LIVES: {lives}", quarter_w + quarter_w // 2),
-        (f"LEVEL: {level}", quarter_w * 2 + quarter_w // 2),
-        (f"TIME: {remaining_time}s", quarter_w * 3 + quarter_w // 2),
+        (f"SCORE: {score}", quarter_w // 2, (255, 230, 0)),
+        (f"LIVES: {lives}", quarter_w + quarter_w // 2, lives_color),
+        (f"LEVEL: {level}", quarter_w * 2 + quarter_w // 2, (255, 230, 0)),
+        (
+            f"TIME: {remaining_time}s",
+            quarter_w * 3 + quarter_w // 2,
+            time_color,
+        ),
     )
 
-    for text, center_x in hud_items:
+    for text, center_x, color in hud_items:
         _draw_centered_text(
             screen,
             fonts.body,
             text,
-            (255, 230, 0),
+            color,
             (center_x, center_y),
         )
 
