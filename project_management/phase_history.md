@@ -135,9 +135,25 @@ The review is supported by focused tests for:
   maze, and infrastructure responsibilities, with tests organized to mirror
   those boundaries.
 
+## Phase 6 - UI and Full Game Flow
+
+### Ownership
+
+| Owner | Jira tasks | Delivered focus |
+| --- | --- | --- |
+| Jayesh | PK-76, PK-79, PK-80, PK-81, PK-83 | Main menu navigation; in-game HUD; pause menu; Game Over and Victory screens; vector sprites, dynamic maze scaling, and feedback indicators |
+| Mariia | PK-77, PK-78, PK-82 | Highscores screen; instructions screen; validated player name entry and highscore saving flow |
+| Team | PK-84 | Complete menu-to-game-to-score flow review, end-screen cancellation, victory transition, and full-loop integration testing |
+
+* **User Interface & Navigation:** Keyboard-driven main menu, structured instructions screen, ordered top-10 highscores display, and in-game HUD tracking score, lives, level, and timer.
+* **Game Lifecycle Screens:** Distinct Game Over and Victory screens with contextual causes (out of lives, time expired, or all levels cleared) and validated name entry.
+* **Flow Control & Cancellation:** Implemented clean Escape cancellation on end screens returning to the main menu without saving, and state-level victory transitions.
+* **Visual Presentation:** Procedural vector sprites for player and ghost identities, dynamic maze viewport centering and integer tile scaling, wall rendering, and score popups.
+* **Verification:** Dedicated end-to-end integration test suite (`test_full_game_flow.py`) covering the complete Lose journey, Win journey, cancellation flow, and consecutive playthrough session isolation with zero state leakage.
+
 ## Current Status
 
-This history covers delivered work through Phase 5. Future work remains in
+This history covers delivered work through Phase 6. Future work remains in
 Jira and the progressive planner and is added here only after its phase review.
-The next planned stage is Phase 6 - UI and Full Game Flow, including complete
-pygame presentation and live player-input integration.
+The next planned stage is Phase 7 - Packaging and Distribution.
+
