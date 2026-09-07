@@ -367,3 +367,22 @@ def test_render_pause_menu_highlights_return_to_main_menu() -> None:
 
     assert "Resume" in pygame.surface.rendered_texts
     assert "> Return to Main Menu <" in pygame.surface.rendered_texts
+
+
+def test_render_hud_warning_colors_low_time_and_lives() -> None:
+    """Verify HUD text renders warning text when time and lives are low."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+    window_settings = WindowSettings()
+    session = GameSession(
+        lives=1,
+        remaining_level_time=8.5,
+    )
+
+    render_hud(pygame.surface, fonts, window_settings, session)
+
+    assert "LIVES: 1" in pygame.surface.rendered_texts
+    assert "TIME: 9s" in pygame.surface.rendered_texts

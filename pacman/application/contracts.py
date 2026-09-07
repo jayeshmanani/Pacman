@@ -7,6 +7,9 @@ Color = tuple[int, int, int]
 Rectangle = tuple[int, int, int, int]
 
 
+Coordinate = tuple[int, int]
+
+
 class Event(Protocol):
     """Describe the common part of a pygame event."""
 
@@ -36,6 +39,49 @@ class Surface(Protocol):
 
     def blit(self, source: object, destination: object) -> object:
         """Draw one surface onto another."""
+
+
+class DrawModule(Protocol):
+    """Describe pygame's draw module operations."""
+
+    def circle(
+        self,
+        surface: Surface,
+        color: Color,
+        center: Coordinate,
+        radius: float,
+        width: int = 0,
+    ) -> None:
+        """Draw a circle on a surface."""
+
+    def rect(
+        self,
+        surface: Surface,
+        color: Color,
+        rect: Rectangle,
+        width: int = 0,
+        border_radius: int = 0,
+    ) -> None:
+        """Draw a rectangle on a surface."""
+
+    def polygon(
+        self,
+        surface: Surface,
+        color: Color,
+        points: list[Coordinate],
+        width: int = 0,
+    ) -> None:
+        """Draw a polygon on a surface."""
+
+    def line(
+        self,
+        surface: Surface,
+        color: Color,
+        start_pos: Coordinate,
+        end_pos: Coordinate,
+        width: int = 1,
+    ) -> None:
+        """Draw a straight line segment on a surface."""
 
 
 class RenderedText(Protocol):
@@ -105,6 +151,7 @@ class PygameModule(Protocol):
     K_ESCAPE: int
     K_p: int
     display: DisplayModule
+    draw: DrawModule
     event: EventModule
     font: FontModule
     time: TimeModule
