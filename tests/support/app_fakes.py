@@ -212,6 +212,7 @@ class _FakePygame:
     K_e = 101
     K_ESCAPE = 27
     K_p = 112
+    K_v = 118
 
     def __init__(self, event_batches: list[list[_FakeEvent]]) -> None:
         self.surface = _FakeSurface()
@@ -245,6 +246,7 @@ class _FailingPygame:
     K_e = 101
     K_ESCAPE = 27
     K_p = 112
+    K_v = 118
 
     def __init__(self) -> None:
         self.surface = _FakeSurface()
@@ -275,4 +277,5 @@ def state_controls() -> StateControls:
         end_screen_key=_FakePygame.K_e,
         main_menu_key=_FakePygame.K_ESCAPE,
         pause_key=_FakePygame.K_p,
+        victory_key=_FakePygame.K_v,
     )

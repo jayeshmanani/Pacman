@@ -28,6 +28,7 @@ class StateControls:
     end_screen_key: int
     main_menu_key: int
     pause_key: int
+    victory_key: int = 0
 
 
 class GameStateController:
@@ -110,6 +111,10 @@ class GameStateController:
             elif key == controls.end_screen_key:
                 if session is not None:
                     session.resume_gameplay()
+                self.end_game(session)
+            elif controls.victory_key and key == controls.victory_key:
+                if session is not None:
+                    session.trigger_victory()
                 self.end_game(session)
             elif key == controls.main_menu_key:
                 self.return_to_main_menu(session)

@@ -47,6 +47,7 @@ def _create_state_controls(pygame_instance: PygameModule) -> StateControls:
         end_screen_key=pygame_instance.K_e,
         main_menu_key=pygame_instance.K_ESCAPE,
         pause_key=pygame_instance.K_p,
+        victory_key=pygame_instance.K_v,
     )
 
 
@@ -155,6 +156,7 @@ def run_app(
                             submit_key=pygame_instance.K_RETURN,
                             controller=controller,
                             context=app_context,
+                            cancel_key=controls.main_menu_key,
                         )
                     elif controller.state is GameState.PAUSED:
                         if key == controls.pause_key:

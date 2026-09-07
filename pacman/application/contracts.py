@@ -150,6 +150,7 @@ class PygameModule(Protocol):
     K_e: int
     K_ESCAPE: int
     K_p: int
+    K_v: int
     display: DisplayModule
     draw: DrawModule
     event: EventModule

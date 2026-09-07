@@ -13,7 +13,7 @@ The current implementation provides:
 - Complete four-ghost autonomous AI: distinct chase targeting for Blinky, Pinky, Inky, and Clyde; frightened fleeing; score chaining; delayed corner respawn; and frame contact protection.
 - Session lifecycle: scoring, lives, level timers, pause/resume, and multi-level progression.
 - Robust commented-JSON configuration parsing and persistent highscores.
-- Automated testing with 245 test cases and headless playtest verification.
+- Automated testing with 362 test cases and headless playtest verification.
 
 ## Instructions
 
@@ -48,10 +48,11 @@ The current application supports the state controls below:
 
 | Key | Action |
 | --- | --- |
-| `Enter` / `Space` | Start game from menu or return from end screen |
+| `Enter` / `Space` | Start game from menu or confirm name on end screen |
 | `P` | Pause or resume the active gameplay session |
-| `E` | Open the end screen |
-| `Esc` | Return from playing state to main menu |
+| `E` | Trigger game over from playing state |
+| `V` | Trigger victory from playing state |
+| `Esc` | Return to main menu from playing, paused, or end screen |
 | `W`, `A`, `S`, `D` / Arrows | Buffer directional turns for Pac-Man |
 | Close window | Quit the application |
 
@@ -157,7 +158,7 @@ pacman/
 The project is developed using Jira (issue key prefix `PK-`) and GitHub pull requests following trunk-based development with peer reviews and continuous automated testing.
 
 Detailed project management records, engineering decision logs, sprint ownership, and phase delivery histories are maintained in the [`project_management/`](project_management/) directory:
-- [`phase_history.md`](project_management/phase_history.md): Comprehensive delivery history and phase reviews for Phases 0 through 5.
+- [`phase_history.md`](project_management/phase_history.md): Comprehensive delivery history and phase reviews for Phases 0 through 6.
 - [`README.md`](project_management/README.md): Team workflow, branch protection rules, and shared engineering standards.
 
 ## Resources and AI Usage

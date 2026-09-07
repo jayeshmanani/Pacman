@@ -1,6 +1,7 @@
 """Application tests for high-level game-state transitions."""
 
 from pacman.app import GameState, GameStateController
+from pacman.application.context import GameSession
 from tests.support.app_fakes import _FakePygame, state_controls
 
 
@@ -153,3 +154,14 @@ def test_paused_transitions_to_main_menu_on_escape() -> None:
     controller.handle_key(_FakePygame.K_ESCAPE, state_controls())
 
     assert controller.state is GameState.MAIN_MENU
+
+
+def test_playing_transitions_to_victory_on_victory_key() -> None:
+    """Verify pressing V while playing enters VICTORY and flags victory."""
+    session = GameSession()
+    controller = GameStateController(GameState.PLAYING)
+
+    controller.handle_key(_FakePygame.K_v, state_controls(), session=session)
+
+    assert session.is_victory
+    assert controller.state is GameState.VICTORY
