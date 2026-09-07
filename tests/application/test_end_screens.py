@@ -37,6 +37,7 @@ def test_render_game_over_screen_out_of_lives() -> None:
         "FINAL SCORE: 1250",
         "NAME: _",
         "Enter: Save score and return to menu",
+        "Esc: Return to menu without saving",
     ]
 
 
@@ -56,6 +57,7 @@ def test_render_game_over_screen_time_expired() -> None:
         "FINAL SCORE: 450",
         "NAME: _",
         "Enter: Save score and return to menu",
+        "Esc: Return to menu without saving",
     ]
 
 
@@ -75,6 +77,7 @@ def test_render_victory_screen() -> None:
         "FINAL SCORE: 9900",
         "NAME: _",
         "Enter: Save score and return to menu",
+        "Esc: Return to menu without saving",
     ]
 
 

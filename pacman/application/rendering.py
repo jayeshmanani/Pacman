@@ -194,13 +194,20 @@ def render_game_view(
         (255, 230, 0),
         (center_x, center_y + 32),
     )
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Press V for Victory",
+        (100, 255, 100),
+        (center_x, center_y + 56),
+    )
     if session is not None:
         _draw_centered_text(
             screen,
             fonts.body,
             f"Lives: {session.lives} | Score: {session.score}",
             (255, 255, 255),
-            (center_x, center_y + 64),
+            (center_x, center_y + 88),
         )
 
 
@@ -330,6 +337,13 @@ def _render_player_name_prompt(
         "Enter: Save score and return to menu",
         (255, 230, 0),
         (center_x, window_settings.height - 48),
+    )
+    _draw_centered_text(
+        screen,
+        fonts.body,
+        "Esc: Return to menu without saving",
+        (180, 180, 180),
+        (center_x, window_settings.height - 24),
     )
 
 

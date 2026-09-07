@@ -14,6 +14,7 @@ from pacman.infrastructure.highscore import HighscoreEntry
 
 BACKSPACE_KEY = 8
 SUBMIT_KEY = 13
+CANCEL_KEY = 27
 
 
 @pytest.mark.parametrize("completed_state", [
@@ -69,3 +70,45 @@ def test_completed_game_saves_once_and_returns_to_menu(
     assert context.storage.load() == [
         HighscoreEntry(name="Maria", score=2400)
     ]
+
+
+@pytest.mark.parametrize("completed_state", [
+    GameState.GAME_OVER,
+    GameState.VICTORY,
+])
+def test_completed_game_cancels_and_returns_to_menu_on_cancel_key(
+    tmp_path: Path,
+    completed_state: GameState,
+) -> None:
+    """Verify Escape resets name input and returns to menu without saving."""
+    score_file = tmp_path / "scores.json"
+    context = AppContext(
+        config=GameConfig(highscore_filename=str(score_file))
+    )
+    context.session.score = 1500
+    controller = GameStateController(completed_state)
+
+    handle_completed_game_input(
+        key=ord("M"),
+        character="M",
+        backspace_key=BACKSPACE_KEY,
+        submit_key=SUBMIT_KEY,
+        controller=controller,
+        context=context,
+        cancel_key=CANCEL_KEY,
+    )
+    assert context.player_name_input.value == "M"
+
+    assert handle_completed_game_input(
+        key=CANCEL_KEY,
+        character="",
+        backspace_key=BACKSPACE_KEY,
+        submit_key=SUBMIT_KEY,
+        controller=controller,
+        context=context,
+        cancel_key=CANCEL_KEY,
+    )
+
+    assert controller.state is GameState.MAIN_MENU
+    assert context.storage.load() == []
+    assert context.player_name_input.value == ""

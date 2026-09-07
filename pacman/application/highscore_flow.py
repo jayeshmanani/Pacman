@@ -12,10 +12,17 @@ def handle_completed_game_input(
     submit_key: int,
     controller: GameStateController,
     context: AppContext,
+    cancel_key: int | None = None,
 ) -> bool:
     """Handle one name-entry key for either completed-game state."""
     if controller.state not in (GameState.GAME_OVER, GameState.VICTORY):
         return False
+
+    if cancel_key is not None and key == cancel_key:
+        context.player_name_input.reset()
+        context.reset_session()
+        controller.return_to_main_menu(context.session)
+        return True
 
     if key == backspace_key:
         context.player_name_input.backspace()
