@@ -96,6 +96,7 @@ class GhostGameplay:
         self,
         session: GameSession,
         colliding_ghosts: Iterable[Ghost],
+        player_invincible: bool = False,
     ) -> GhostCollisionFrameResult:
         """Resolve one frame of player contact using shared settings."""
         return resolve_ghost_collisions(
@@ -105,16 +106,22 @@ class GhostGameplay:
             points_per_ghost=self.points_per_ghost,
             respawn_delay=self.respawn_delay,
             guard=self.collision_guard,
+            player_invincible=player_invincible,
         )
 
     def resolve_player_collisions(
         self,
         session: GameSession,
         player: Player,
+        player_invincible: bool = False,
     ) -> GhostCollisionFrameResult:
         """Detect and resolve every ghost touching the player this frame."""
         colliding_ghosts = find_colliding_ghosts(player, self.ghosts)
-        return self.resolve_collisions(session, colliding_ghosts)
+        return self.resolve_collisions(
+            session,
+            colliding_ghosts,
+            player_invincible,
+        )
 
     def handle_player_collisions(
         self,
@@ -123,9 +130,14 @@ class GhostGameplay:
         player_spawn: TileCoordinate,
         world: WorldMap,
         state_controller: GameStateController,
+        player_invincible: bool = False,
     ) -> GhostGameplayCollisionResult:
         """Resolve ghost contact and apply one normal-ghost player death."""
-        collision = self.resolve_player_collisions(session, player)
+        collision = self.resolve_player_collisions(
+            session,
+            player,
+            player_invincible,
+        )
         if not collision.player_hit:
             return GhostGameplayCollisionResult(collision=collision)
 
@@ -140,6 +152,14 @@ class GhostGameplay:
             collision=collision,
             player_death=player_death,
         )
+
+    def set_ghosts_frozen(self, frozen: bool) -> None:
+        """Apply or remove movement freeze across the complete ghost group."""
+        for ghost in self.ghosts:
+            if frozen:
+                ghost.freeze()
+            else:
+                ghost.unfreeze()
 
     def _blinky_tile(self, world: WorldMap) -> tuple[int, int] | None:
         """Return Blinky's current tile for Inky's chase calculation."""

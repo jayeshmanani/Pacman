@@ -195,3 +195,45 @@ def test_normal_overlap_applies_one_life_loss_through_coordinator() -> None:
     assert session.lives == 2
     assert player.position == (3.5, 3.5)
     assert controller.state is GameState.PLAYING
+
+
+def test_invincibility_prevents_life_loss_through_coordinator() -> None:
+    """Verify the gameplay coordinator preserves an invincible player."""
+    gameplay = GhostGameplay.create(_spawns(), GameConfig(seed=42))
+    world = _world()
+    player = Player.from_spawn((3, 3))
+    session = GameSession(lives=3)
+    controller = GameStateController(GameState.PLAYING)
+    gameplay.ghosts[0].position = player.position
+
+    result = gameplay.handle_player_collisions(
+        session=session,
+        player=player,
+        player_spawn=(3, 3),
+        world=world,
+        state_controller=controller,
+        player_invincible=True,
+    )
+
+    assert not result.collision.player_hit
+    assert result.player_death is None
+    assert session.lives == 3
+    assert controller.state is GameState.PLAYING
+
+
+def test_ghost_freeze_restores_each_previous_state() -> None:
+    """Verify group freeze preserves independent ghost state transitions."""
+    gameplay = GhostGameplay.create(_spawns(), GameConfig(seed=42))
+    gameplay.ghosts[0].frighten(5.0)
+    gameplay.ghosts[1].start_respawn(3.0)
+
+    gameplay.set_ghosts_frozen(True)
+
+    assert all(ghost.state is GhostState.FROZEN for ghost in gameplay.ghosts)
+
+    gameplay.set_ghosts_frozen(False)
+
+    assert gameplay.ghosts[0].state is GhostState.FRIGHTENED
+    assert gameplay.ghosts[1].state is GhostState.RESPAWNING
+    assert gameplay.ghosts[2].state is GhostState.NORMAL
+    assert gameplay.ghosts[3].state is GhostState.NORMAL

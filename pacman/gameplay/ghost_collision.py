@@ -102,6 +102,7 @@ def resolve_ghost_collisions(
     points_per_ghost: int = 200,
     respawn_delay: float = 5.0,
     guard: GhostCollisionGuard | None = None,
+    player_invincible: bool = False,
 ) -> GhostCollisionFrameResult:
     """Resolve every overlapping ghost deterministically for one frame."""
     colliding_ghosts = tuple(ghosts)
@@ -109,7 +110,7 @@ def resolve_ghost_collisions(
         ghost.state is GhostState.NORMAL
         for ghost in colliding_ghosts
     )
-    if has_normal_contact:
+    if has_normal_contact and not player_invincible:
         is_new_contact = (
             guard.register_normal_contact(True)
             if guard is not None
