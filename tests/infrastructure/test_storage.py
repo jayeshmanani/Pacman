@@ -210,3 +210,51 @@ def test_update_preserves_file_when_atomic_replace_fails(
     assert result == [HighscoreEntry(name="Maria", score=500)]
     assert score_file.read_text(encoding="utf-8") == original_contents
     assert not (tmp_path / ".scores.json.tmp").exists()
+
+
+def test_load_missing_file_emits_no_warning(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Verify that a missing file silently defaults without warning noise."""
+    storage = HighscoreStorage(str(tmp_path / "nonexistent.json"))
+    assert storage.load() == []
+    captured = capsys.readouterr()
+    assert captured.err == ""
+
+
+def test_load_corrupt_file_emits_diagnostic_warning(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Verify that a corrupted JSON file logs a warning with the path."""
+    score_file = tmp_path / "corrupt.json"
+    score_file.write_text("{broken json", encoding="utf-8")
+
+    storage = HighscoreStorage(str(score_file))
+    assert storage.load() == []
+
+    captured = capsys.readouterr()
+    assert f"Warning: Failed to read highscore file '{score_file}'" in (
+        captured.err
+    )
+
+
+def test_save_failure_emits_diagnostic_warning(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify that a failed save logs a warning with the target path."""
+    score_file = tmp_path / "scores.json"
+    storage = HighscoreStorage(str(score_file))
+
+    def fail_replace(source: Path, target: Path) -> Path:
+        raise OSError("Permission denied")
+
+    monkeypatch.setattr(Path, "replace", fail_replace)
+
+    storage.update(HighscoreEntry(name="Player", score=900))
+
+    captured = capsys.readouterr()
+    assert f"Warning: Failed to save highscores to '{score_file}'" in (
+        captured.err
+    )
