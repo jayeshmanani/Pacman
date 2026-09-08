@@ -35,7 +35,12 @@ def test_level_completion_handles_generation_failure_cleanly(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Verify level progression handles generator error without crashing."""
-    session = GameSession(score=100, lives=3, current_level=0)
+    session = GameSession(
+        score=100,
+        lives=3,
+        current_level=0,
+        remaining_level_time=42.0,
+    )
     player = Player.from_spawn((3, 3))
     controller = GameStateController(GameState.PLAYING)
     failing_gen = _FailingGenerator()
@@ -50,6 +55,10 @@ def test_level_completion_handles_generation_failure_cleanly(
     assert outcome is LevelCompletionOutcome.FAILED
     assert next_level is None
     assert controller.state is GameState.MAIN_MENU
+    assert session.current_level == 0
+    assert session.score == 100
+    assert session.lives == 3
+    assert session.remaining_level_time == 42.0
 
     captured = capsys.readouterr()
     assert "Error: Simulated package failure on level 2" in captured.err
