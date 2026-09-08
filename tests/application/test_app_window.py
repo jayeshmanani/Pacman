@@ -99,6 +99,24 @@ def test_f1_toggles_visible_cheat_mode_indicator_during_gameplay() -> None:
     )
 
 
+def test_invincibility_and_ghost_freeze_show_independent_feedback() -> None:
+    """Verify keys 1 and 3 expose both active PK-87 effects."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_1)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_3)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "ACTIVE: INVINCIBLE" in pygame.surface.rendered_texts
+    assert "ACTIVE: INVINCIBLE | GHOST FREEZE" in (
+        pygame.surface.rendered_texts
+    )
+
+
 def test_game_over_screen_accepts_text_and_backspace() -> None:
     """Verify end-screen keyboard input updates the visible player name."""
     pygame = _FakePygame([

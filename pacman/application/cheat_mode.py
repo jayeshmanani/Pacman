@@ -53,3 +53,25 @@ class CheatMode:
         """Clear individual effects when evaluation mode is disabled."""
         self.invincibility_enabled = False
         self.ghost_freeze_enabled = False
+
+
+def handle_cheat_key(
+    key: int,
+    controls: CheatControls,
+    cheat_mode: CheatMode,
+) -> bool:
+    """Apply one supported cheat key and report whether it was handled."""
+    if key == controls.toggle_key:
+        cheat_mode.toggle()
+        return True
+
+    if not cheat_mode.enabled:
+        return False
+
+    if key == controls.invincibility_key:
+        cheat_mode.toggle_invincibility()
+        return True
+    if key == controls.ghost_freeze_key:
+        cheat_mode.toggle_ghost_freeze()
+        return True
+    return False
