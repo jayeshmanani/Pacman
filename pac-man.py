@@ -1,29 +1,15 @@
+#!/usr/bin/env python3
 """Launch the Pacman graphical application."""
 
-import json
-import sys
 from pathlib import Path
-from typing import Any, cast
+import sys
 
 from pacman.app import run_app
-from pacman.infrastructure.config import GameConfig, parse_game_config
-
-
-def load_commented_json(filepath: Path) -> dict[str, Any]:
-    """Read a JSON file while ignoring comment lines (# or //)."""
-    clean_lines = []
-    with filepath.open("r", encoding="utf-8") as file:
-        for line in file:
-            stripped = line.strip()
-            if not (stripped.startswith("#") or stripped.startswith("//")):
-                clean_lines.append(line)
-    content = "".join(clean_lines)
-    if not content.strip():
-        return {}
-    parsed = json.loads(content)
-    if not isinstance(parsed, dict):
-        raise ValueError("JSON root must be an object (dict)")
-    return cast(dict[str, Any], parsed)
+from pacman.infrastructure.config import (
+    GameConfig,
+    load_commented_json,
+    parse_game_config,
+)
 
 
 def main() -> None:
@@ -54,7 +40,13 @@ def main() -> None:
             file=sys.stderr,
         )
 
-    run_app(config=game_config)
+    try:
+        run_app(config=game_config)
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except Exception as err:
+        print(f"Error: {err}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

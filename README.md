@@ -39,7 +39,7 @@ make run
 
 Direct CLI invocation:
 ```bash
-uv run python pac_man.py config.json
+uv run python pac-man.py config.json
 ```
 
 ### Controls

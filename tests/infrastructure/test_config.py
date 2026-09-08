@@ -2,8 +2,11 @@
 
 from pathlib import Path
 import pytest
-from pacman.infrastructure.config import LevelConfig, parse_game_config
-from pac_man import load_commented_json
+from pacman.infrastructure.config import (
+    LevelConfig,
+    load_commented_json,
+    parse_game_config,
+)
 
 
 def test_parse_game_config_defaults() -> None:

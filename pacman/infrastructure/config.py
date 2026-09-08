@@ -2,8 +2,27 @@
 
 
 from dataclasses import dataclass, field
+import json
 import math
-from typing import Any
+from pathlib import Path
+from typing import Any, cast
+
+
+def load_commented_json(filepath: Path) -> dict[str, Any]:
+    """Read a JSON file while ignoring comment lines (# or //)."""
+    clean_lines = []
+    with filepath.open("r", encoding="utf-8") as file:
+        for line in file:
+            stripped = line.strip()
+            if not (stripped.startswith("#") or stripped.startswith("//")):
+                clean_lines.append(line)
+    content = "".join(clean_lines)
+    if not content.strip():
+        return {}
+    parsed = json.loads(content)
+    if not isinstance(parsed, dict):
+        raise ValueError("JSON root must be an object (dict)")
+    return cast(dict[str, Any], parsed)
 
 
 @dataclass(frozen=True)

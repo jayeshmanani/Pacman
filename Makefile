@@ -4,7 +4,7 @@ PYTHON ?= $(UV) run python
 FLAKE8 ?= $(UV) run flake8
 MYPY ?= $(UV) run mypy
 PYTEST ?= $(UV) run pytest
-MAIN ?= pac_man.py
+MAIN ?= pac-man.py
 CONFIG ?= config.json
 
 .PHONY: install run debug clean lint lint-strict test preview-mazes check-python-version
