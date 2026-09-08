@@ -209,6 +209,12 @@ class _FakePygame:
     K_UP = 273
     K_DOWN = 274
     K_BACKSPACE = 8
+    K_F1 = 1073741882
+    K_1 = 49
+    K_2 = 50
+    K_3 = 51
+    K_4 = 52
+    K_5 = 53
     K_e = 101
     K_ESCAPE = 27
     K_p = 112
@@ -243,6 +249,12 @@ class _FailingPygame:
     K_UP = 273
     K_DOWN = 274
     K_BACKSPACE = 8
+    K_F1 = 1073741882
+    K_1 = 49
+    K_2 = 50
+    K_3 = 51
+    K_4 = 52
+    K_5 = 53
     K_e = 101
     K_ESCAPE = 27
     K_p = 112

@@ -89,6 +89,7 @@ def render_hud(
     fonts: RenderFonts,
     window_settings: WindowSettings,
     session: GameSession | None = None,
+    cheat_mode_enabled: bool = False,
 ) -> None:
     """Render the always-visible in-game HUD bar across the top."""
     hud_height = 40
@@ -135,6 +136,29 @@ def render_hud(
             (center_x, center_y),
         )
 
+    if cheat_mode_enabled:
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            "CHEAT MODE: ON (F1 to disable)",
+            (255, 90, 90),
+            (window_settings.width // 2, hud_height + 14),
+        )
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            "1 Invincible | 2 Skip | 3 Freeze",
+            (255, 230, 0),
+            (window_settings.width // 2, hud_height + 38),
+        )
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            "4 Extra Life | 5 Speed Boost",
+            (255, 230, 0),
+            (window_settings.width // 2, hud_height + 62),
+        )
+
 
 def render_main_menu(
     screen: Surface,
@@ -174,12 +198,19 @@ def render_game_view(
     fonts: RenderFonts,
     window_settings: WindowSettings,
     session: GameSession | None = None,
+    cheat_mode_enabled: bool = False,
 ) -> None:
     """Render the placeholder game view with the HUD."""
     center_x = window_settings.width // 2
     center_y = window_settings.height // 2
     screen.fill(window_settings.background_color)
-    render_hud(screen, fonts, window_settings, session)
+    render_hud(
+        screen,
+        fonts,
+        window_settings,
+        session,
+        cheat_mode_enabled,
+    )
     _draw_centered_text(
         screen,
         fonts.title,
@@ -607,6 +638,7 @@ def render_state(
             fonts,
             window_settings,
             context.session if context is not None else None,
+            context.cheat_mode.enabled if context is not None else False,
         )
     elif state is GameState.PAUSED:
         render_pause_menu(

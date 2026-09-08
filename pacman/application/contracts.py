@@ -147,6 +147,12 @@ class PygameModule(Protocol):
     K_UP: int
     K_DOWN: int
     K_BACKSPACE: int
+    K_F1: int
+    K_1: int
+    K_2: int
+    K_3: int
+    K_4: int
+    K_5: int
     K_e: int
     K_ESCAPE: int
     K_p: int

@@ -30,6 +30,7 @@ from pacman.application.state import (
 from pacman.infrastructure.config import GameConfig
 from pacman.application.context import AppContext
 from pacman.application.highscore_flow import handle_completed_game_input
+from pacman.application.cheat_mode import CheatControls
 
 
 def _load_pygame() -> PygameModule:
@@ -60,6 +61,18 @@ def _create_menu_controls(pygame_instance: PygameModule) -> MenuControls:
             pygame_instance.K_RETURN,
             pygame_instance.K_SPACE,
         }),
+    )
+
+
+def _create_cheat_controls(pygame_instance: PygameModule) -> CheatControls:
+    """Create evaluation cheat controls from pygame key constants."""
+    return CheatControls(
+        toggle_key=pygame_instance.K_F1,
+        invincibility_key=pygame_instance.K_1,
+        level_skip_key=pygame_instance.K_2,
+        ghost_freeze_key=pygame_instance.K_3,
+        extra_life_key=pygame_instance.K_4,
+        speed_boost_key=pygame_instance.K_5,
     )
 
 
@@ -119,6 +132,7 @@ def run_app(
         clock = pygame_instance.time.Clock()
         controls = _create_state_controls(pygame_instance)
         menu_controls = _create_menu_controls(pygame_instance)
+        cheat_controls = _create_cheat_controls(pygame_instance)
         fonts = create_render_fonts(pygame_instance)
         controller = GameStateController()
         main_menu = MainMenu()
@@ -178,6 +192,12 @@ def run_app(
                                     pause_menu,
                                 )
                     else:
+                        if (
+                            controller.state is GameState.PLAYING
+                            and key == cheat_controls.toggle_key
+                        ):
+                            app_context.cheat_mode.toggle()
+                            continue
                         if (
                             controller.state is GameState.PLAYING
                             and key == controls.pause_key
