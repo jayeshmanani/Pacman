@@ -1,6 +1,11 @@
 """Application tests for one-shot evaluation cheat actions."""
 
-from pacman.application.cheat_actions import add_extra_life, skip_current_level
+from pacman.application.cheat_actions import (
+    add_extra_life,
+    skip_current_level,
+    synchronize_player_speed,
+    toggle_player_speed_boost,
+)
 from pacman.application.cheat_mode import CheatMode
 from pacman.application.context import GameSession
 from pacman.application.state import GameState, GameStateController
@@ -120,3 +125,50 @@ def test_level_skip_on_final_level_triggers_victory() -> None:
     assert session.score == 1200
     assert session.lives == 3
     assert controller.state is GameState.VICTORY
+
+
+def test_speed_boost_is_reversible_without_changing_base_speed() -> None:
+    """Verify repeated toggles apply 2x then restore exact normal speed."""
+    cheat_mode = CheatMode(enabled=True)
+    player = Player.from_spawn((1, 1), speed=6.5)
+    original_state = (
+        player.position,
+        player.direction,
+        player.queued_direction,
+    )
+
+    assert toggle_player_speed_boost(cheat_mode, player) is True
+    assert player.speed == 6.5
+    assert player.movement_speed == 13.0
+
+    assert toggle_player_speed_boost(cheat_mode, player) is False
+    assert player.speed == 6.5
+    assert player.movement_speed == 6.5
+    assert (
+        player.position,
+        player.direction,
+        player.queued_direction,
+    ) == original_state
+
+
+def test_speed_boost_requires_active_cheat_mode() -> None:
+    """Verify speed cannot change while evaluation mode is disabled."""
+    player = Player.from_spawn((1, 1), speed=5.0)
+
+    assert toggle_player_speed_boost(CheatMode(), player) is None
+    assert player.speed_multiplier == 1.0
+    assert player.movement_speed == 5.0
+
+
+def test_disabling_cheat_mode_restores_normal_player_speed() -> None:
+    """Verify synchronization removes boost after master deactivation."""
+    cheat_mode = CheatMode(enabled=True)
+    player = Player.from_spawn((1, 1))
+    toggle_player_speed_boost(cheat_mode, player)
+
+    cheat_mode.toggle()
+    synchronize_player_speed(cheat_mode, player)
+
+    assert not cheat_mode.speed_boost_enabled
+    assert player.speed_multiplier == 1.0
+    assert player.movement_speed == 5.0

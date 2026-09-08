@@ -22,6 +22,7 @@ class CheatMode:
     enabled: bool = False
     invincibility_enabled: bool = False
     ghost_freeze_enabled: bool = False
+    speed_boost_enabled: bool = False
 
     def toggle(self) -> bool:
         """Toggle cheat mode and return its new activation state."""
@@ -44,6 +45,13 @@ class CheatMode:
         self.ghost_freeze_enabled = not self.ghost_freeze_enabled
         return self.ghost_freeze_enabled
 
+    def toggle_speed_boost(self) -> bool:
+        """Toggle player speed boost when cheat mode is available."""
+        if not self.enabled:
+            return False
+        self.speed_boost_enabled = not self.speed_boost_enabled
+        return self.speed_boost_enabled
+
     def reset(self) -> None:
         """Disable cheat mode for a clean gameplay session."""
         self.enabled = False
@@ -53,6 +61,7 @@ class CheatMode:
         """Clear individual effects when evaluation mode is disabled."""
         self.invincibility_enabled = False
         self.ghost_freeze_enabled = False
+        self.speed_boost_enabled = False
 
 
 def handle_cheat_key(

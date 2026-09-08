@@ -11,6 +11,9 @@ from pacman.gameplay.progression import (
 from pacman.maze.level_generator import LevelData, LevelGenerator
 
 
+PLAYER_SPEED_BOOST_MULTIPLIER = 2.0
+
+
 def add_extra_life(
     cheat_mode: CheatMode,
     session: GameSession,
@@ -38,3 +41,28 @@ def skip_current_level(
         level_generator,
         state_controller,
     )
+
+
+def toggle_player_speed_boost(
+    cheat_mode: CheatMode,
+    player: Player,
+) -> bool | None:
+    """Toggle a reversible player speed multiplier."""
+    if not cheat_mode.enabled:
+        return None
+    enabled = cheat_mode.toggle_speed_boost()
+    synchronize_player_speed(cheat_mode, player)
+    return enabled
+
+
+def synchronize_player_speed(
+    cheat_mode: CheatMode,
+    player: Player,
+) -> None:
+    """Apply cheat state without changing the player's base speed."""
+    multiplier = (
+        PLAYER_SPEED_BOOST_MULTIPLIER
+        if cheat_mode.enabled and cheat_mode.speed_boost_enabled
+        else 1.0
+    )
+    player.set_speed_multiplier(multiplier)

@@ -3,6 +3,7 @@
 
 from enum import Enum
 from dataclasses import dataclass
+import math
 
 from pacman.maze.grid import TileCoordinate
 from pacman.maze.world import WorldPosition, WorldSize, WorldMap
@@ -58,7 +59,23 @@ class Player:
     direction: Direction = Direction.NONE
     queued_direction: Direction = Direction.NONE
     speed: float = 5.0
+    speed_multiplier: float = 1.0
     half_size: WorldSize = (0.4, 0.4)
+
+    @property
+    def movement_speed(self) -> float:
+        """Return base speed with the current gameplay multiplier applied."""
+        return self.speed * self.speed_multiplier
+
+    def set_speed_multiplier(self, multiplier: float) -> None:
+        """Set a finite positive movement multiplier."""
+        if (
+            type(multiplier) not in (int, float)
+            or not math.isfinite(multiplier)
+            or multiplier <= 0
+        ):
+            raise ValueError("speed multiplier must be a positive number")
+        self.speed_multiplier = float(multiplier)
 
     @classmethod
     def from_spawn(
@@ -91,10 +108,11 @@ class Player:
             return
 
         if self.queued_direction != Direction.NONE:
+            movement_speed = self.movement_speed
             q_dx, q_dy = self.queued_direction.vector
             q_target = (
-                self.position[0] + q_dx * self.speed * dt,
-                self.position[1] + q_dy * self.speed * dt,
+                self.position[0] + q_dx * movement_speed * dt,
+                self.position[1] + q_dy * movement_speed * dt,
             )
             if world.can_occupy(q_target, self.half_size):
                 if self.direction.is_perpendicular(
@@ -110,10 +128,11 @@ class Player:
                 self.queued_direction = Direction.NONE
 
         if self.direction != Direction.NONE:
+            movement_speed = self.movement_speed
             dx, dy = self.direction.vector
             target = (
-                self.position[0] + dx * self.speed * dt,
-                self.position[1] + dy * self.speed * dt,
+                self.position[0] + dx * movement_speed * dt,
+                self.position[1] + dy * movement_speed * dt,
             )
             if world.can_occupy(target, self.half_size):
                 self.position = target
