@@ -3,6 +3,7 @@
 
 import json
 from pathlib import Path
+import sys
 
 from pacman.infrastructure.highscore import HighscoreEntry
 
@@ -23,31 +24,59 @@ class HighscoreStorage:
 
     def load(self) -> list[HighscoreEntry]:
         """Load valid highscore entries or return an empty list safely."""
+        if not self._path.exists():
+            return []
+
         try:
             data: object = json.loads(self._path.read_text(encoding="utf-8"))
-        except (OSError, UnicodeError, json.JSONDecodeError):
+        except (OSError, UnicodeError, json.JSONDecodeError) as err:
+            print(
+                f"Warning: Failed to read highscore file '{self._path}' "
+                f"({err}). Starting with empty highscores.",
+                file=sys.stderr,
+            )
             return []
 
         if not isinstance(data, list):
+            print(
+                f"Warning: Highscore file '{self._path}' contains invalid "
+                "data. Starting with empty highscores.",
+                file=sys.stderr,
+            )
             return []
 
         entries: list[HighscoreEntry] = []
         for item in data:
-            if not isinstance(item, dict):
-                return []
-            if set(item) != {"name", "score"}:
+            if not isinstance(item, dict) or set(item) != {"name", "score"}:
+                print(
+                    f"Warning: Highscore file '{self._path}' contains "
+                    "invalid entries. Starting with empty highscores.",
+                    file=sys.stderr,
+                )
                 return []
 
             name = item["name"]
             score = item["score"]
-            if not isinstance(name, str):
-                return []
-            if not isinstance(score, int) or isinstance(score, bool):
+            if (
+                not isinstance(name, str)
+                or not isinstance(score, int)
+                or isinstance(score, bool)
+            ):
+                print(
+                    f"Warning: Highscore file '{self._path}' contains "
+                    "invalid entries. Starting with empty highscores.",
+                    file=sys.stderr,
+                )
                 return []
 
             try:
                 entries.append(HighscoreEntry(name=name, score=score))
             except (TypeError, ValueError):
+                print(
+                    f"Warning: Highscore file '{self._path}' contains "
+                    "invalid entries. Starting with empty highscores.",
+                    file=sys.stderr,
+                )
                 return []
 
         return entries
@@ -83,7 +112,12 @@ class HighscoreStorage:
                 encoding="utf-8",
             )
             temporary_path.replace(self._path)
-        except OSError:
+        except OSError as err:
+            print(
+                f"Warning: Failed to save highscores to '{self._path}' "
+                f"({err}).",
+                file=sys.stderr,
+            )
             try:
                 temporary_path.unlink(missing_ok=True)
             except OSError:

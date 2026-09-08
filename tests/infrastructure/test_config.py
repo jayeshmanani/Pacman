@@ -2,8 +2,11 @@
 
 from pathlib import Path
 import pytest
-from pacman.infrastructure.config import LevelConfig, parse_game_config
-from pac_man import load_commented_json
+from pacman.infrastructure.config import (
+    LevelConfig,
+    load_commented_json,
+    parse_game_config,
+)
 
 
 def test_parse_game_config_defaults() -> None:
@@ -119,3 +122,56 @@ def test_load_commented_json_non_dict_root_raises(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="JSON root must be an object"):
         load_commented_json(config_file)
+
+
+def test_parse_game_config_emits_clear_warnings_for_faulty_values(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify diagnostic warnings are logged for faulty config values."""
+    faulty_data = {
+        "lives": -5,
+        "points_per_pacgum": "not_a_number",
+        "level_max_time": -10,
+        "frightened_duration": "bad_float",
+        "highscore_filename": "",
+        "levels": [{"width": 2, "height": "bad"}],
+    }
+
+    config = parse_game_config(faulty_data)
+
+    captured = capsys.readouterr()
+    # Clamped lives
+    assert (
+        "Warning: Value -5 for key 'lives' is below minimum 1" in captured.err
+    )
+    assert config.lives == 1
+
+    # Invalid points_per_pacgum
+    assert (
+        "Warning: Invalid value 'not_a_number' for key 'points_per_pacgum'"
+        in captured.err
+    )
+    assert config.points_per_pacgum == 10
+
+    # Clamped level_max_time
+    assert (
+        "Warning: Value -10 for key 'level_max_time' is below minimum 1"
+        in captured.err
+    )
+    assert config.level_max_time == 1
+
+    # Invalid float
+    assert (
+        "Warning: Invalid value 'bad_float' for key 'frightened_duration'"
+        in captured.err
+    )
+    assert config.frightened_duration == 7.0
+
+    # Empty filename
+    assert "Warning: Invalid 'highscore_filename'" in captured.err
+    assert config.highscore_filename == "highscores.json"
+
+    # Clamped level dimensions
+    assert "Warning: Level 1 width 2 is below minimum 5" in captured.err
+    assert "Warning: Invalid height 'bad' in level 1" in captured.err
+    assert config.levels[0] == LevelConfig(width=5, height=21)
