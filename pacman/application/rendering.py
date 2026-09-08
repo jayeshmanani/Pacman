@@ -140,9 +140,23 @@ def render_hud(
         _draw_centered_text(
             screen,
             fonts.body,
-            "CHEAT MODE: ON",
+            "CHEAT MODE: ON (F1 to disable)",
             (255, 90, 90),
             (window_settings.width // 2, hud_height + 14),
+        )
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            "1 Invincible | 2 Skip | 3 Freeze",
+            (255, 230, 0),
+            (window_settings.width // 2, hud_height + 38),
+        )
+        _draw_centered_text(
+            screen,
+            fonts.body,
+            "4 Extra Life | 5 Speed Boost",
+            (255, 230, 0),
+            (window_settings.width // 2, hud_height + 62),
         )
 
 

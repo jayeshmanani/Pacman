@@ -56,6 +56,22 @@ The current application supports the state controls below:
 | `W`, `A`, `S`, `D` / Arrows | Buffer directional turns for Pac-Man |
 | Close window | Quit the application |
 
+### Cheat Mode Controls
+
+Cheat mode is intended for peer review and evaluation. Press `F1` during
+gameplay to enable or disable it. When enabled, the game displays the complete
+control map below the HUD so evaluation controls do not need to appear on the
+regular player instructions screen.
+
+| Key | Cheat action |
+| --- | --- |
+| `F1` | Enable or disable cheat mode |
+| `1` | Toggle player invincibility |
+| `2` | Skip the current level |
+| `3` | Toggle ghost freeze |
+| `4` | Add an extra life |
+| `5` | Toggle the player speed boost |
+
 ### Development Commands
 
 | Command | Purpose |

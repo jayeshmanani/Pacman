@@ -345,8 +345,15 @@ def test_hud_renders_clear_indicator_when_cheat_mode_is_enabled() -> None:
         cheat_mode_enabled=True,
     )
 
-    assert "CHEAT MODE: ON" in pygame.surface.rendered_texts
+    assert "CHEAT MODE: ON (F1 to disable)" in pygame.surface.rendered_texts
+    assert (
+        "1 Invincible | 2 Skip | 3 Freeze"
+        in pygame.surface.rendered_texts
+    )
+    assert "4 Extra Life | 5 Speed Boost" in pygame.surface.rendered_texts
     assert {"center": (260, 54)} in pygame.surface.blit_destinations
+    assert {"center": (260, 78)} in pygame.surface.blit_destinations
+    assert {"center": (260, 102)} in pygame.surface.blit_destinations
 
 
 def test_render_pause_menu_displays_expected_elements() -> None:

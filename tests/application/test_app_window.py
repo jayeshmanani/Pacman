@@ -79,7 +79,24 @@ def test_f1_toggles_visible_cheat_mode_indicator_during_gameplay() -> None:
 
     run_app(pygame_module=pygame)
 
-    assert pygame.surface.rendered_texts.count("CHEAT MODE: ON") == 1
+    assert (
+        pygame.surface.rendered_texts.count(
+            "CHEAT MODE: ON (F1 to disable)"
+        )
+        == 1
+    )
+    assert (
+        pygame.surface.rendered_texts.count(
+            "1 Invincible | 2 Skip | 3 Freeze"
+        )
+        == 1
+    )
+    assert (
+        pygame.surface.rendered_texts.count(
+            "4 Extra Life | 5 Speed Boost"
+        )
+        == 1
+    )
 
 
 def test_game_over_screen_accepts_text_and_backspace() -> None:
