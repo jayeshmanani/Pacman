@@ -329,6 +329,26 @@ def test_hud_renders_active_session_values() -> None:
     assert "TIME: 43s" in pygame.surface.rendered_texts
 
 
+def test_hud_renders_clear_indicator_when_cheat_mode_is_enabled() -> None:
+    """Verify active cheat mode is visibly identified during gameplay."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(
+        title=_FakeFont(64),
+        body=_FakeFont(28),
+    )
+
+    render_hud(
+        pygame.surface,
+        fonts,
+        WindowSettings(width=520, height=496),
+        GameSession(),
+        cheat_mode_enabled=True,
+    )
+
+    assert "CHEAT MODE: ON" in pygame.surface.rendered_texts
+    assert {"center": (260, 54)} in pygame.surface.blit_destinations
+
+
 def test_render_pause_menu_displays_expected_elements() -> None:
     """Verify that render_pause_menu renders the title, options, and HUD."""
     pygame = _FakePygame([])

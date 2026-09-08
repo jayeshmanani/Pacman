@@ -9,6 +9,7 @@ from pacman.infrastructure.highscore import HighscoreEntry
 from pacman.maze.level_generator import LevelGenerator
 from pacman.infrastructure.storage import HighscoreStorage
 from pacman.application.player_name_input import PlayerNameInput
+from pacman.application.cheat_mode import CheatMode
 
 
 @dataclass
@@ -105,6 +106,7 @@ class AppContext:
     storage: HighscoreStorage = field(default_factory=HighscoreStorage)
     session: GameSession = field(default_factory=GameSession)
     player_name_input: PlayerNameInput = field(default_factory=PlayerNameInput)
+    cheat_mode: CheatMode = field(default_factory=CheatMode)
     level_generator: LevelGenerator = field(init=False)
     highscores: list[HighscoreEntry] = field(
         default_factory=list,
@@ -128,6 +130,7 @@ class AppContext:
     def start_new_game(self) -> GameSession:
         """Create a fresh configured gameplay session."""
         self.player_name_input.reset()
+        self.cheat_mode.reset()
         return self.reset_session()
 
     def reset_session(self) -> GameSession:

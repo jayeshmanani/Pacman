@@ -68,6 +68,20 @@ def test_event_loop_applies_state_transitions() -> None:
     assert pygame.clock.framerates == [60, 60, 60]
 
 
+def test_f1_toggles_visible_cheat_mode_indicator_during_gameplay() -> None:
+    """Verify F1 activates and deactivates the visible evaluation mode."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.surface.rendered_texts.count("CHEAT MODE: ON") == 1
+
+
 def test_game_over_screen_accepts_text_and_backspace() -> None:
     """Verify end-screen keyboard input updates the visible player name."""
     pygame = _FakePygame([
