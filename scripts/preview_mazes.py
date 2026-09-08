@@ -1,5 +1,7 @@
 """Generate several complete levels for human visual inspection."""
 
+import sys
+
 from pacman.infrastructure.config import GameConfig, LevelConfig
 from pacman.maze.level_generator import LevelGenerator
 from pacman.maze.preview import render_level_ascii
@@ -16,7 +18,11 @@ def main() -> None:
     )
     generator = LevelGenerator(config=config)
     for level_index, seed in enumerate(_PREVIEW_SEEDS):
-        level = generator.generate_level(level_index, seed=seed)
+        try:
+            level = generator.generate_level(level_index, seed=seed)
+        except Exception as error:
+            print(f"Error generating preview: {error}", file=sys.stderr)
+            return
         print(
             f"\nLevel {level.level_number} | seed {seed} | internal grid "
             f"{level.maze.width}x{level.maze.height} | "
