@@ -51,6 +51,11 @@ class GameSession:
         self.lives = max(0, self.lives - 1)
         return self.lives
 
+    def add_life(self) -> int:
+        """Add one life and return the updated count."""
+        self.lives += 1
+        return self.lives
+
     def pause_gameplay(self) -> None:
         """Pause active gameplay updates."""
         self.is_paused = True
