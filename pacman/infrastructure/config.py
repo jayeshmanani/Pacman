@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 import json
 import math
 from pathlib import Path
+import sys
 from typing import Any, cast
 
 
@@ -52,44 +53,132 @@ class GameConfig:
 
 def parse_game_config(data: dict[str, Any]) -> GameConfig:
     """Parse raw JSON dict into a GameConfig, clamping/falling back safely."""
-    raw_levels = data.get("levels", [])
+    raw_levels = data.get("levels")
     levels = []
-    if isinstance(raw_levels, list) and len(raw_levels) > 0:
-        for lvl in raw_levels:
-            if isinstance(lvl, dict):
+    if raw_levels is not None:
+        if not isinstance(raw_levels, list) or len(raw_levels) == 0:
+            print(
+                "Warning: Invalid 'levels' list in config. "
+                "Using default level.",
+                file=sys.stderr,
+            )
+        else:
+            for idx, lvl in enumerate(raw_levels):
+                if not isinstance(lvl, dict):
+                    print(
+                        f"Warning: Level {idx + 1} config is not an object. "
+                        "Using default 21x21.",
+                        file=sys.stderr,
+                    )
+                    levels.append(LevelConfig())
+                    continue
+                w_raw = lvl.get("width", 21)
                 try:
-                    w = max(5, int(lvl.get("width", 21)))
+                    w = int(w_raw)
+                    if w < 5:
+                        print(
+                            f"Warning: Level {idx + 1} width {w} is below "
+                            "minimum 5. Clamped to 5.",
+                            file=sys.stderr,
+                        )
+                        w = 5
                 except (ValueError, TypeError):
+                    print(
+                        f"Warning: Invalid width '{w_raw}' in "
+                        f"level {idx + 1}. Using default 21.",
+                        file=sys.stderr,
+                    )
                     w = 21
+
+                h_raw = lvl.get("height", 21)
                 try:
-                    h = max(5, int(lvl.get("height", 21)))
+                    h = int(h_raw)
+                    if h < 5:
+                        print(
+                            f"Warning: Level {idx + 1} height {h} is below "
+                            "minimum 5. Clamped to 5.",
+                            file=sys.stderr,
+                        )
+                        h = 5
                 except (ValueError, TypeError):
+                    print(
+                        f"Warning: Invalid height '{h_raw}' in "
+                        f"level {idx + 1}. Using default 21.",
+                        file=sys.stderr,
+                    )
                     h = 21
                 levels.append(LevelConfig(width=w, height=h))
+
     if not levels:
         levels = [LevelConfig()]
 
     def _safe_int(key: str, default: int, min_val: int | None = None) -> int:
-        try:
-            val = int(data.get(key, default))
-            return max(min_val, val) if min_val is not None else val
-        except (ValueError, TypeError):
+        if key not in data:
             return default
+        raw_val = data[key]
+        try:
+            val = int(raw_val)
+        except (ValueError, TypeError):
+            print(
+                f"Warning: Invalid value '{raw_val}' for key '{key}'. "
+                f"Using default {default}.",
+                file=sys.stderr,
+            )
+            return default
+
+        if min_val is not None and val < min_val:
+            print(
+                f"Warning: Value {val} for key '{key}' is below minimum "
+                f"{min_val}. Clamped to {min_val}.",
+                file=sys.stderr,
+            )
+            return min_val
+        return val
 
     def _safe_float(
         key: str,
         default: float,
         min_val: float | None = None,
     ) -> float:
+        if key not in data:
+            return default
+        raw_val = data[key]
         try:
-            value = float(data.get(key, default))
-            if not math.isfinite(value):
+            val = float(raw_val)
+            if not math.isfinite(val):
+                print(
+                    f"Warning: Non-finite value '{raw_val}' for key '{key}'. "
+                    f"Using default {default}.",
+                    file=sys.stderr,
+                )
                 return default
-            return max(min_val, value) if min_val is not None else value
         except (ValueError, TypeError):
+            print(
+                f"Warning: Invalid value '{raw_val}' for key '{key}'. "
+                f"Using default {default}.",
+                file=sys.stderr,
+            )
             return default
 
-    filename = str(data.get("highscore_filename", "highscores.json"))
+        if min_val is not None and val < min_val:
+            print(
+                f"Warning: Value {val} for key '{key}' is below minimum "
+                f"{min_val}. Clamped to {min_val}.",
+                file=sys.stderr,
+            )
+            return min_val
+        return val
+
+    raw_filename = data.get("highscore_filename", "highscores.json")
+    if not isinstance(raw_filename, str) or not raw_filename.strip():
+        print(
+            "Warning: Invalid 'highscore_filename'. Using 'highscores.json'.",
+            file=sys.stderr,
+        )
+        filename = "highscores.json"
+    else:
+        filename = raw_filename.strip()
+
     return GameConfig(
         highscore_filename=filename,
         pacgum=_safe_int("pacgum", 42, min_val=1),
