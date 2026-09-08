@@ -377,6 +377,23 @@ def test_hud_renders_active_invincibility_and_ghost_freeze() -> None:
     assert {"center": (260, 126)} in pygame.surface.blit_destinations
 
 
+def test_hud_renders_active_speed_boost() -> None:
+    """Verify PK-88 speed boost has clear persistent feedback."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(title=_FakeFont(64), body=_FakeFont(28))
+
+    render_hud(
+        pygame.surface,
+        fonts,
+        WindowSettings(),
+        GameSession(),
+        cheat_mode_enabled=True,
+        speed_boost_enabled=True,
+    )
+
+    assert "ACTIVE: SPEED BOOST" in pygame.surface.rendered_texts
+
+
 def test_render_pause_menu_displays_expected_elements() -> None:
     """Verify that render_pause_menu renders the title, options, and HUD."""
     pygame = _FakePygame([])

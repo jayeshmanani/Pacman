@@ -55,11 +55,13 @@ def test_disabling_cheat_mode_clears_individual_effects() -> None:
     cheat_mode = CheatMode(enabled=True)
     cheat_mode.toggle_invincibility()
     cheat_mode.toggle_ghost_freeze()
+    cheat_mode.toggle_speed_boost()
 
     assert not cheat_mode.toggle()
 
     assert not cheat_mode.invincibility_enabled
     assert not cheat_mode.ghost_freeze_enabled
+    assert not cheat_mode.speed_boost_enabled
 
 
 def _controls() -> CheatControls:
@@ -84,10 +86,12 @@ def test_cheat_key_handler_routes_supported_pk87_controls() -> None:
         controls.invincibility_key, controls, cheat_mode
     )
     assert handle_cheat_key(controls.ghost_freeze_key, controls, cheat_mode)
+    assert handle_cheat_key(controls.speed_boost_key, controls, cheat_mode)
 
     assert cheat_mode.enabled
     assert cheat_mode.invincibility_enabled
     assert cheat_mode.ghost_freeze_enabled
+    assert cheat_mode.speed_boost_enabled
 
 
 def test_cheat_key_handler_ignores_effect_keys_when_disabled() -> None:

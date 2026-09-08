@@ -83,4 +83,7 @@ def handle_cheat_key(
     if key == controls.ghost_freeze_key:
         cheat_mode.toggle_ghost_freeze()
         return True
+    if key == controls.speed_boost_key:
+        cheat_mode.toggle_speed_boost()
+        return True
     return False

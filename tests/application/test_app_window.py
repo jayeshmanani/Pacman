@@ -117,6 +117,25 @@ def test_invincibility_and_ghost_freeze_show_independent_feedback() -> None:
     )
 
 
+def test_pk88_controls_update_level_lives_and_speed_feedback() -> None:
+    """Verify keys 2, 4, and 5 apply their independent cheat actions."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_4)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_5)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_2)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "LIVES: 4" in pygame.surface.rendered_texts
+    assert "ACTIVE: SPEED BOOST" in pygame.surface.rendered_texts
+    assert "LEVEL: 2" in pygame.surface.rendered_texts
+    assert "TIME: 90s" in pygame.surface.rendered_texts
+
+
 def test_game_over_screen_accepts_text_and_backspace() -> None:
     """Verify end-screen keyboard input updates the visible player name."""
     pygame = _FakePygame([
