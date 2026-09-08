@@ -6,6 +6,7 @@ from pacman.gameplay.ghost import Ghost, GhostIdentity, GhostState
 from pacman.gameplay.ghost_collision import (
     GhostCollisionOutcome,
     handle_ghost_collision,
+    resolve_ghost_collisions,
 )
 from pacman.gameplay.power_state import PowerState
 
@@ -56,6 +57,39 @@ def test_normal_collision_reports_player_hit_without_changing_score() -> None:
     assert outcome is GhostCollisionOutcome.PLAYER_HIT
     assert session.score == 100
     assert ghost.state is GhostState.NORMAL
+
+
+def test_invincibility_ignores_normal_ghost_contact() -> None:
+    """Verify a normal ghost cannot damage an invincible player."""
+    session = GameSession(lives=3)
+
+    result = resolve_ghost_collisions(
+        session,
+        (_ghost(GhostState.NORMAL),),
+        PowerState(),
+        player_invincible=True,
+    )
+
+    assert not result.player_hit
+    assert session.lives == 3
+
+
+def test_invincible_player_can_still_eat_frightened_ghost() -> None:
+    """Verify invincibility does not block valid frightened scoring."""
+    session = GameSession()
+    frightened_ghost = _ghost(GhostState.FRIGHTENED)
+
+    result = resolve_ghost_collisions(
+        session,
+        (_ghost(GhostState.NORMAL), frightened_ghost),
+        PowerState(),
+        player_invincible=True,
+    )
+
+    assert not result.player_hit
+    assert result.eaten_ghosts == 1
+    assert result.score_gained == 200
+    assert frightened_ghost.state is GhostState.RESPAWNING
 
 
 def test_inactive_ghost_collision_is_ignored() -> None:

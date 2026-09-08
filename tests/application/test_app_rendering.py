@@ -356,6 +356,27 @@ def test_hud_renders_clear_indicator_when_cheat_mode_is_enabled() -> None:
     assert {"center": (260, 102)} in pygame.surface.blit_destinations
 
 
+def test_hud_renders_active_invincibility_and_ghost_freeze() -> None:
+    """Verify enabled PK-87 effects have clear combined feedback."""
+    pygame = _FakePygame([])
+    fonts = RenderFonts(title=_FakeFont(64), body=_FakeFont(28))
+
+    render_hud(
+        pygame.surface,
+        fonts,
+        WindowSettings(),
+        GameSession(),
+        cheat_mode_enabled=True,
+        invincibility_enabled=True,
+        ghost_freeze_enabled=True,
+    )
+
+    assert "ACTIVE: INVINCIBLE | GHOST FREEZE" in (
+        pygame.surface.rendered_texts
+    )
+    assert {"center": (260, 126)} in pygame.surface.blit_destinations
+
+
 def test_render_pause_menu_displays_expected_elements() -> None:
     """Verify that render_pause_menu renders the title, options, and HUD."""
     pygame = _FakePygame([])

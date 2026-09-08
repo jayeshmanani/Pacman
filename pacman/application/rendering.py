@@ -90,6 +90,8 @@ def render_hud(
     window_settings: WindowSettings,
     session: GameSession | None = None,
     cheat_mode_enabled: bool = False,
+    invincibility_enabled: bool = False,
+    ghost_freeze_enabled: bool = False,
 ) -> None:
     """Render the always-visible in-game HUD bar across the top."""
     hud_height = 40
@@ -158,6 +160,19 @@ def render_hud(
             (255, 230, 0),
             (window_settings.width // 2, hud_height + 62),
         )
+        active_cheats = []
+        if invincibility_enabled:
+            active_cheats.append("INVINCIBLE")
+        if ghost_freeze_enabled:
+            active_cheats.append("GHOST FREEZE")
+        if active_cheats:
+            _draw_centered_text(
+                screen,
+                fonts.body,
+                f"ACTIVE: {' | '.join(active_cheats)}",
+                (100, 255, 100),
+                (window_settings.width // 2, hud_height + 86),
+            )
 
 
 def render_main_menu(
@@ -199,6 +214,8 @@ def render_game_view(
     window_settings: WindowSettings,
     session: GameSession | None = None,
     cheat_mode_enabled: bool = False,
+    invincibility_enabled: bool = False,
+    ghost_freeze_enabled: bool = False,
 ) -> None:
     """Render the placeholder game view with the HUD."""
     center_x = window_settings.width // 2
@@ -210,6 +227,8 @@ def render_game_view(
         window_settings,
         session,
         cheat_mode_enabled,
+        invincibility_enabled,
+        ghost_freeze_enabled,
     )
     _draw_centered_text(
         screen,
@@ -639,6 +658,16 @@ def render_state(
             window_settings,
             context.session if context is not None else None,
             context.cheat_mode.enabled if context is not None else False,
+            (
+                context.cheat_mode.invincibility_enabled
+                if context is not None
+                else False
+            ),
+            (
+                context.cheat_mode.ghost_freeze_enabled
+                if context is not None
+                else False
+            ),
         )
     elif state is GameState.PAUSED:
         render_pause_menu(

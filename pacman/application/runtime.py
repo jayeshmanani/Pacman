@@ -30,7 +30,7 @@ from pacman.application.state import (
 from pacman.infrastructure.config import GameConfig
 from pacman.application.context import AppContext
 from pacman.application.highscore_flow import handle_completed_game_input
-from pacman.application.cheat_mode import CheatControls
+from pacman.application.cheat_mode import CheatControls, handle_cheat_key
 
 
 def _load_pygame() -> PygameModule:
@@ -192,11 +192,13 @@ def run_app(
                                     pause_menu,
                                 )
                     else:
-                        if (
-                            controller.state is GameState.PLAYING
-                            and key == cheat_controls.toggle_key
+                        if controller.state is GameState.PLAYING and (
+                            handle_cheat_key(
+                                key,
+                                cheat_controls,
+                                app_context.cheat_mode,
+                            )
                         ):
-                            app_context.cheat_mode.toggle()
                             continue
                         if (
                             controller.state is GameState.PLAYING
