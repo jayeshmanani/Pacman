@@ -406,3 +406,31 @@ def test_pause_menu_returns_to_main_menu_via_escape() -> None:
         "Pacman - Main Menu",
         "Pacman - Main Menu",
     ]
+
+
+def test_return_to_main_menu_from_pause_resets_menu_selection() -> None:
+    """Verify returning to main menu from pause resets selection to Start."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_p)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert "> Start Game <" in pygame.surface.rendered_texts
+
+
+def test_escape_from_playing_resets_main_menu_selection() -> None:
+    """Verify pressing Escape in playing state returns to Start Game."""
+    pygame = _FakePygame([
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
+        [_FakeEvent(type=_FakePygame.QUIT)],
+    ])
+
+    run_app(pygame_module=pygame)
+
+    assert pygame.display.captions[-1] == "Pacman - Main Menu"
+    assert "> Start Game <" in pygame.surface.rendered_texts
