@@ -151,9 +151,23 @@ The review is supported by focused tests for:
 * **Visual Presentation:** Procedural vector sprites for player and ghost identities, dynamic maze viewport centering and integer tile scaling, wall rendering, and score popups.
 * **Verification:** Dedicated end-to-end integration test suite (`test_full_game_flow.py`) covering the complete Lose journey, Win journey, cancellation flow, and consecutive playthrough session isolation with zero state leakage.
 
+## Evaluation Cheats and Robustness Audit
+
+### Ownership
+
+| Owner | Jira tasks | Delivered focus |
+| --- | --- | --- |
+| Mariia | PK-86, PK-87, PK-88 | Evaluation cheat mode activation; invincibility; ghost freeze; level skip; extra lives; reversible speed boost |
+| Jayesh | PK-89, PK-90 | External boundary fault tolerance; error diagnostics; resource cleanup audit; session and cheat deactivation on exit; multi-cycle integration tests |
+
+* **Evaluation Cheats:** Implemented F1 master cheat toggle, invincibility (1), level skip (2), ghost freeze (3), extra life (4), and reversible 2x player speed boost (5) with dedicated HUD indicators and non-mutating player speed multiplier.
+* **Boundary Hardening:** Graceful recovery without tracebacks for external maze generation failures, faulty config parameters clamped to safe defaults, and diagnostic logging for corrupt highscore files.
+* **Resource Cleanup & Lifecycle Audit (PK-90):**
+  - Guaranteed full cheat deactivation (`cheat_mode.reset()`) whenever a game session is cleared or abandoned (`reset_session()`), preventing active cheat multipliers from lingering into menus.
+  - Reset main menu cursor to `> Start Game <` on all transitions back to the main menu from gameplay, pause, or end screens, ensuring deterministic start/quit cycles.
+  - Multi-cycle stress test suite (`test_lifecycle_cleanup.py`) verifying zero state leakage across repeated start/play/pause/return-to-menu iterations, cancelled highscore submissions, and consecutive application runs.
+
 ## Current Status
 
-This history covers delivered work through Phase 6. Future work remains in
-Jira and the progressive planner and is added here only after its phase review.
-The next planned stage is Phase 7 - Packaging and Distribution.
+This history covers delivered work through Phase 6 and the Evaluation Cheats & Robustness Audit (PK-86 through PK-90). The test suite comprises 409 automated tests passing with strict `mypy` and `flake8` compliance. The next planned stage is Phase 7 - Packaging and Distribution.
 
