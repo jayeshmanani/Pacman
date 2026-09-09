@@ -31,6 +31,11 @@ from pacman.infrastructure.config import GameConfig
 from pacman.application.context import AppContext
 from pacman.application.highscore_flow import handle_completed_game_input
 from pacman.application.cheat_mode import CheatControls, handle_cheat_key
+from pacman.application.cheat_actions import (
+    add_extra_life,
+    skip_current_level,
+    synchronize_player_speed,
+)
 
 
 def _load_pygame() -> PygameModule:
@@ -106,6 +111,36 @@ def _handle_pause_menu_action(
     elif action is PauseMenuAction.RETURN_TO_MAIN_MENU:
         context.reset_session()
         controller.return_to_main_menu(context.session)
+
+
+def _handle_cheat_action(
+    key: int,
+    controls: CheatControls,
+    context: AppContext,
+    controller: GameStateController,
+) -> bool:
+    """Apply one active gameplay cheat control."""
+    if key == controls.level_skip_key and context.cheat_mode.enabled:
+        if context.player is None:
+            return False
+        result = skip_current_level(
+            context.cheat_mode,
+            context.session,
+            context.player,
+            context.level_generator,
+            controller,
+        )
+        if result is not None:
+            _, context.active_level = result
+        return result is not None
+
+    if key == controls.extra_life_key and context.cheat_mode.enabled:
+        return add_extra_life(context.cheat_mode, context.session)
+
+    handled = handle_cheat_key(key, controls, context.cheat_mode)
+    if handled and context.player is not None:
+        synchronize_player_speed(context.cheat_mode, context.player)
+    return handled
 
 
 def run_app(
@@ -193,10 +228,11 @@ def run_app(
                                 )
                     else:
                         if controller.state is GameState.PLAYING and (
-                            handle_cheat_key(
+                            _handle_cheat_action(
                                 key,
                                 cheat_controls,
-                                app_context.cheat_mode,
+                                app_context,
+                                controller,
                             )
                         ):
                             continue

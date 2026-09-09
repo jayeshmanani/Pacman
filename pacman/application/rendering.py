@@ -92,6 +92,7 @@ def render_hud(
     cheat_mode_enabled: bool = False,
     invincibility_enabled: bool = False,
     ghost_freeze_enabled: bool = False,
+    speed_boost_enabled: bool = False,
 ) -> None:
     """Render the always-visible in-game HUD bar across the top."""
     hud_height = 40
@@ -165,6 +166,8 @@ def render_hud(
             active_cheats.append("INVINCIBLE")
         if ghost_freeze_enabled:
             active_cheats.append("GHOST FREEZE")
+        if speed_boost_enabled:
+            active_cheats.append("SPEED BOOST")
         if active_cheats:
             _draw_centered_text(
                 screen,
@@ -216,6 +219,7 @@ def render_game_view(
     cheat_mode_enabled: bool = False,
     invincibility_enabled: bool = False,
     ghost_freeze_enabled: bool = False,
+    speed_boost_enabled: bool = False,
 ) -> None:
     """Render the placeholder game view with the HUD."""
     center_x = window_settings.width // 2
@@ -229,6 +233,7 @@ def render_game_view(
         cheat_mode_enabled,
         invincibility_enabled,
         ghost_freeze_enabled,
+        speed_boost_enabled,
     )
     _draw_centered_text(
         screen,
@@ -665,6 +670,11 @@ def render_state(
             ),
             (
                 context.cheat_mode.ghost_freeze_enabled
+                if context is not None
+                else False
+            ),
+            (
+                context.cheat_mode.speed_boost_enabled
                 if context is not None
                 else False
             ),

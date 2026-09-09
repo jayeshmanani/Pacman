@@ -34,7 +34,7 @@ def handle_level_completion(
         state_controller.end_game(session)
         return LevelCompletionOutcome.VICTORY, None
 
-    next_level_index = session.advance_level()
+    next_level_index = session.current_level + 1
     try:
         next_level = level_generator.generate_level(next_level_index)
     except LevelGenerationError as error:
@@ -42,6 +42,7 @@ def handle_level_completion(
         state_controller.return_to_main_menu(session)
         return LevelCompletionOutcome.FAILED, None
 
+    session.advance_level()
     if next_level.spawns is not None:
         player.respawn(next_level.spawns.player, next_level.world)
 

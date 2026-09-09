@@ -66,6 +66,13 @@ def test_start_new_game_resets_session_with_configured_defaults() -> None:
     assert not session.level_timed_out
     assert not session.is_paused
     assert not session.is_victory
+    assert context.active_level is not None
+    assert context.active_level.level_number == 1
+    assert context.active_level.spawns is not None
+    assert context.player is not None
+    assert context.player.position == context.active_level.world.tile_center(
+        context.active_level.spawns.player
+    )
 
 
 def test_save_completed_game_score_persists_entry_and_refreshes_list(

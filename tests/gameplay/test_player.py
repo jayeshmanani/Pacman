@@ -1,5 +1,7 @@
 """Gameplay tests for movement, turn buffering, and wall collisions."""
 
+import pytest
+
 from pacman.maze.grid import MazeGrid, Tile
 from pacman.gameplay.player import Direction, Player, direction_from_key
 from pacman.maze.world import WorldMap
@@ -115,3 +117,45 @@ def test_player_corner_snapping() -> None:
     assert player.direction == Direction.DOWN
     # X coordinate snapped from 1.52 to tile center 1.5
     assert player.position[0] == 1.5
+
+
+def test_speed_multiplier_increases_movement_without_stacking_base_speed(
+) -> None:
+    """Verify boosted movement uses the multiplier and keeps base speed."""
+    world = _create_test_world()
+    normal_player = Player.from_spawn((1, 1), speed=5.0)
+    boosted_player = Player.from_spawn((1, 1), speed=5.0)
+    normal_player.direction = Direction.RIGHT
+    boosted_player.direction = Direction.RIGHT
+    boosted_player.set_speed_multiplier(2.0)
+
+    normal_player.update(dt=0.05, world=world)
+    boosted_player.update(dt=0.05, world=world)
+
+    assert normal_player.position == (1.75, 1.5)
+    assert boosted_player.position == (2.0, 1.5)
+    assert boosted_player.speed == 5.0
+
+
+def test_speed_multiplier_preserves_wall_collision() -> None:
+    """Verify boosted movement still cannot pass through walls."""
+    world = _create_test_world()
+    player = Player.from_spawn((1, 1))
+    player.direction = Direction.UP
+    player.set_speed_multiplier(2.0)
+
+    player.update(dt=0.1, world=world)
+
+    assert player.position == (1.5, 1.5)
+    assert player.direction is Direction.NONE
+
+
+@pytest.mark.parametrize("multiplier", (0, -1, float("inf"), float("nan")))
+def test_speed_multiplier_rejects_invalid_values(multiplier: float) -> None:
+    """Verify invalid multipliers cannot corrupt movement state."""
+    player = Player.from_spawn((1, 1))
+
+    with pytest.raises(ValueError, match="speed multiplier"):
+        player.set_speed_multiplier(multiplier)
+
+    assert player.speed_multiplier == 1.0

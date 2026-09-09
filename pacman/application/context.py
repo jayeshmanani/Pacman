@@ -6,10 +6,11 @@ import math
 
 from pacman.infrastructure.config import GameConfig
 from pacman.infrastructure.highscore import HighscoreEntry
-from pacman.maze.level_generator import LevelGenerator
+from pacman.maze.level_generator import LevelData, LevelGenerator
 from pacman.infrastructure.storage import HighscoreStorage
 from pacman.application.player_name_input import PlayerNameInput
 from pacman.application.cheat_mode import CheatMode
+from pacman.gameplay.player import Player
 
 
 @dataclass
@@ -49,6 +50,11 @@ class GameSession:
     def lose_life(self) -> int:
         """Remove one life without allowing the count to become negative."""
         self.lives = max(0, self.lives - 1)
+        return self.lives
+
+    def add_life(self) -> int:
+        """Add one life and return the updated count."""
+        self.lives += 1
         return self.lives
 
     def pause_gameplay(self) -> None:
@@ -107,6 +113,8 @@ class AppContext:
     session: GameSession = field(default_factory=GameSession)
     player_name_input: PlayerNameInput = field(default_factory=PlayerNameInput)
     cheat_mode: CheatMode = field(default_factory=CheatMode)
+    active_level: LevelData | None = field(default=None, init=False)
+    player: Player | None = field(default=None, init=False)
     level_generator: LevelGenerator = field(init=False)
     highscores: list[HighscoreEntry] = field(
         default_factory=list,
@@ -131,11 +139,19 @@ class AppContext:
         """Create a fresh configured gameplay session."""
         self.player_name_input.reset()
         self.cheat_mode.reset()
-        return self.reset_session()
+        session = self.reset_session()
+        self.active_level = self.level_generator.generate_level(0)
+        if self.active_level.spawns is not None:
+            self.player = Player.from_spawn(
+                self.active_level.spawns.player
+            )
+        return session
 
     def reset_session(self) -> GameSession:
         """Reset session defaults, preventing stale gameplay state."""
         self.session = self._configure_session(GameSession())
+        self.active_level = None
+        self.player = None
         return self.session
 
     def save_completed_game_score(self) -> bool:
