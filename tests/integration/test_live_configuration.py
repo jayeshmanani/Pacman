@@ -17,8 +17,10 @@ from pacman.infrastructure.config import (
     load_commented_json,
     parse_game_config,
 )
+from pacman.infrastructure.highscore import HighscoreEntry
 from pacman.maze.adapter import MazeGeneratorAdapter
 from pacman.maze.grid import MazeGrid, Tile
+from pacman.maze.level_generator import LevelGenerator
 
 
 class RecordingMazeAdapter(MazeGeneratorAdapter):
@@ -313,3 +315,145 @@ def test_changing_one_config_value_preserves_unrelated_defaults(
     assert config.points_per_ghost == 200
     assert config.level_max_time == 90
     assert config.levels == [LevelConfig()]
+
+
+def test_parsed_maze_dimensions_reach_generation_requests(
+    tmp_path: Path,
+) -> None:
+    """Verify configured level dimensions reach the maze adapter."""
+    config = _write_config(
+        tmp_path,
+        {
+            "levels": [
+                {"width": 7, "height": 9},
+                {"width": 11, "height": 13},
+            ],
+        },
+    )
+    adapter = RecordingMazeAdapter()
+    context = AppContext(config=config)
+    context.level_generator = context.level_generator.__class__(
+        config=config,
+        adapter=adapter,
+    )
+
+    first_level = context.level_generator.generate_level(0)
+    second_level = context.level_generator.generate_level(1)
+
+    assert first_level.maze.width == 7
+    assert first_level.maze.height == 9
+    assert second_level.maze.width == 11
+    assert second_level.maze.height == 13
+    assert adapter.calls[0]["width"] == 7
+    assert adapter.calls[0]["height"] == 9
+    assert adapter.calls[1]["width"] == 11
+    assert adapter.calls[1]["height"] == 13
+
+
+def test_parsed_seed_reaches_deterministic_first_level_generation(
+    tmp_path: Path,
+) -> None:
+    """Verify configured seed controls repeatable first-level requests."""
+    first_config = _write_config(
+        tmp_path,
+        {"seed": 1234, "levels": [{"width": 7, "height": 7}]},
+    )
+    second_config = _write_config(
+        tmp_path,
+        {"seed": 5678, "levels": [{"width": 7, "height": 7}]},
+    )
+    first_adapter = RecordingMazeAdapter()
+    repeated_adapter = RecordingMazeAdapter()
+    second_adapter = RecordingMazeAdapter()
+    first_generator = context_generator(first_config, first_adapter)
+    repeated_generator = context_generator(first_config, repeated_adapter)
+    second_generator = context_generator(second_config, second_adapter)
+
+    first_level = first_generator.generate_level(0)
+    repeated_level = repeated_generator.generate_level(0)
+    second_level = second_generator.generate_level(0)
+
+    assert first_level.seed == repeated_level.seed == 1234
+    assert second_level.seed == 5678
+    assert first_adapter.calls[0]["seed"] == 1234
+    assert repeated_adapter.calls[0]["seed"] == 1234
+    assert second_adapter.calls[0]["seed"] == 5678
+    assert first_adapter.calls[0]["include_42"] is True
+
+
+def context_generator(
+    config: GameConfig,
+    adapter: RecordingMazeAdapter,
+) -> LevelGenerator:
+    """Create a configured level generator through AppContext."""
+    context = AppContext(config=config)
+    context.level_generator = context.level_generator.__class__(
+        config=config,
+        adapter=adapter,
+    )
+    return context.level_generator
+
+
+def test_configured_highscore_filename_is_used_for_load_and_save(
+    tmp_path: Path,
+) -> None:
+    """Verify highscore persistence uses the parsed configured path."""
+    score_file = tmp_path / "custom-scores.json"
+    score_file.write_text(
+        json.dumps([{"name": "Maria", "score": 1200}]),
+        encoding="utf-8",
+    )
+    config = _write_config(
+        tmp_path,
+        {"highscore_filename": str(score_file)},
+    )
+    context = AppContext(config=config)
+
+    assert context.storage.path == score_file
+    assert context.highscores == [
+        HighscoreEntry(name="Maria", score=1200)
+    ]
+
+    context.session.score = 1500
+    context.player_name_input.value = "Jayesh"
+
+    assert context.save_completed_game_score()
+    assert context.storage.load() == [
+        HighscoreEntry(name="Jayesh", score=1500),
+        HighscoreEntry(name="Maria", score=1200),
+    ]
+
+
+def test_separate_configured_highscore_files_do_not_leak_state(
+    tmp_path: Path,
+) -> None:
+    """Verify distinct configured storage paths remain isolated."""
+    first_file = tmp_path / "first-scores.json"
+    second_file = tmp_path / "second-scores.json"
+    first_context = AppContext(
+        config=_write_config(
+            tmp_path,
+            {"highscore_filename": str(first_file)},
+        )
+    )
+    second_context = AppContext(
+        config=_write_config(
+            tmp_path,
+            {"highscore_filename": str(second_file)},
+        )
+    )
+
+    first_context.session.score = 700
+    first_context.player_name_input.value = "First"
+    second_context.session.score = 900
+    second_context.player_name_input.value = "Second"
+
+    assert first_context.save_completed_game_score()
+    assert second_context.save_completed_game_score()
+
+    assert first_context.storage.load() == [
+        HighscoreEntry(name="First", score=700)
+    ]
+    assert second_context.storage.load() == [
+        HighscoreEntry(name="Second", score=900)
+    ]
