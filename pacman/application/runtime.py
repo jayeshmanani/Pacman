@@ -210,7 +210,7 @@ def run_app(
                             context=app_context,
                             cancel_key=controls.main_menu_key,
                         )
-                        if controller.state is GameState.MAIN_MENU:
+                        if controller.state.value == GameState.MAIN_MENU.value:
                             main_menu.reset_selection()
                     elif controller.state is GameState.PAUSED:
                         if key == controls.pause_key:

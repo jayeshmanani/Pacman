@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from pacman.app import WindowSettings, run_app
-from pacman.infrastructure.config import GameConfig
+from pacman.infrastructure.config import GameConfig, LevelConfig
 from tests.support.app_fakes import (
     _FailingPygame,
     _FakeEvent,
@@ -119,6 +119,12 @@ def test_invincibility_and_ghost_freeze_show_independent_feedback() -> None:
 
 def test_pk88_controls_update_level_lives_and_speed_feedback() -> None:
     """Verify keys 2, 4, and 5 apply their independent cheat actions."""
+    config = GameConfig(
+        levels=[
+            LevelConfig(width=21, height=21),
+            LevelConfig(width=21, height=21),
+        ]
+    )
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
@@ -128,7 +134,7 @@ def test_pk88_controls_update_level_lives_and_speed_feedback() -> None:
         [_FakeEvent(type=_FakePygame.QUIT)],
     ])
 
-    run_app(pygame_module=pygame)
+    run_app(pygame_module=pygame, config=config)
 
     assert "LIVES: 4" in pygame.surface.rendered_texts
     assert "ACTIVE: SPEED BOOST" in pygame.surface.rendered_texts
