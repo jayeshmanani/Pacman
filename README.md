@@ -13,7 +13,7 @@ The current implementation provides:
 - Complete four-ghost autonomous AI: distinct chase targeting for Blinky, Pinky, Inky, and Clyde; frightened fleeing; score chaining; delayed corner respawn; and frame contact protection.
 - Session lifecycle: scoring, lives, level timers, pause/resume, and multi-level progression.
 - Robust commented-JSON configuration parsing and persistent highscores.
-- Automated testing with 362 test cases and headless playtest verification.
+- Automated testing with 409 test cases and headless playtest verification.
 
 ## Instructions
 
