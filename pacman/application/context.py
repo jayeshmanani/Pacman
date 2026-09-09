@@ -138,7 +138,6 @@ class AppContext:
     def start_new_game(self) -> GameSession:
         """Create a fresh configured gameplay session."""
         self.player_name_input.reset()
-        self.cheat_mode.reset()
         session = self.reset_session()
         self.active_level = self.level_generator.generate_level(0)
         if self.active_level.spawns is not None:
@@ -150,6 +149,7 @@ class AppContext:
     def reset_session(self) -> GameSession:
         """Reset session defaults, preventing stale gameplay state."""
         self.session = self._configure_session(GameSession())
+        self.cheat_mode.reset()
         self.active_level = None
         self.player = None
         return self.session

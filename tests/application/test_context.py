@@ -108,3 +108,27 @@ def test_save_completed_game_score_rejects_empty_name(
     assert context.player_name_input.error_message == "Enter a player name"
     assert context.highscores == []
     assert not score_file.exists()
+
+
+def test_reset_session_cleans_up_gameplay_state_and_active_cheats() -> None:
+    """Verify reset_session clears cheats, player, level, and session data."""
+    context = AppContext(config=GameConfig(lives=3, level_max_time=60))
+    context.start_new_game()
+    context.session.score = 500
+    context.session.lives = 2
+    context.cheat_mode.enabled = True
+    context.cheat_mode.invincibility_enabled = True
+    context.cheat_mode.ghost_freeze_enabled = True
+    context.cheat_mode.speed_boost_enabled = True
+
+    session = context.reset_session()
+
+    assert session.score == 0
+    assert session.lives == 3
+    assert session.remaining_level_time == 60.0
+    assert context.active_level is None
+    assert context.player is None
+    assert not context.cheat_mode.enabled
+    assert not context.cheat_mode.invincibility_enabled
+    assert not context.cheat_mode.ghost_freeze_enabled
+    assert not context.cheat_mode.speed_boost_enabled
