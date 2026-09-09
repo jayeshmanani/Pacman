@@ -40,6 +40,7 @@ class GameConfig:
 
     highscore_filename: str = "highscores.json"
     pacgum: int = 42
+    pacgum_configured: bool = False
     seed: int = 42
     lives: int = 3
     points_per_pacgum: int = 10
@@ -182,6 +183,7 @@ def parse_game_config(data: dict[str, Any]) -> GameConfig:
     return GameConfig(
         highscore_filename=filename,
         pacgum=_safe_int("pacgum", 42, min_val=1),
+        pacgum_configured="pacgum" in data,
         seed=_safe_int("seed", 42),
         lives=_safe_int("lives", 3, min_val=1),
         points_per_pacgum=_safe_int("points_per_pacgum", 10, min_val=0),

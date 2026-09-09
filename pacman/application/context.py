@@ -132,6 +132,7 @@ class AppContext:
     def _configure_session(self, session: GameSession) -> GameSession:
         """Apply configured gameplay defaults to a session."""
         session.lives = self.config.lives
+        session.total_levels = len(self.config.levels)
         session.start_level_timer(self.config.level_max_time)
         return session
 
