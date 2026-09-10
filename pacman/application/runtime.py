@@ -1,6 +1,7 @@
 """Pygame startup and frame-loop orchestration."""
 
 import importlib
+from functools import partial
 from typing import cast
 
 from pacman.application.contracts import (
@@ -35,6 +36,11 @@ from pacman.application.cheat_actions import (
     add_extra_life,
     skip_current_level,
     synchronize_player_speed,
+)
+from pacman.application.gameplay_loop import (
+    GameplayControls,
+    queue_player_direction,
+    update_gameplay_frame,
 )
 
 
@@ -78,6 +84,18 @@ def _create_cheat_controls(pygame_instance: PygameModule) -> CheatControls:
         ghost_freeze_key=pygame_instance.K_3,
         extra_life_key=pygame_instance.K_4,
         speed_boost_key=pygame_instance.K_5,
+    )
+
+
+def _create_gameplay_controls(
+    pygame_instance: PygameModule,
+) -> GameplayControls:
+    """Create player movement controls from pygame key constants."""
+    return GameplayControls(
+        up_keys=frozenset({pygame_instance.K_UP, pygame_instance.K_w}),
+        down_keys=frozenset({pygame_instance.K_DOWN, pygame_instance.K_s}),
+        left_keys=frozenset({pygame_instance.K_LEFT, pygame_instance.K_a}),
+        right_keys=frozenset({pygame_instance.K_RIGHT, pygame_instance.K_d}),
     )
 
 
@@ -173,6 +191,7 @@ def run_app(
         controls = _create_state_controls(pygame_instance)
         menu_controls = _create_menu_controls(pygame_instance)
         cheat_controls = _create_cheat_controls(pygame_instance)
+        gameplay_controls = _create_gameplay_controls(pygame_instance)
         fonts = create_render_fonts(pygame_instance)
         controller = GameStateController()
         main_menu = MainMenu()
@@ -180,6 +199,11 @@ def run_app(
         app_context = AppContext(
             config=config or GameConfig(),
             state_controller=controller,
+        )
+        gameplay_update = partial(
+            update_gameplay_frame,
+            app_context,
+            controller,
         )
         running = True
 
@@ -256,6 +280,12 @@ def run_app(
                         ):
                             main_menu.reset_selection()
                             app_context.reset_session()
+                        elif controller.state is GameState.PLAYING:
+                            queue_player_direction(
+                                key,
+                                gameplay_controls,
+                                app_context,
+                            )
                         controller.handle_key(
                             key,
                             controls,
@@ -278,6 +308,7 @@ def run_app(
                 app_context.session,
                 controller,
                 elapsed_ms / 1000.0,
+                gameplay_update,
             )
     finally:
         pygame_instance.quit()
