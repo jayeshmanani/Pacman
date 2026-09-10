@@ -159,6 +159,8 @@ The review is supported by focused tests for:
 | --- | --- | --- |
 | Mariia | PK-86, PK-87, PK-88 | Evaluation cheat mode activation; invincibility; ghost freeze; level skip; extra lives; reversible speed boost |
 | Jayesh | PK-89, PK-90 | External boundary fault tolerance; error diagnostics; resource cleanup audit; session and cheat deactivation on exit; multi-cycle integration tests |
+| Mariia | PK-91 | Live configuration testing; dual-mode pacgum placement; dynamic total levels progression scaling |
+| Jayesh | PK-92 | Long-play and multi-level soak tests; headless simulation harness; floating-point timer drift fix; lifecycle & persistence endurance |
 
 * **Evaluation Cheats:** Implemented F1 master cheat toggle, invincibility (1), level skip (2), ghost freeze (3), extra life (4), and reversible 2x player speed boost (5) with dedicated HUD indicators and non-mutating player speed multiplier.
 * **Boundary Hardening:** Graceful recovery without tracebacks for external maze generation failures, faulty config parameters clamped to safe defaults, and diagnostic logging for corrupt highscore files.
@@ -166,8 +168,18 @@ The review is supported by focused tests for:
   - Guaranteed full cheat deactivation (`cheat_mode.reset()`) whenever a game session is cleared or abandoned (`reset_session()`), preventing active cheat multipliers from lingering into menus.
   - Reset main menu cursor to `> Start Game <` on all transitions back to the main menu from gameplay, pause, or end screens, ensuring deterministic start/quit cycles.
   - Multi-cycle stress test suite (`test_lifecycle_cleanup.py`) verifying zero state leakage across repeated start/play/pause/return-to-menu iterations, cancelled highscore submissions, and consecutive application runs.
+* **Live Configuration Testing (PK-91):**
+  - Connected `pacgum` config key to support both explicit pellet counts and default corridor-filling modes.
+  - Dynamically bound `total_levels` to configuration array length.
+  - Dedicated 13-test integration suite (`test_live_configuration.py`) verifying defense-time live parameter adjustments.
+* **Long-Play and Multi-Level Soak Testing (PK-92):**
+  - Built headless simulation harness (`SoakSimulationHarness`) and frame invariant validator (`SoakInvariantChecker`).
+  - Verified unbroken 10-level marathon playthrough from Level 1 through Level 10 to Victory with life and score retention across boundaries (`test_soak_progression.py`).
+  - Resolved floating-point epsilon residual drift in `PowerState`, `Ghost`, and `GameSession` by snapping timer thresholds $\le 10^{-9}\text{s}$ to `0.0`. Verified 50,000 continuous ticks, 20-cycle power refreshes, and zero-leakage pause/resume cycles (`test_soak_timers.py`).
+  - Hardened `PlayerNameInput.create_entry()` against unhandled exceptions on invalid characters; verified 50-cycle session resets, 100 consecutive highscore disk writes, and garbage-collected entity cleanup (`test_soak_lifecycle.py`).
 
 ## Current Status
 
-This history covers delivered work through Phase 6 and the Evaluation Cheats & Robustness Audit (PK-86 through PK-90). The test suite comprises 409 automated tests passing with strict `mypy` and `flake8` compliance. The next planned stage is Phase 7 - Packaging and Distribution.
+This history covers delivered work through Phase 6, the Evaluation Cheats & Robustness Audit, Live Configuration Testing, and Long-Play Soak Testing (PK-86 through PK-92). The test suite comprises 447 automated tests passing with strict `mypy` and `flake8` compliance. The next planned stage is Phase 7 - Packaging and Distribution.
+
 
