@@ -3,6 +3,7 @@
 
 from dataclasses import dataclass, field
 import math
+from typing import TYPE_CHECKING
 
 from pacman.infrastructure.config import GameConfig
 from pacman.infrastructure.highscore import HighscoreEntry
@@ -11,6 +12,9 @@ from pacman.infrastructure.storage import HighscoreStorage
 from pacman.application.player_name_input import PlayerNameInput
 from pacman.application.cheat_mode import CheatMode
 from pacman.gameplay.player import Player
+
+if TYPE_CHECKING:
+    from pacman.gameplay.ghost_gameplay import GhostGameplay
 
 
 @dataclass
@@ -119,6 +123,7 @@ class AppContext:
     cheat_mode: CheatMode = field(default_factory=CheatMode)
     active_level: LevelData | None = field(default=None, init=False)
     player: Player | None = field(default=None, init=False)
+    ghost_gameplay: "GhostGameplay | None" = field(default=None, init=False)
     level_generator: LevelGenerator = field(init=False)
     highscores: list[HighscoreEntry] = field(
         default_factory=list,
@@ -144,12 +149,31 @@ class AppContext:
         """Create a fresh configured gameplay session."""
         self.player_name_input.reset()
         session = self.reset_session()
-        self.active_level = self.level_generator.generate_level(0)
-        if self.active_level.spawns is not None:
-            self.player = Player.from_spawn(
-                self.active_level.spawns.player
-            )
+        self.activate_level(self.level_generator.generate_level(0))
         return session
+
+    def activate_level(
+        self,
+        level: LevelData,
+        respawn_player: bool = True,
+    ) -> None:
+        """Install one generated level and its visible gameplay entities."""
+        from pacman.gameplay.ghost_gameplay import GhostGameplay
+
+        self.active_level = level
+        if level.spawns is None:
+            self.player = None
+            self.ghost_gameplay = None
+            return
+
+        if self.player is None:
+            self.player = Player.from_spawn(level.spawns.player)
+        elif respawn_player:
+            self.player.respawn(level.spawns.player, level.world)
+        self.ghost_gameplay = GhostGameplay.create(
+            level.spawns.ghosts,
+            self.config,
+        )
 
     def reset_session(self) -> GameSession:
         """Reset session defaults, preventing stale gameplay state."""
@@ -157,6 +181,7 @@ class AppContext:
         self.cheat_mode.reset()
         self.active_level = None
         self.player = None
+        self.ghost_gameplay = None
         return self.session
 
     def save_completed_game_score(self) -> bool:

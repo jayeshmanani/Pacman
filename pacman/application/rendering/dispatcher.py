@@ -63,6 +63,15 @@ def render_state(
                 if context is not None
                 else False
             ),
+            pygame_instance.draw,
+            context.active_level if context is not None else None,
+            context.player if context is not None else None,
+            (
+                context.ghost_gameplay.ghosts
+                if context is not None
+                and context.ghost_gameplay is not None
+                else ()
+            ),
         )
     elif state is GameState.PAUSED:
         render_pause_menu(

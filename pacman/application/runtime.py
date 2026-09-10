@@ -134,7 +134,9 @@ def _handle_cheat_action(
             controller,
         )
         if result is not None:
-            _, context.active_level = result
+            _, next_level = result
+            if next_level is not None:
+                context.activate_level(next_level, respawn_player=False)
         return result is not None
 
     if key == controls.extra_life_key and context.cheat_mode.enabled:

@@ -12,8 +12,8 @@ class WindowSettings:
     """Settings for the Pacman window."""
 
     title: str = "Pacman"
-    width: int = 520
-    height: int = 496
+    width: int = 900
+    height: int = 800
     frames_per_second: int = 60
     background_color: Color = (0, 0, 0)
 

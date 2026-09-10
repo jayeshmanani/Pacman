@@ -7,7 +7,11 @@ from pacman.app import (
     render_hud,
 )
 from pacman.application.context import GameSession
+from pacman.application.context import AppContext
+from pacman.infrastructure.config import GameConfig
+from pacman.maze.level_generator import LevelGenerator
 from tests.support.app_fakes import _FakeFont, _FakePygame
+from tests.support.gameplay_fakes import FixedMazeAdapter
 
 
 def _fonts() -> RenderFonts:
@@ -32,6 +36,43 @@ def test_game_view_renders_placeholder_and_session_values() -> None:
     assert "SCORE: 120" in pygame.surface.rendered_texts
     assert "LIVES: 7" in pygame.surface.rendered_texts
     assert "Lives: 7 | Score: 120" in pygame.surface.rendered_texts
+
+
+def test_game_view_renders_generated_level_and_entities() -> None:
+    """Verify the active maze, pellets, player, and ghosts are visible."""
+    pygame = _FakePygame([])
+    context = AppContext(config=GameConfig())
+    context.level_generator = LevelGenerator(
+        config=context.config,
+        adapter=FixedMazeAdapter(),
+    )
+    context.start_new_game()
+    assert context.active_level is not None
+    assert context.player is not None
+    assert context.ghost_gameplay is not None
+
+    render_game_view(
+        pygame.surface,
+        _fonts(),
+        WindowSettings(),
+        context.session,
+        draw=pygame.draw,
+        active_level=context.active_level,
+        player=context.player,
+        ghosts=context.ghost_gameplay.ghosts,
+    )
+
+    assert pygame.draw.rectangles
+    assert pygame.draw.circles
+    assert "Game View" not in pygame.surface.rendered_texts
+    assert "Press E to End" not in pygame.surface.rendered_texts
+
+
+def test_default_window_keeps_first_level_tiles_comfortably_sized() -> None:
+    """Verify the default viewport does not shrink gameplay to tiny tiles."""
+    settings = WindowSettings()
+    assert settings.width == 900
+    assert settings.height == 800
 
 
 def test_hud_renders_default_metrics_and_background() -> None:
