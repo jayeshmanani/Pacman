@@ -176,6 +176,7 @@ The project is developed using Jira (issue key prefix `PK-`) and GitHub pull req
 
 Detailed project management records, engineering decision logs, sprint ownership, and phase delivery histories are maintained in the [`project_management/`](project_management/) directory:
 - [`phase_history.md`](project_management/phase_history.md): Comprehensive delivery history and phase reviews for Phases 0 through 6.
+- [`bug_triage.md`](project_management/bug_triage.md): Acceptance defect triage register, reproduction evidence, severity classifications, and resolutions (PK-93).
 - [`README.md`](project_management/README.md): Team workflow, branch protection rules, and shared engineering standards.
 
 ## Resources and AI Usage
