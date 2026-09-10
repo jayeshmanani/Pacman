@@ -172,12 +172,12 @@ class Ghost:
 
         if self.state == GhostState.FRIGHTENED:
             self.frightened_timer -= dt
-            if self.frightened_timer <= 0.0:
+            if self.frightened_timer <= 1e-9:
                 self.recover_from_frightened()
 
         elif self.state == GhostState.RESPAWNING:
             self.respawn_timer -= dt
-            if self.respawn_timer <= 0.0:
+            if self.respawn_timer <= 1e-9:
                 self.respawn_timer = 0.0
                 self.state = GhostState.NORMAL
 
