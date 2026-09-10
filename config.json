@@ -2,7 +2,7 @@
     "highscore_filename": "highscores.json",
     // Optional test override: uncomment to limit normal pacgums per level.
     // "pacgum": 42,
-    "seed": 42,
+    "seed": 43,
     "lives": 3,
     "points_per_pacgum": 10,
     "points_per_super_pacgum": 50,
@@ -12,44 +12,44 @@
     "level_max_time": 90,
     "levels": [
         {
-            "width": 21,
-            "height": 21
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 21,
-            "height": 21
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 23,
-            "height": 23
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 23,
-            "height": 23
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 25,
-            "height": 25
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 25,
-            "height": 25
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 27,
-            "height": 27
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 27,
-            "height": 27
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 29,
-            "height": 29
+            "width": 14,
+            "height": 14
         },
         {
-            "width": 29,
-            "height": 29
+            "width": 14,
+            "height": 14
         }
     ]
 }

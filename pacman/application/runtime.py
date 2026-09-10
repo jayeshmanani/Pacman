@@ -281,10 +281,12 @@ def run_app(
                             main_menu.reset_selection()
                             app_context.reset_session()
                         elif controller.state is GameState.PLAYING:
+                            keyboard_event = cast(KeyboardEvent, event)
                             queue_player_direction(
                                 key,
                                 gameplay_controls,
                                 app_context,
+                                keyboard_event.unicode,
                             )
                         controller.handle_key(
                             key,

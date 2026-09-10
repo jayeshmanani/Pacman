@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from pacman.gameplay.ghost_gameplay import GhostGameplay
 
 
+LIVE_PLAYER_SPEED = 7.0
+
+
 @dataclass
 class GameSession:
     """Track active gameplay session state baseline."""
@@ -167,7 +170,10 @@ class AppContext:
             return
 
         if self.player is None:
-            self.player = Player.from_spawn(level.spawns.player)
+            self.player = Player.from_spawn(
+                level.spawns.player,
+                speed=LIVE_PLAYER_SPEED,
+            )
         elif respawn_player:
             self.player.respawn(level.spawns.player, level.world)
         self.ghost_gameplay = GhostGameplay.create(

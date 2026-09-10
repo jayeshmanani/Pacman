@@ -63,6 +63,27 @@ def test_direction_key_queues_player_turn() -> None:
     assert not queue_player_direction(99, _controls(), context)
 
 
+def test_wasd_physical_positions_work_with_russian_layout() -> None:
+    """Verify localized ЦФЫВ characters map to movement directions."""
+    context = _context()
+    assert context.player is not None
+
+    localized_inputs = (
+        ("ц", Direction.UP),
+        ("ы", Direction.DOWN),
+        ("ф", Direction.LEFT),
+        ("в", Direction.RIGHT),
+    )
+    for character, expected_direction in localized_inputs:
+        assert queue_player_direction(
+            999,
+            _controls(),
+            context,
+            character,
+        )
+        assert context.player.queued_direction is expected_direction
+
+
 def test_frame_moves_player_and_collects_pacgum() -> None:
     """Verify movement and collection execute in the live frame pipeline."""
     context = _context()
@@ -120,7 +141,21 @@ def test_normal_ghost_collision_removes_life_and_respawns_player() -> None:
     assert context.player.position == context.active_level.world.tile_center(
         context.active_level.spawns.player
     )
+    assert all(
+        ghost.position == context.active_level.world.tile_center(
+            ghost.home_spawn
+        )
+        for ghost in context.ghost_gameplay.ghosts
+    )
+    assert all(
+        ghost.state is GhostState.NORMAL
+        for ghost in context.ghost_gameplay.ghosts
+    )
     assert controller.state is GameState.PLAYING
+
+    update_gameplay_frame(context, controller, 0.0)
+
+    assert context.session.lives == starting_lives - 1
 
 
 def test_last_pacgum_advances_to_a_fresh_visible_level() -> None:

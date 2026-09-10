@@ -12,6 +12,18 @@ from pacman.gameplay.progression import (
 )
 
 
+CHARACTER_DIRECTIONS = {
+    "w": Direction.UP,
+    "ц": Direction.UP,
+    "s": Direction.DOWN,
+    "ы": Direction.DOWN,
+    "a": Direction.LEFT,
+    "ф": Direction.LEFT,
+    "d": Direction.RIGHT,
+    "в": Direction.RIGHT,
+}
+
+
 @dataclass(frozen=True)
 class GameplayControls:
     """Map pygame keys to the four player movement directions."""
@@ -38,9 +50,12 @@ def queue_player_direction(
     key: int,
     controls: GameplayControls,
     context: AppContext,
+    character: str = "",
 ) -> bool:
-    """Queue one supported turn without coupling Player to pygame keys."""
+    """Queue a turn from a key code or a localized WASD character."""
     direction = controls.direction_for_key(key)
+    if direction is None:
+        direction = CHARACTER_DIRECTIONS.get(character.casefold())
     if direction is None or context.player is None:
         return False
     context.player.queued_direction = direction

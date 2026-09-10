@@ -29,8 +29,8 @@ from pacman.maze.level_generator import LevelData
 
 DEFAULT_HUD_HEIGHT = 40
 CHEAT_HUD_HEIGHT = 140
-PACMAN_RADIUS_RATIO = 0.56
-GHOST_RADIUS_RATIO = 0.52
+PACMAN_RADIUS_RATIO = 0.66
+GHOST_RADIUS_RATIO = 0.60
 
 
 def render_hud(

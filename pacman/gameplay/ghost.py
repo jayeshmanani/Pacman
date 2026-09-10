@@ -133,6 +133,17 @@ class Ghost:
         self.respawn_timer = float(delay)
         self.frightened_timer = 0.0
 
+    def reset_to_home(self) -> None:
+        """Restore the ghost's initial position and normal round state."""
+        hx, hy = self.home_spawn
+        self.position = (hx + 0.5, hy + 0.5)
+        self.direction = Direction.NONE
+        self.state = GhostState.NORMAL
+        self.previous_state = None
+        self.target_tile = None
+        self.frightened_timer = 0.0
+        self.respawn_timer = 0.0
+
     def freeze(self) -> bool:
         """Freeze ghost movement and timers for cheat mode or pause."""
         if self.state == GhostState.FROZEN:

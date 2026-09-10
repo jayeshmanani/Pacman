@@ -4,7 +4,11 @@ import json
 from pathlib import Path
 
 from pacman.infrastructure.config import GameConfig
-from pacman.application.context import AppContext, GameSession
+from pacman.application.context import (
+    LIVE_PLAYER_SPEED,
+    AppContext,
+    GameSession,
+)
 from pacman.infrastructure.highscore import HighscoreEntry
 
 
@@ -73,6 +77,7 @@ def test_start_new_game_resets_session_with_configured_defaults() -> None:
     assert context.player.position == context.active_level.world.tile_center(
         context.active_level.spawns.player
     )
+    assert context.player.movement_speed == LIVE_PLAYER_SPEED
     assert context.ghost_gameplay is not None
     assert len(context.ghost_gameplay.ghosts) == 4
 
