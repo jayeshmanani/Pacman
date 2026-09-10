@@ -94,6 +94,7 @@ Configuration is loaded from a JSON file that supports comment lines (prefixed w
 | Key | Type | Default | Description |
 | --- | --- | --- | --- |
 | `highscore_filename` | string | `highscores.json` | Path to persistent highscore JSON file |
+| `pacgum` | integer | omitted | Optional normal pacgum count; omit to fill all eligible corridors |
 | `lives` | integer | `3` | Starting lives for the player (minimum: 1) |
 | `points_per_pacgum` | integer | `10` | Score awarded per normal pacgum (minimum: 0) |
 | `points_per_super_pacgum` | integer | `50` | Score awarded per super-pacgum (minimum: 0) |
@@ -111,7 +112,7 @@ The game integrates an assigned external maze generation package (`mazegenerator
 - **Adapter Pattern:** `MazeGeneratorAdapter` adapts the external package interface, setting `perfect=False` to create interconnected corridor loops essential for Pac-Man gameplay.
 - **Grid Normalization:** Converts external wall bitmasks into an immutable 2D grid of walls and corridors, validating boundaries and entry/exit reachability.
 - **Deterministic vs. Random:** Level 1 uses a fixed seed (`42`) and includes the central `42` wall logo; subsequent levels generate procedural mazes using random seeds.
-- **Entity Spawns & Pellets:** Computes the central player spawn, four corner ghost spawns, four corner-oriented super-pacgums, and fills reachable corridors with normal pacgums.
+- **Entity Spawns & Pellets:** Computes the central player spawn, four corner ghost spawns, four corner-oriented super-pacgums, and either fills reachable corridors with normal pacgums or uses an explicit configured normal pacgum count.
 
 ## Highscores
 

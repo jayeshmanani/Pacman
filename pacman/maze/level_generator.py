@@ -133,7 +133,16 @@ class LevelGenerator:
             ) from error
 
         spawns = find_spawn_positions(maze)
-        pellets = place_pacgums(maze, spawns)
+        normal_count = (
+            self._config.pacgum
+            if self._config.pacgum_configured
+            else None
+        )
+        pellets = place_pacgums(
+            maze,
+            spawns,
+            normal_count=normal_count,
+        )
         return LevelData(
             level_number=level_index + 1,
             maze=maze,

@@ -15,6 +15,7 @@ def test_parse_game_config_defaults() -> None:
 
     assert config.highscore_filename == "highscores.json"
     assert config.pacgum == 42
+    assert not config.pacgum_configured
     assert config.seed == 42
     assert config.lives == 3
     assert config.points_per_pacgum == 10
@@ -50,6 +51,7 @@ def test_parse_game_config_valid_custom_values() -> None:
 
     assert config.highscore_filename == "scores.json"
     assert config.pacgum == 100
+    assert config.pacgum_configured
     assert config.seed == 123
     assert config.lives == 5
     assert config.points_per_pacgum == 20
@@ -78,6 +80,7 @@ def test_parse_game_config_clamps_invalid_and_negative_values() -> None:
     config = parse_game_config(data)
 
     assert config.pacgum == 1
+    assert config.pacgum_configured
     assert config.lives == 1
     assert config.points_per_pacgum == 0
     assert config.level_max_time == 90
