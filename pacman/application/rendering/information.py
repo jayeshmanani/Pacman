@@ -8,7 +8,6 @@ from pacman.application.rendering.common import (
     STATE_BACKGROUNDS,
     WindowSettings,
     draw_centered_text,
-    draw_left_text,
 )
 from pacman.application.state import GameState
 from pacman.infrastructure.config import GameConfig
@@ -93,12 +92,15 @@ def render_instructions_screen(
     center_x = window_settings.width // 2
     table_left = 24
     table_right = window_settings.width - 24
-    table_top = 88
-    table_middle_y = 230
-    table_bottom = 370
+    table_height = 282
+    table_top = (window_settings.height - table_height) // 2
+    table_middle_y = table_top + 142
+    table_bottom = table_top + table_height
+    title_y = table_top - 36
+    footer_y = table_bottom + 48
     table_middle_x = window_settings.width // 2
-    left_x = table_left + 18
-    right_x = table_middle_x + 18
+    left_center_x = (table_left + table_middle_x) // 2
+    right_center_x = (table_middle_x + table_right) // 2
     screen.fill(STATE_BACKGROUNDS[GameState.INSTRUCTIONS])
     line_color = (82, 113, 214)
     for rectangle in (
@@ -115,12 +117,12 @@ def render_instructions_screen(
         fonts.title,
         "Instructions",
         (255, 230, 0),
-        (center_x, 52),
+        (center_x, title_y),
     )
 
     sections = (
         (
-            left_x,
+            left_center_x,
             "CONTROLS",
             ("Arrows / WASD", "P: Pause / Resume"),
             "RULES",
@@ -131,7 +133,7 @@ def render_instructions_screen(
             ),
         ),
         (
-            right_x,
+            right_center_x,
             "SCORING",
             (
                 f"Pacgum: +{game_config.points_per_pacgum}",
@@ -149,46 +151,46 @@ def render_instructions_screen(
         ),
     )
     for (
-        column_x,
+        column_center_x,
         first_heading,
         first_lines,
         second_heading,
         second_lines,
     ) in sections:
-        draw_left_text(
+        draw_centered_text(
             screen,
             fonts.body,
             first_heading,
             (255, 230, 0),
-            (column_x, 108),
+            (column_center_x, table_top + 20),
         )
         for index, line in enumerate(first_lines):
-            draw_left_text(
+            draw_centered_text(
                 screen,
                 fonts.body,
                 line,
                 (255, 255, 255),
-                (column_x, 140 + index * 30),
+                (column_center_x, table_top + 52 + index * 30),
             )
-        draw_left_text(
+        draw_centered_text(
             screen,
             fonts.body,
             second_heading,
             (255, 230, 0),
-            (column_x, 252),
+            (column_center_x, table_middle_y + 22),
         )
         for index, line in enumerate(second_lines):
-            draw_left_text(
+            draw_centered_text(
                 screen,
                 fonts.body,
                 line,
                 (255, 255, 255),
-                (column_x, 284 + index * 30),
+                (column_center_x, table_middle_y + 54 + index * 30),
             )
     draw_centered_text(
         screen,
         fonts.body,
         "Esc / Enter / Space: Main Menu",
         (255, 230, 0),
-        (center_x, window_settings.height - 48),
+        (center_x, footer_y),
     )

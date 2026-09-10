@@ -110,6 +110,18 @@ def test_instructions_render_active_configuration() -> None:
     assert "Power pellet: +60" in texts
     assert "Ghost: +250 to +2000" in texts
     assert "Lasts 8 seconds" in texts
+    assert pygame.surface.blit_destinations[0] == {
+        "center": (450, 223),
+    }
+    assert pygame.surface.blit_destinations[1] == {
+        "center": (237, 279),
+    }
+    assert pygame.surface.blit_destinations[8] == {
+        "center": (663, 279),
+    }
+    assert pygame.surface.blit_destinations[-1] == {
+        "center": (450, 589),
+    }
 
 
 def test_pause_menu_renders_session_and_selection() -> None:
