@@ -125,7 +125,7 @@ def test_viewport_coordinate_conversions() -> None:
 
 
 def test_draw_maze_walls() -> None:
-    """Verify wall tiles render filled and bordered rectangles."""
+    """Verify walls render as connected lines narrower than corridors."""
     tiles = (
         (Tile.WALL, Tile.WALL, Tile.WALL),
         (Tile.WALL, Tile.CORRIDOR, Tile.WALL),
@@ -144,9 +144,22 @@ def test_draw_maze_walls() -> None:
 
     draw_maze_walls(surface, draw, maze, viewport)
 
-    # 8 wall tiles, each drawn twice (fill + border)
-    assert len(draw.rectangles) == 16
-
     wall_colors = [rect[0] for rect in draw.rectangles]
-    assert wall_colors.count(DEFAULT_WALL_COLOR) == 8
-    assert wall_colors.count(DEFAULT_WALL_BORDER) == 8
+    assert wall_colors.count(DEFAULT_WALL_COLOR) == 16
+    assert wall_colors.count(DEFAULT_WALL_BORDER) == 16
+
+    for _, (_, _, width, height), _, _ in draw.rectangles:
+        assert width < viewport.tile_size or height < viewport.tile_size
+
+    horizontal_bridges = [
+        rect
+        for _, rect, _, _ in draw.rectangles
+        if rect[2] == viewport.tile_size
+    ]
+    vertical_bridges = [
+        rect
+        for _, rect, _, _ in draw.rectangles
+        if rect[3] == viewport.tile_size
+    ]
+    assert len(horizontal_bridges) == 8
+    assert len(vertical_bridges) == 8
