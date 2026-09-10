@@ -163,3 +163,36 @@ def test_draw_maze_walls() -> None:
     ]
     assert len(horizontal_bridges) == 8
     assert len(vertical_bridges) == 8
+
+
+def test_draw_maze_walls_fills_package_blocked_cells() -> None:
+    """Verify 42 marker cells remain visibly solid among thin walls."""
+    maze = MazeGrid(
+        tiles=(
+            (Tile.WALL, Tile.WALL, Tile.WALL),
+            (Tile.WALL, Tile.CORRIDOR, Tile.WALL),
+            (Tile.WALL, Tile.WALL, Tile.WALL),
+        ),
+        entry=(1, 1),
+        exit=(1, 1),
+        blocked_cells=frozenset({(0, 0)}),
+    )
+    viewport = MazeViewport(
+        tile_size=20,
+        offset_x=10,
+        offset_y=10,
+        grid_width=3,
+        grid_height=3,
+    )
+    surface = _FakeSurface()
+    draw = _FakeDrawModule()
+
+    draw_maze_walls(surface, draw, maze, viewport)
+
+    blocked_rectangles = [
+        rect
+        for color, rect, _, _ in draw.rectangles
+        if color == DEFAULT_WALL_COLOR
+        and rect[2:] == (40, 40)
+    ]
+    assert blocked_rectangles == [(0, 0, 40, 40)]

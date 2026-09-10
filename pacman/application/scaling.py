@@ -100,7 +100,6 @@ def draw_maze_walls(
     outer_width = max(2, round(viewport.tile_size * WALL_WIDTH_RATIO))
     edge_width = max(1, viewport.tile_size // 12)
     inner_width = max(1, outer_width - 2 * edge_width)
-
     _draw_wall_layer(
         surface,
         draw,
@@ -117,6 +116,36 @@ def draw_maze_walls(
         wall_color,
         inner_width,
     )
+    _draw_blocked_cells(
+        surface,
+        draw,
+        maze,
+        viewport,
+        wall_color,
+    )
+
+
+def _draw_blocked_cells(
+    surface: Surface,
+    draw: DrawModule,
+    maze: MazeGrid,
+    viewport: MazeViewport,
+    color: Color,
+) -> None:
+    """Draw package-defined 42 cells as contiguous solid blocks."""
+    block_size = 2 * viewport.tile_size
+    for col, row in maze.blocked_cells:
+        center_x, center_y = viewport.tile_center(col, row)
+        draw.rect(
+            surface,
+            color,
+            (
+                center_x - viewport.tile_size,
+                center_y - viewport.tile_size,
+                block_size,
+                block_size,
+            ),
+        )
 
 
 def _draw_wall_layer(
