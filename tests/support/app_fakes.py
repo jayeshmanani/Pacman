@@ -79,6 +79,18 @@ class _FakeEventModule:
         return self.event_batches.pop(0)
 
 
+def type_text_events(text: str) -> list[list[_FakeEvent]]:
+    """Create one fake keydown frame for each character in text."""
+    return [
+        [_FakeEvent(
+            type=_FakePygame.KEYDOWN,
+            key=ord(character),
+            unicode=character,
+        )]
+        for character in text
+    ]
+
+
 class _FakeSurface:
     """Record drawing operations performed on the fake window."""
 

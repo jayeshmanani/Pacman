@@ -5,19 +5,11 @@ from pathlib import Path
 
 from pacman.app import run_app
 from pacman.infrastructure.config import GameConfig
-from tests.support.app_fakes import _FakeEvent, _FakePygame
-
-
-def _type_string_events(text: str) -> list[list[_FakeEvent]]:
-    """Generate fake Pygame keydown event batches for each character."""
-    return [
-        [_FakeEvent(
-            type=_FakePygame.KEYDOWN,
-            key=ord(character),
-            unicode=character,
-        )]
-        for character in text
-    ]
+from tests.support.app_fakes import (
+    _FakeEvent,
+    _FakePygame,
+    type_text_events,
+)
 
 
 def test_full_lose_journey_from_menu_to_game_over_to_highscores(
@@ -25,7 +17,7 @@ def test_full_lose_journey_from_menu_to_game_over_to_highscores(
 ) -> None:
     """Verify complete Lose flow from main menu through highscore display."""
     score_file = tmp_path / "scores.json"
-    name_events = _type_string_events("ALICE")
+    name_events = type_text_events("ALICE")
     events: list[list[_FakeEvent]] = [
         # Frame 1: Main Menu -> Start Game
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
@@ -70,7 +62,7 @@ def test_full_win_journey_from_menu_to_victory_to_highscores(
 ) -> None:
     """Verify complete Win flow from main menu through highscore display."""
     score_file = tmp_path / "scores.json"
-    name_events = _type_string_events("CHAMP")
+    name_events = type_text_events("CHAMP")
     events: list[list[_FakeEvent]] = [
         # Frame 1: Main Menu -> Start Game
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
@@ -115,7 +107,7 @@ def test_end_screen_escape_cancels_without_persisting_score(
 ) -> None:
     """Verify Escape on end screen returns to menu without saving highscore."""
     score_file = tmp_path / "scores.json"
-    name_events = _type_string_events("GHOST")
+    name_events = type_text_events("GHOST")
     events: list[list[_FakeEvent]] = [
         # Frame 1: Main Menu -> Start Game
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
@@ -151,8 +143,8 @@ def test_consecutive_playthroughs_isolate_session_state(
 ) -> None:
     """Verify playing consecutive games resets session data cleanly."""
     score_file = tmp_path / "scores.json"
-    p1_events = _type_string_events("PONE")
-    p2_events = _type_string_events("PTWO")
+    p1_events = type_text_events("PONE")
+    p2_events = type_text_events("PTWO")
 
     events: list[list[_FakeEvent]] = [
         # Game 1: Start -> Lose -> Type PONE -> Save -> Menu
