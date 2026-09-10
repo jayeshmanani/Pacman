@@ -13,7 +13,7 @@ The current implementation provides:
 - Complete four-ghost autonomous AI: distinct chase targeting for Blinky, Pinky, Inky, and Clyde; frightened fleeing; score chaining; delayed corner respawn; and frame contact protection.
 - Session lifecycle: scoring, lives, level timers, pause/resume, and multi-level progression.
 - Robust commented-JSON configuration parsing and persistent highscores.
-- Automated testing with 447 test cases and headless playtest verification.
+- Automated unit, integration, soak, and headless playtest verification.
 
 ## Instructions
 
@@ -50,10 +50,8 @@ The current application supports the state controls below:
 | --- | --- |
 | `Enter` / `Space` | Start game from menu or confirm name on end screen |
 | `P` | Pause or resume the active gameplay session |
-| `E` | Trigger game over from playing state |
-| `V` | Trigger victory from playing state |
 | `Esc` | Return to main menu from playing, paused, or end screen |
-| `W`, `A`, `S`, `D` / Arrows | Buffer directional turns for Pac-Man |
+| `W`, `A`, `S`, `D` / `Ц`, `Ф`, `Ы`, `В` / Arrows | Buffer directional turns for Pac-Man |
 | Close window | Quit the application |
 
 ### Cheat Mode Controls
@@ -89,9 +87,13 @@ regular player instructions screen.
 
 Configuration is loaded from a JSON file that supports comment lines (prefixed with `#`). If a key is missing or contains an invalid value, the system logs a descriptive message and falls back to safe defaults without crashing or outputting tracebacks. Unknown keys are safely ignored.
 
-### Key Schema and Defaults
+### Key Schema and Fallbacks
 
-| Key | Type | Default | Description |
+The bundled `config.json` defines ten 14x14 native maze levels, a 90-second
+limit, and fixed seed `43` for its repeatable first-level layout. The values
+below are parser fallbacks used when settings are omitted or invalid.
+
+| Key | Type | Fallback | Description |
 | --- | --- | --- | --- |
 | `highscore_filename` | string | `highscores.json` | Path to persistent highscore JSON file |
 | `pacgum` | integer | omitted | Optional normal pacgum count; omit to fill all eligible corridors |
@@ -111,7 +113,7 @@ The game integrates an assigned external maze generation package (`mazegenerator
 
 - **Adapter Pattern:** `MazeGeneratorAdapter` adapts the external package interface, setting `perfect=False` to create interconnected corridor loops essential for Pac-Man gameplay.
 - **Grid Normalization:** Converts external wall bitmasks into an immutable 2D grid of walls and corridors, validating boundaries and entry/exit reachability.
-- **Deterministic vs. Random:** Level 1 uses a fixed seed (`42`) and includes the central `42` wall logo; subsequent levels generate procedural mazes using random seeds.
+- **Deterministic vs. Random:** Level 1 uses the fixed seed from `config.json` (`43` in the bundled configuration) and preserves the package's central `42` blocked-cell marker; subsequent levels generate procedural mazes using random seeds without the marker.
 - **Entity Spawns & Pellets:** Computes the central player spawn, four corner ghost spawns, four corner-oriented super-pacgums, and either fills reachable corridors with normal pacgums or uses an explicit configured normal pacgum count.
 
 ## Highscores
@@ -165,7 +167,7 @@ pacman/
 
 | Package | Key Modules | Responsibility |
 | --- | --- | --- |
-| `application/` | `state.py`, `context.py`, `runtime.py`, `rendering.py` | State machine, session coordination, rendering dispatch, Pygame event loop |
+| `application/` | `state.py`, `context.py`, `runtime.py`, `gameplay_loop.py`, `rendering/` | State machine, live gameplay coordination, focused rendering components, Pygame event loop |
 | `gameplay/` | `player.py`, `ghost.py`, `ghost_collision.py`, `ghost_gameplay.py`, `power_state.py`, `lives.py`, `progression.py` | Game rules, physics, AI pathfinding, collision resolution, lifecycle |
 | `maze/` | `adapter.py`, `grid.py`, `level_generator.py`, `spawns.py`, `world.py` | External maze adaptation, grid normalization, level construction |
 | `infrastructure/` | `config.py`, `highscore.py`, `storage.py` | Safe configuration parsing and robust JSON highscore persistence |
@@ -175,7 +177,7 @@ pacman/
 The project is developed using Jira (issue key prefix `PK-`) and GitHub pull requests following trunk-based development with peer reviews and continuous automated testing.
 
 Detailed project management records, engineering decision logs, sprint ownership, and phase delivery histories are maintained in the [`project_management/`](project_management/) directory:
-- [`phase_history.md`](project_management/phase_history.md): Comprehensive delivery history and phase reviews for Phases 0 through 6.
+- [`phase_history.md`](project_management/phase_history.md): Delivery history and phase reviews through the completed Phase 7 gameplay review.
 - [`bug_triage.md`](project_management/bug_triage.md): Acceptance defect triage register, reproduction evidence, severity classifications, and resolutions (PK-93).
 - [`README.md`](project_management/README.md): Team workflow, branch protection rules, and shared engineering standards.
 
