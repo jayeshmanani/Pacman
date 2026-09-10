@@ -42,3 +42,5 @@ and delivery evidence.
 
 - [`phase_history.md`](phase_history.md) records delivered results and phase
   reviews.
+- [`bug_triage.md`](bug_triage.md) records defects discovered during robustness
+  and soak testing, reproduction steps, severity, and resolutions (PK-93).
