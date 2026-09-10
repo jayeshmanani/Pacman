@@ -1,6 +1,7 @@
 {
     "highscore_filename": "highscores.json",
-    "pacgum": 42,
+    // Optional test override: uncomment to limit normal pacgums per level.
+    // "pacgum": 42,
     "seed": 42,
     "lives": 3,
     "points_per_pacgum": 10,
