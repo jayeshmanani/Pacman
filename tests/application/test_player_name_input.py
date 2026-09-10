@@ -89,3 +89,14 @@ def test_player_name_input_reset_clears_previous_game_data() -> None:
 
     assert player_name.value == ""
     assert player_name.error_message is None
+
+
+def test_player_name_input_create_entry_catches_invalid_name() -> None:
+    """Verify invalid direct name values fail safely without exception."""
+    player_name = PlayerNameInput(value="Bad!Name")
+
+    entry = player_name.create_entry(score=500)
+    assert entry is None
+    assert player_name.error_message == (
+        "name must contain only letters, numbers, and spaces"
+    )
