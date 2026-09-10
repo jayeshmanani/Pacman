@@ -100,6 +100,10 @@ class GameSession:
             return True
 
         self.remaining_level_time -= dt
+        if self.remaining_level_time <= 1e-9:
+            self.remaining_level_time = 0.0
+            self.level_timed_out = True
+            return True
         return False
 
 

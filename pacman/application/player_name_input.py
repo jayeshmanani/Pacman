@@ -45,8 +45,14 @@ class PlayerNameInput:
             self.error_message = "Enter a player name"
             return None
 
+        try:
+            entry = HighscoreEntry(name=normalized_name, score=score)
+        except (ValueError, TypeError) as err:
+            self.error_message = str(err)
+            return None
+
         self.error_message = None
-        return HighscoreEntry(name=normalized_name, score=score)
+        return entry
 
     def reset(self) -> None:
         """Clear input and validation state for another completed game."""

@@ -43,6 +43,8 @@ class PowerState:
 
         was_active = self.is_active
         self.remaining_time = max(0.0, self.remaining_time - dt)
+        if self.remaining_time <= 1e-9:
+            self.remaining_time = 0.0
         expired = was_active and not self.is_active
         if expired:
             self._recover_ghosts(ghosts)
