@@ -4,6 +4,11 @@ This record describes what was actually delivered, how it was verified, and
 where the implementation can be reviewed. Jira remains the task tracker and
 the progressive planner remains the live planning view.
 
+Ownership records the agreed responsibility for each work item rather than
+the author of an individual commit. `Team` identifies collaboratively
+discussed, reviewed, and delivered work even when one member created the
+commit or pull request.
+
 ## Phase 0 - Align and Set Up
 
 ### Ownership
@@ -232,3 +237,18 @@ Phase 7 is complete through PK-94: the implemented gameplay was exercised in
 the real Pygame application, difficult states were reached with cheats, and
 the defects found during that review were corrected and retested. This marks
 the end of the gameplay-review phase.
+
+## Phase 8 - Documentation, Packaging, and Release
+
+### Planned Ownership
+
+| Owner | Work items | Planned focus |
+| --- | --- | --- |
+| Mariia | P8-01, P8-02, P8-03 | README; configuration and gameplay-system documentation; software architecture |
+| Jayesh | P8-05, P8-06, P8-07, P8-09 | Reproducible packaging; packaged-game instructions; platform publishing; release rebuild |
+| Team | P8-04 | Project timeline; progress evidence; decisions; risks; team organisation; blockers and conflicts |
+| Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release-evidence review |
+
+Phase 8 is in progress. Completed outcomes and their verification evidence
+will be recorded here as the corresponding work items are reviewed and
+merged.

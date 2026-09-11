@@ -42,6 +42,13 @@ Direct CLI invocation:
 uv run python pac-man.py config.json
 ```
 
+Alternatively, after activating the project environment, use the exact
+subject-compatible command:
+```bash
+source .venv/bin/activate
+python3 pac-man.py config.json
+```
+
 ### Controls
 
 The current application supports the state controls below:
@@ -85,7 +92,11 @@ regular player instructions screen.
 
 ## Configuration
 
-Configuration is loaded from a JSON file that supports comment lines (prefixed with `#`). If a key is missing or contains an invalid value, the system logs a descriptive message and falls back to safe defaults without crashing or outputting tracebacks. Unknown keys are safely ignored.
+Configuration is loaded from a JSON file that supports full-line `#` and `//`
+comments. Missing keys use the documented fallbacks, while invalid values emit
+clear warnings and either fall back or clamp to their safe minimums. An
+unreadable or malformed configuration starts the game with the complete default
+configuration instead of exposing a traceback. Unknown keys are safely ignored.
 
 ### Key Schema and Fallbacks
 
@@ -96,25 +107,30 @@ below are parser fallbacks used when settings are omitted or invalid.
 | Key | Type | Fallback | Description |
 | --- | --- | --- | --- |
 | `highscore_filename` | string | `highscores.json` | Path to persistent highscore JSON file |
-| `pacgum` | integer | omitted | Optional normal pacgum count; omit to fill all eligible corridors |
+| `pacgum` | integer | `42` | Optional normal pacgum limit (minimum: 1); the fallback remains inactive when the key is omitted, so eligible corridors are filled |
 | `lives` | integer | `3` | Starting lives for the player (minimum: 1) |
 | `points_per_pacgum` | integer | `10` | Score awarded per normal pacgum (minimum: 0) |
 | `points_per_super_pacgum` | integer | `50` | Score awarded per super-pacgum (minimum: 0) |
-| `points_per_ghost` | integer | `200` | Base score awarded for eating a frightened ghost |
-| `frightened_duration` | float | `7.0` | Duration (seconds) of ghost frightened mode |
-| `ghost_respawn_delay` | float | `5.0` | Time (seconds) an eaten ghost spends respawning |
+| `points_per_ghost` | integer | `200` | Base score awarded for eating a frightened ghost (minimum: 0) |
+| `frightened_duration` | float | `7.0` | Duration in seconds of ghost frightened mode (minimum: 0) |
+| `ghost_respawn_delay` | float | `5.0` | Time in seconds an eaten ghost spends respawning (minimum: 0) |
 | `seed` | integer | `42` | Deterministic seed for Level 1 generation |
 | `level_max_time` | integer | `90` | Time limit (seconds) allowed per level |
 | `levels` | array | `[{"width": 21, "height": 21}]` | Per-level maze dimensions (minimum: 5x5) |
 
 ## Maze Generation
 
-The game integrates an assigned external maze generation package (`mazegenerator`) without modifying its source code:
+The game uses the assigned external `mazegenerator` package as installed,
+without modifying its source code. Pacman keeps package-specific calls behind
+its own adapter so the gameplay and rendering layers depend only on the
+project's validated grid model.
 
-- **Adapter Pattern:** `MazeGeneratorAdapter` adapts the external package interface, setting `perfect=False` to create interconnected corridor loops essential for Pac-Man gameplay.
+- **Adapter Pattern:** `MazeGeneratorAdapter` translates the assigned package interface and wall bitmasks into Pacman's internal model.
+- **Imperfect Mazes:** Every package request sets `perfect=False`. A perfect maze has only one route between cells; disabling that mode allows interconnected corridor loops that support Pac-Man movement and ghost pursuit.
 - **Grid Normalization:** Converts external wall bitmasks into an immutable 2D grid of walls and corridors, validating boundaries and entry/exit reachability.
 - **Deterministic vs. Random:** Level 1 uses the fixed seed from `config.json` (`43` in the bundled configuration) and preserves the package's central `42` blocked-cell marker; subsequent levels generate procedural mazes using random seeds without the marker.
 - **Entity Spawns & Pellets:** Computes the central player spawn, four corner ghost spawns, four corner-oriented super-pacgums, and either fills reachable corridors with normal pacgums or uses an explicit configured normal pacgum count.
+- **Failure Handling:** Missing or incompatible package installations, package exceptions, malformed wall data, invalid boundaries, and unreachable exits are converted into clear application errors without a traceback. If a later level cannot be generated, the current score, lives, level, and timer remain unchanged and the application returns safely to the main menu.
 
 ## Highscores
 
@@ -123,7 +139,8 @@ The highscore subsystem provides persistent score tracking across game sessions:
 - **Storage Format:** Stored as human-readable JSON (`highscores.json`).
 - **Validation:** Player names are restricted to 1–10 alphanumeric characters and spaces; scores must be non-negative integers.
 - **Capacity & Ordering:** Retains the top 10 highest scores sorted in descending order.
-- **Fault Tolerance:** If the storage file is missing, empty, corrupt, or unwritable, the system logs a warning and falls back to an empty list without interrupting gameplay.
+- **Fault Tolerance:** A missing storage file starts with an empty highscore list. Unreadable, empty, corrupt, or invalid data emits a warning and also falls back safely without interrupting gameplay.
+- **Safe Writes:** Updates are written to a temporary file and then atomically replace the previous file. If saving fails, the existing highscores remain active and a warning is displayed.
 - **Design Rationale:** JSON was chosen for transparent inspection, ease of debugging, cross-platform portability, and straightforward serialization without external database dependencies.
 
 ## Implementation
@@ -181,7 +198,7 @@ Detailed project management records, engineering decision logs, sprint ownership
 - [`bug_triage.md`](project_management/bug_triage.md): Acceptance defect triage register, reproduction evidence, severity classifications, and resolutions (PK-93).
 - [`README.md`](project_management/README.md): Team workflow, branch protection rules, and shared engineering standards.
 
-## Resources and AI Usage
+## Resources
 
 ### References
 - [Python 3 Documentation](https://docs.python.org/3/)
@@ -190,10 +207,13 @@ Detailed project management records, engineering decision logs, sprint ownership
 - [pytest Documentation](https://docs.pytest.org/)
 - [mypy Documentation](https://mypy.readthedocs.io/)
 
-### AI Usage
-Artificial Intelligence tools were utilized throughout development to:
-- Formulate automated test suites and identify tricky edge cases (e.g. multi-ghost collision in the same frame, timer boundary expirations).
-- Support code reviews, static type verification, and architecture boundary refactoring.
-- Draft documentation and verify compliance with PEP 257 docstring standards.
+### AI Usage Disclosure
 
-All AI-suggested code and documentation were systematically reviewed, refactored, and verified by the project authors through comprehensive test suites.
+AI was used as a collaborative learning and review tool to discuss the subject,
+identify implementation risks, propose tests, and improve documentation. It
+also supported analysis of gameplay edge cases, code reviews, static type
+verification, and discussions about modular architecture.
+
+Every accepted change was reviewed, discussed, and tested before it was
+committed. The project authors remain responsible for understanding,
+explaining, and maintaining all submitted code and documentation.
