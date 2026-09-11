@@ -196,6 +196,7 @@ def _normalize_grid(
     native_grid: tuple[tuple[int, ...], ...],
     entry: Coordinate,
     exit: Coordinate,
+    include_42: bool,
 ) -> MazeGrid:
     """Convert native wall bitmasks to stable wall/corridor tiles."""
     native_height = len(native_grid)
@@ -233,10 +234,17 @@ def _normalize_grid(
         )
         for y in range(normalized_grid.height)
     )
+    blocked_cells = frozenset(
+        _to_internal_coordinate((native_x, native_y))
+        for native_y, native_row in enumerate(native_grid)
+        for native_x, walls in enumerate(native_row)
+        if include_42 and walls == 15
+    )
     return MazeGrid(
         tiles=reachable_tiles,
         entry=normalized_grid.entry,
         exit=normalized_grid.exit,
+        blocked_cells=blocked_cells,
     )
 
 
@@ -369,6 +377,7 @@ class MazeGeneratorAdapter:
                 native_grid,
                 validated_entry,
                 validated_exit,
+                include_42,
             )
         except (IndexError, TypeError, ValueError) as error:
             raise MazeAdapterError(

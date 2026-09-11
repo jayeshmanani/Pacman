@@ -66,6 +66,8 @@ def test_real_package_42_pattern_can_be_disabled() -> None:
         if value == 1
     }
 
+    assert first_level.blocked_cells == frozenset(pattern_positions)
+    assert not later_level.blocked_cells
     assert all(
         not first_level.is_corridor(position)
         for position in pattern_positions

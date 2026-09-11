@@ -90,6 +90,28 @@ def test_ghost_start_respawn_transition() -> None:
     assert ghost.frightened_timer == 0.0
 
 
+def test_ghost_reset_to_home_clears_transient_state() -> None:
+    """Verify a new round restores one ghost to a clean baseline."""
+    ghost = Ghost.from_spawn(GhostIdentity.BLINKY, (2, 3))
+    ghost.position = (8.5, 9.5)
+    ghost.direction = Direction.LEFT
+    ghost.state = GhostState.FROZEN
+    ghost.previous_state = GhostState.FRIGHTENED
+    ghost.target_tile = (7, 7)
+    ghost.frightened_timer = 4.0
+    ghost.respawn_timer = 2.0
+
+    ghost.reset_to_home()
+
+    assert ghost.position == (2.5, 3.5)
+    assert ghost.direction is Direction.NONE
+    assert ghost.state is GhostState.NORMAL
+    assert ghost.previous_state is None
+    assert ghost.target_tile is None
+    assert ghost.frightened_timer == 0.0
+    assert ghost.respawn_timer == 0.0
+
+
 def test_ghost_freeze_and_unfreeze() -> None:
     """Verify freeze preserves previous state and unfreeze restores it."""
     ghost = Ghost.from_spawn(GhostIdentity.PINKY, (3, 3))

@@ -148,10 +148,19 @@ class GhostGameplay:
             world=world,
             state_controller=state_controller,
         )
+        if player_death is PlayerDeathOutcome.RESPAWNED:
+            self.reset_round()
         return GhostGameplayCollisionResult(
             collision=collision,
             player_death=player_death,
         )
+
+    def reset_round(self) -> None:
+        """Return every ghost and transient collision state to baseline."""
+        for ghost in self.ghosts:
+            ghost.reset_to_home()
+        self.power_state = PowerState()
+        self.collision_guard = GhostCollisionGuard()
 
     def set_ghosts_frozen(self, frozen: bool) -> None:
         """Apply or remove movement freeze across the complete ghost group."""

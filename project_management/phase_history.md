@@ -1,4 +1,4 @@
-# Delivery History: Phases 0-9
+# Delivery History
 
 This record describes what was actually delivered, how it was verified, and
 where the implementation can be reviewed. Jira remains the task tracker and
@@ -151,7 +151,7 @@ The review is supported by focused tests for:
 * **Visual Presentation:** Procedural vector sprites for player and ghost identities, dynamic maze viewport centering and integer tile scaling, wall rendering, and score popups.
 * **Verification:** Dedicated end-to-end integration test suite (`test_full_game_flow.py`) covering the complete Lose journey, Win journey, cancellation flow, and consecutive playthrough session isolation with zero state leakage.
 
-## Evaluation Cheats and Robustness Audit
+## Phase 7 - Evaluation Cheats, Robustness, and Gameplay Review
 
 ### Ownership
 
@@ -162,6 +162,7 @@ The review is supported by focused tests for:
 | Mariia | PK-91 | Live configuration testing; dual-mode pacgum placement; dynamic total levels progression scaling |
 | Jayesh | PK-92 | Long-play and multi-level soak tests; headless simulation harness; floating-point timer drift fix; lifecycle & persistence endurance |
 | Team | PK-93 | Defect triage register; bug classification, reproduction steps, root cause analysis, and disposition |
+| Team | PK-94 | Cheat-assisted gameplay review; live rendering integration; evaluation-flow fixes and verification |
 
 * **Evaluation Cheats:** Implemented F1 master cheat toggle, invincibility (1), level skip (2), ghost freeze (3), extra life (4), and reversible 2x player speed boost (5) with dedicated HUD indicators and non-mutating player speed multiplier.
 * **Boundary Hardening:** Graceful recovery without tracebacks for external maze generation failures, faulty config parameters clamped to safe defaults, and diagnostic logging for corrupt highscore files.
@@ -182,8 +183,52 @@ The review is supported by focused tests for:
   - Compiled and structured [`bug_triage.md`](bug_triage.md) recording 7 defects across the robustness audit, live config testing, and soak testing phases.
   - Classified each issue by severity (Critical, High, Medium, Low), documented reproduction steps and root-cause analysis, and recorded resolution and acceptance rationale in accordance with Chapter VIII.
 
+### Cheat-Assisted Gameplay Review (PK-94)
+
+PK-94 connected the previously tested game rules to the real Pygame flow and
+used the completed cheat system to reach difficult evaluation states quickly.
+The review covered movement, wall collision, pellet collection, frightened and
+eaten ghosts, player death, respawn, timeout, pause, ten-level progression,
+Victory, Game Over, and persistent highscore saving.
+
+The PK-94 review also produced focused improvements:
+
+* Split the growing rendering module and its tests into focused
+  `pacman/application/rendering/` components.
+* Rendered the generated maze, pellets, Pac-Man, and all four live ghost states
+  using the shared viewport and world-coordinate model.
+* Refined the 900x800 game view with narrow connected walls and larger,
+  readable entity sprites.
+* Preserved the assigned package's blocked-cell `42` marker explicitly in the
+  internal grid while keeping it limited to the fixed first level. After
+  visual review, the bundled fixed seed changed from `42` to `43`: both retain
+  deterministic generation and the package marker, while seed `43` produces a
+  cleaner surrounding topology without a lower wall visually joining the two
+  digits.
+* Balanced the bundled ten-level configuration around 29x29 normalized grids,
+  a 90-second level timer, and a playable live movement speed. Normal pacgums
+  remain in most eligible corridors as required by the subject.
+* Added localized physical-key support so WASD remains usable when the Russian
+  keyboard layout reports `ЦФЫВ` characters.
+* Fixed repeated life loss after respawn by returning Pac-Man and all ghosts to
+  their assigned spawn positions and resetting transient round state.
+
+| Acceptance path | Result | Evidence |
+| --- | --- | --- |
+| Movement and wall collision | Passed | Arrow, WASD/ЦФЫВ runtime checks and manual playtest |
+| Pacgums, super-pacgums, score, frightened ghosts | Passed | Gameplay pipeline tests and manual cheat-assisted playtest |
+| Player death, one-life loss, and safe group respawn | Passed | Multi-frame regression test and manual collision check |
+| Pause, timer, timeout, Game Over | Passed | Rule tests and natural timeout integration journey |
+| Ten levels and Victory | Passed | Soak progression plus F1/2 evaluation journey |
+| Name entry and persistent Top 10 highscores | Passed | End-to-end save/display tests and manual review |
+
+At the completion of PK-94, 456 automated tests pass together with `flake8`
+and strict `mypy` checks. The manual application review confirmed the same
+paths in the real Pygame window.
+
 ## Current Status
 
-This history covers delivered work through Phase 6, the Evaluation Cheats & Robustness Audit, Live Configuration Testing, Long-Play Soak Testing, and Defect Triage (PK-86 through PK-93). The test suite comprises 447 automated tests passing with strict `mypy` and `flake8` compliance. The next planned stage is Phase 7 - Packaging and Distribution.
-
-
+Phase 7 is complete through PK-94: the implemented gameplay was exercised in
+the real Pygame application, difficult states were reached with cheats, and
+the defects found during that review were corrected and retested. This marks
+the end of the gameplay-review phase.

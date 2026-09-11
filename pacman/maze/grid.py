@@ -22,6 +22,7 @@ class MazeGrid:
     tiles: tuple[tuple[Tile, ...], ...]
     entry: Coordinate
     exit: Coordinate
+    blocked_cells: frozenset[Coordinate] = frozenset()
 
     def __post_init__(self) -> None:
         """Require a non-empty rectangular grid and walkable endpoints."""
@@ -37,6 +38,12 @@ class MazeGrid:
                 raise ValueError(f"maze {name} must be inside the grid")
             if not self.is_corridor(coordinate):
                 raise ValueError(f"maze {name} must be a corridor")
+
+        for coordinate in self.blocked_cells:
+            if not self.contains(coordinate):
+                raise ValueError("maze blocked cell must be inside the grid")
+            if self.tile_at(coordinate) is not Tile.WALL:
+                raise ValueError("maze blocked cell must be a wall")
 
     @property
     def width(self) -> int:

@@ -1,4 +1,4 @@
-"""Application rendering tests for distinct Game Over and Victory screens."""
+"""Rendering tests for distinct Game Over and Victory screens."""
 
 from pacman.app import (
     GameState,

@@ -9,6 +9,7 @@ from pacman.maze.grid import MazeGrid, Tile
 
 DEFAULT_WALL_COLOR: Final[Color] = (33, 33, 222)
 DEFAULT_WALL_BORDER: Final[Color] = (82, 113, 255)
+WALL_WIDTH_RATIO: Final[float] = 0.46
 
 
 @dataclass(frozen=True)
@@ -95,18 +96,108 @@ def draw_maze_walls(
     wall_color: Color = DEFAULT_WALL_COLOR,
     border_color: Color = DEFAULT_WALL_BORDER,
 ) -> None:
-    """Render styled wall blocks for each non-corridor cell in the maze."""
-    border_width = max(1, viewport.tile_size // 10)
+    """Render connected narrow walls while preserving tile collisions."""
+    outer_width = max(2, round(viewport.tile_size * WALL_WIDTH_RATIO))
+    edge_width = max(1, viewport.tile_size // 12)
+    inner_width = max(1, outer_width - 2 * edge_width)
+    _draw_wall_layer(
+        surface,
+        draw,
+        maze,
+        viewport,
+        border_color,
+        outer_width,
+    )
+    _draw_wall_layer(
+        surface,
+        draw,
+        maze,
+        viewport,
+        wall_color,
+        inner_width,
+    )
+    _draw_blocked_cells(
+        surface,
+        draw,
+        maze,
+        viewport,
+        wall_color,
+    )
+
+
+def _draw_blocked_cells(
+    surface: Surface,
+    draw: DrawModule,
+    maze: MazeGrid,
+    viewport: MazeViewport,
+    color: Color,
+) -> None:
+    """Draw package-defined 42 cells as contiguous solid blocks."""
+    block_size = 2 * viewport.tile_size
+    for col, row in maze.blocked_cells:
+        center_x, center_y = viewport.tile_center(col, row)
+        draw.rect(
+            surface,
+            color,
+            (
+                center_x - viewport.tile_size,
+                center_y - viewport.tile_size,
+                block_size,
+                block_size,
+            ),
+        )
+
+
+def _draw_wall_layer(
+    surface: Surface,
+    draw: DrawModule,
+    maze: MazeGrid,
+    viewport: MazeViewport,
+    color: Color,
+    thickness: int,
+) -> None:
+    """Draw one connected center-line layer for all wall tiles."""
+    half = thickness // 2
 
     for row in range(maze.height):
         for col in range(maze.width):
-            if maze.tile_at((col, row)) is Tile.WALL:
-                top_left = viewport.tile_to_screen(col, row)
-                rect = (
-                    top_left[0],
-                    top_left[1],
-                    viewport.tile_size,
-                    viewport.tile_size,
+            if maze.tile_at((col, row)) is not Tile.WALL:
+                continue
+
+            center_x, center_y = viewport.tile_center(col, row)
+            draw.rect(
+                surface,
+                color,
+                (center_x - half, center_y - half, thickness, thickness),
+                border_radius=half,
+            )
+
+            if (
+                col + 1 < maze.width
+                and maze.tile_at((col + 1, row)) is Tile.WALL
+            ):
+                draw.rect(
+                    surface,
+                    color,
+                    (
+                        center_x,
+                        center_y - half,
+                        viewport.tile_size,
+                        thickness,
+                    ),
                 )
-                draw.rect(surface, wall_color, rect)
-                draw.rect(surface, border_color, rect, width=border_width)
+
+            if (
+                row + 1 < maze.height
+                and maze.tile_at((col, row + 1)) is Tile.WALL
+            ):
+                draw.rect(
+                    surface,
+                    color,
+                    (
+                        center_x - half,
+                        center_y,
+                        thickness,
+                        viewport.tile_size,
+                    ),
+                )

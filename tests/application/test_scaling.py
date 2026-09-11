@@ -125,7 +125,7 @@ def test_viewport_coordinate_conversions() -> None:
 
 
 def test_draw_maze_walls() -> None:
-    """Verify wall tiles render filled and bordered rectangles."""
+    """Verify walls render as connected lines narrower than corridors."""
     tiles = (
         (Tile.WALL, Tile.WALL, Tile.WALL),
         (Tile.WALL, Tile.CORRIDOR, Tile.WALL),
@@ -144,9 +144,55 @@ def test_draw_maze_walls() -> None:
 
     draw_maze_walls(surface, draw, maze, viewport)
 
-    # 8 wall tiles, each drawn twice (fill + border)
-    assert len(draw.rectangles) == 16
-
     wall_colors = [rect[0] for rect in draw.rectangles]
-    assert wall_colors.count(DEFAULT_WALL_COLOR) == 8
-    assert wall_colors.count(DEFAULT_WALL_BORDER) == 8
+    assert wall_colors.count(DEFAULT_WALL_COLOR) == 16
+    assert wall_colors.count(DEFAULT_WALL_BORDER) == 16
+
+    for _, (_, _, width, height), _, _ in draw.rectangles:
+        assert width < viewport.tile_size or height < viewport.tile_size
+
+    horizontal_bridges = [
+        rect
+        for _, rect, _, _ in draw.rectangles
+        if rect[2] == viewport.tile_size
+    ]
+    vertical_bridges = [
+        rect
+        for _, rect, _, _ in draw.rectangles
+        if rect[3] == viewport.tile_size
+    ]
+    assert len(horizontal_bridges) == 8
+    assert len(vertical_bridges) == 8
+
+
+def test_draw_maze_walls_fills_package_blocked_cells() -> None:
+    """Verify 42 marker cells remain visibly solid among thin walls."""
+    maze = MazeGrid(
+        tiles=(
+            (Tile.WALL, Tile.WALL, Tile.WALL),
+            (Tile.WALL, Tile.CORRIDOR, Tile.WALL),
+            (Tile.WALL, Tile.WALL, Tile.WALL),
+        ),
+        entry=(1, 1),
+        exit=(1, 1),
+        blocked_cells=frozenset({(0, 0)}),
+    )
+    viewport = MazeViewport(
+        tile_size=20,
+        offset_x=10,
+        offset_y=10,
+        grid_width=3,
+        grid_height=3,
+    )
+    surface = _FakeSurface()
+    draw = _FakeDrawModule()
+
+    draw_maze_walls(surface, draw, maze, viewport)
+
+    blocked_rectangles = [
+        rect
+        for color, rect, _, _ in draw.rectangles
+        if color == DEFAULT_WALL_COLOR
+        and rect[2:] == (40, 40)
+    ]
+    assert blocked_rectangles == [(0, 0, 40, 40)]

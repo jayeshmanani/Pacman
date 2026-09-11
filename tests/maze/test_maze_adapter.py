@@ -106,6 +106,7 @@ def test_normalization_removes_unreachable_corridor_islands() -> None:
     maze = MazeGeneratorAdapter(factory).generate(3, 2)
 
     assert maze.tile_at((3, 1)) is Tile.WALL
+    assert maze.blocked_cells == frozenset({(3, 1)})
     assert maze.is_corridor(maze.entry)
     assert maze.is_corridor(maze.exit)
 

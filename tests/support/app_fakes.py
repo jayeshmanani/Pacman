@@ -79,6 +79,18 @@ class _FakeEventModule:
         return self.event_batches.pop(0)
 
 
+def type_text_events(text: str) -> list[list[_FakeEvent]]:
+    """Create one fake keydown frame for each character in text."""
+    return [
+        [_FakeEvent(
+            type=_FakePygame.KEYDOWN,
+            key=ord(character),
+            unicode=character,
+        )]
+        for character in text
+    ]
+
+
 class _FakeSurface:
     """Record drawing operations performed on the fake window."""
 
@@ -183,10 +195,11 @@ class _FakeClock:
 
     def __init__(self) -> None:
         self.framerates: list[int] = []
+        self.elapsed_ms = 0
 
     def tick(self, framerate: int) -> int:
         self.framerates.append(framerate)
-        return 0
+        return self.elapsed_ms
 
 
 class _FakeTime:
@@ -208,6 +221,12 @@ class _FakePygame:
     K_SPACE = 32
     K_UP = 273
     K_DOWN = 274
+    K_RIGHT = 275
+    K_LEFT = 276
+    K_w = 119
+    K_a = 97
+    K_s = 115
+    K_d = 100
     K_BACKSPACE = 8
     K_F1 = 1073741882
     K_1 = 49
@@ -248,6 +267,12 @@ class _FailingPygame:
     K_SPACE = 32
     K_UP = 273
     K_DOWN = 274
+    K_RIGHT = 275
+    K_LEFT = 276
+    K_w = 119
+    K_a = 97
+    K_s = 115
+    K_d = 100
     K_BACKSPACE = 8
     K_F1 = 1073741882
     K_1 = 49
