@@ -35,25 +35,25 @@ tests, manual verification procedures, and quality gates.
 | **VI.7** | 10+ levels progression, timer countdown, level timeout handling | Automated Unit | `tests/gameplay/test_progression.py`, `test_level_timer.py` | **Passed** |
 | **VI.7** | Pause / Resume state handling | Automated Unit | `tests/gameplay/test_pause.py` | **Passed** |
 | **VI.8** | Graphical UI: Menu, HUD, Pause, Game Over, Victory | Automated Unit | `tests/application/rendering/`, `test_game_state.py` | **Passed** |
-| **VII** | Project packaging and platform deployment (Itch.io / Steam) | Build & Clean Env | Phase 8 Packaging Tasks (P8-05 to P8-07) | *Active* |
+| **VII** | Project packaging and platform deployment (Itch.io / Steam) | Build & Clean Env | PK-100 to PK-103 | **Passed** |
 | **VIII** | Dedicated `project_management/` directory with PM evidence | Repo Inspection | `project_management/` documentation suite | **Passed** |
 | **IX** | README format, 42 header, controls, architecture, AI disclosure | Manual Inspection | `README.md` | **Passed** |
 
 ---
 
-## 2. Automated Test Suite Distribution (456 Tests)
+## 2. Automated Test Suite Distribution (464 Tests)
 
-All 456 tests execute headlessly and pass without failures:
+All 464 tests execute headlessly and pass without failures:
 
 ```
 tests/
-├── application/           (158 tests)
+├── application/           (167 tests)
 │   ├── rendering/         - Menu, game, completion screens, dispatcher, scaling
 │   ├── test_cheat_*.py    - Cheat controller, HUD feedback, toggles
 │   ├── test_context.py    - AppContext lifecycle, session resets
 │   ├── test_game_state.py - State machine transitions
 │   └── test_sprites.py    - Vector rendering geometry and calculations
-├── gameplay/              (112 tests)
+├── gameplay/              (133 tests)
 │   ├── test_player.py     - Physics, movement, buffered turns, tile alignment
 │   ├── test_ghost_*.py    - Blinky, Pinky, Inky, Clyde targeting, fleeing, respawn
 │   ├── test_pacgums.py    - Pellet grid, collection, scoring
@@ -63,16 +63,17 @@ tests/
 │   ├── test_config.py     - Comment stripping, fallback clamping, invalid JSON
 │   ├── test_highscore.py  - HighscoreEntry validation, sorting, top 10 truncation
 │   └── test_storage.py    - Atomic writes, corruption recovery, file I/O safety
-├── maze/                  (51 tests)
+├── maze/                  (52 tests)
 │   ├── test_maze_adapter.py - Wheel boundary, PERFECT=False, error recovery
 │   ├── test_maze_grid.py    - Grid coordinates, flood-fill connectivity
 │   └── test_spawns.py       - Safe corner spawns, center player placement
-└── integration/           (90 tests)
+├── integration/           (66 tests)
     ├── test_full_game_flow.py      - Menu -> Play -> Win/Lose -> Name Entry -> Menu
     ├── test_lifecycle_cleanup.py   - Multi-cycle session resets, zero cheat leakage
     ├── test_live_configuration.py  - Live defense config overrides
     ├── test_soak_*.py              - 50,000 continuous ticks, floating-point drift
-    └── test_boundary_failures.py   - Corrupt files, missing wheel, zero tracebacks
+│   └── test_boundary_failures.py   - Corrupt files, missing wheel, zero tracebacks
+└── project setup          (2 tests) - Required files, targets, and metadata
 ```
 
 ---
@@ -90,7 +91,7 @@ make lint-strict
 make test
 ```
 *Expected Result:* Clean virtual environment created, zero flake8/mypy errors,
-456 tests passing.
+464 tests passing.
 
 ### Step 2: Fault Tolerance Check
 ```bash
@@ -115,9 +116,17 @@ default settings without raising a Python traceback.
 - Press `1`: Toggle **Invincibility**. Walk into a ghost. Verify Pac-Man survives
   without losing a life.
 - Press `3`: Toggle **Ghost Freeze**. Verify all 4 ghosts freeze in place.
+- While freeze remains active, collect a super-pacgum. Verify all frozen ghosts
+  become visibly frightened and can be eaten without resuming movement.
+- Eat a ghost, then collect another super-pacgum while its eyes are waiting in
+  the corner. Verify it remains inactive during respawn and returns frightened
+  if the newer power timer is still active. Repeat with freeze enabled and
+  verify the eyes remain visible and the respawn delay still completes.
 - Press `4`: Add an extra life. Verify the HUD lives counter increments.
 - Press `5`: Toggle **2x Speed**. Verify Pac-Man moves twice as fast. Toggle
-  again to verify normal speed is restored.
+  again to verify normal speed is restored. While boosted, buffer turns before
+  several crossroads and walls; verify every legal turn remains available and
+  Pac-Man never becomes stuck between tile centres.
 - Press `2`: Skip level. Verify transition to Level 2 with preserved score and lives.
 - Skip through to Level 10 using `2`, then skip once more to trigger **Victory**.
 
@@ -126,3 +135,34 @@ default settings without raising a Python traceback.
 - Press `Enter`: Verify the score saves and returns to the Main Menu.
 - Re-open **Highscores**: Verify `HERO 42` appears in the Top 10 list.
 - Quit the game and re-launch: Verify the highscore persists across restarts.
+
+---
+
+## 4. PK-103 Clean-Machine Acceptance Record
+
+**Date:** September 14, 2026
+
+**Ownership:** Team
+
+**Result:** Passed
+
+The release was rebuilt with `make package`, extracted into a fresh temporary
+directory outside the repository, and launched from the standalone executable
+without the project virtual environment or source tree. The package contained
+the executable, `config.json`, and `INSTRUCTIONS.txt`, and remained stable
+during an isolated headless startup check.
+
+The team then completed an interactive packaged-game review covering menu
+navigation, player movement, cheats, super-pacgum behaviour, ghost eating and
+respawn, scoring, level progression, completion/name entry, highscores, and
+return to the main menu. Three acceptance defects were found, fixed, documented
+in [`bug_triage.md`](bug_triage.md), and retested:
+
+- **BUG-08:** 2x speed could skip the valid buffered-turn window.
+- **BUG-09:** Frozen ghosts did not become visibly edible after a super-pacgum.
+- **BUG-10:** Freeze could visually overwrite and indefinitely pause respawn;
+  a newer power period was also lost while a ghost was inactive.
+
+Final verification completed with 464 passing tests, flake8, strict mypy, a
+successful package rebuild, and a repeated manual check of the corrected
+standalone game.

@@ -66,7 +66,7 @@ gantt
 | **M5** | **Ghost AI** | 2026-09-01 – 2026-09-06 | 2026-09-01 – 2026-09-05 | -1 day | Delivered | 4 autonomous AIs, frightened mode, delayed respawn (PK-62 to PK-70) |
 | **M6** | **UI & Full Flow** | 2026-09-06 – 2026-09-10 | 2026-09-05 – 2026-09-08 | -2 days | Delivered | Main menu, HUD, pause, game-over, victory, vector sprites (PK-76 to PK-84) |
 | **M7** | **Cheats, Soak & Triage** | 2026-09-10 – 2026-09-14 | 2026-09-08 – 2026-09-11 | -1 day | Delivered | F1 cheats, 50k soak test, timer drift fix, bug triage (PK-86 to PK-94) |
-| **M8** | **Docs, Packaging & Release** | 2026-09-12 – 2026-09-16 | 2026-09-11 – Present | On Track | In Progress | README (PK-96), docs (PK-97), arch (PK-98), PM evidence (PK-99) |
+| **M8** | **Docs, Packaging & Release** | 2026-09-12 – 2026-09-16 | 2026-09-11 – Present | On Track | In Progress | Documentation (PK-96 to PK-99), packaging/publishing (PK-100 to PK-102), clean-machine acceptance (PK-103) |
 
 ---
 
@@ -105,7 +105,10 @@ Phase 8 is scheduled from September 11 to September 16, 2026:
   - PK-97: Configuration model and highscore persistence documentation.
   - PK-98: Complete software architecture, package boundaries, and Mermaid flow diagrams.
   - PK-99: Project management update (timeline, decisions, risks, team, acceptance tests, blockers).
+  - PK-100: Reproducible standalone package and distributable archives.
+  - PK-101: Packaged-game controls and configuration instructions.
+  - PK-102: Public Itch.io deployment and launch demonstration.
+  - PK-103: Team clean-machine acceptance, defect fixes, and regression verification.
 - **Upcoming (Sep 14 – 16):**
-  - Standalone packaging script and bundled distribution artifact (Chapter VII).
-  - Platform deployment demonstration (Itch.io / Steam unlisted release).
-  - Clean-machine verification and final defense rehearsal.
+  - Final release rebuild after accepted fixes.
+  - Joint documentation/release review and final defense rehearsal.

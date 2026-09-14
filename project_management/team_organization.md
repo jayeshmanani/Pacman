@@ -108,5 +108,6 @@ following criteria are met:
 | | PK-94 | Live Pygame gameplay review & visual polish | **Team** | Team |
 | **Phase 8** | PK-96, PK-97, PK-98 | README, config/storage docs, architecture | Mariia | Jayesh |
 | | PK-99 | Project management update & progress evidence | **Team** | Team |
-| | P8-05 to P8-07 | Packaging script, packaged instructions, publishing | Jayesh | Mariia |
-| | P8-08, P8-10 | Clean-machine acceptance testing & release review | **Team** | Team |
+| | PK-100 to PK-102 | Packaging script, packaged instructions, publishing | Jayesh | Mariia |
+| | PK-103 | Clean-machine acceptance, defect fixes, regression verification | **Team** | Team |
+| | Not yet assigned | Final release rebuild and joint release review | **Team** | Team |

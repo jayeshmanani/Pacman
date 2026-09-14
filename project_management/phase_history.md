@@ -244,17 +244,18 @@ the end of the gameplay-review phase.
 
 | Owner | Jira tasks / Work items | Focus Area | Status |
 | --- | --- | --- | :---: |
-| Mariia | PK-96 (P8-01) | Root README with 42 curriculum metadata, controls, and instructions | Delivered |
-| Mariia | PK-97 (P8-02) | Configuration model, commented JSON parsing, and storage documentation | Delivered |
-| Mariia | PK-98 (P8-03) | General software architecture, package boundaries, and Mermaid flow diagrams | Delivered |
-| Team | PK-99 (P8-04) | Project timeline, ADR decisions, risk register, team organisation, acceptance tests, blockers | Delivered |
-| Jayesh | PK-100 (P8-05) | Root packaging script and spec; standalone distributable | Delivered |
-| Jayesh | PK-101 (P8-06) | Packaged-game controls and configuration instructions; in-game guidance | Delivered |
-| Jayesh | PK-102 (P8-07) | Public platform release on Itch.io; download and launch demonstration | Delivered |
-| Jayesh | P8-09 | Release rebuild | Planned |
-| Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release review | Planned |
+| Mariia | PK-96 | Root README with 42 curriculum metadata, controls, and instructions | Delivered |
+| Mariia | PK-97 | Configuration model, commented JSON parsing, and storage documentation | Delivered |
+| Mariia | PK-98 | General software architecture, package boundaries, and Mermaid flow diagrams | Delivered |
+| Team | PK-99 | Project timeline, ADR decisions, risk register, team organisation, acceptance tests, blockers | Delivered |
+| Jayesh | PK-100 | Root packaging script and spec; standalone distributable | Delivered |
+| Jayesh | PK-101 | Packaged-game controls and configuration instructions; in-game guidance | Delivered |
+| Jayesh | PK-102 | Public platform release on Itch.io; download and launch demonstration | Delivered |
+| Team | PK-103 | Clean-machine packaged-game acceptance, defect fixes, and regression verification | Delivered |
+| Jayesh | Not yet assigned | Final release rebuild | Planned |
+| Team | Not yet assigned | Joint documentation and release review | Planned |
 
-### Delivered Outcomes (PK-96 to PK-99)
+### Delivered Outcomes (PK-96 to PK-103)
 
 * **Repository Documentation (PK-96 to PK-98):** Completed root [`README.md`](../README.md)
   featuring 42 author login headers, clear CLI execution syntax, complete controls
@@ -272,7 +273,7 @@ the end of the gameplay-review phase.
   - [`team_organization.md`](team_organization.md): Two-person progressive pairing
     model, trunk-based PR workflow, quality gates, and Definition of Done.
   - [`acceptance_tests.md`](acceptance_tests.md): Traceability matrix mapping all
-    subject chapters to the 456 automated test suite and defense evaluation
+    subject chapters to the 464-test automated suite and defense evaluation
     procedures.
   - [`blockers_and_conflicts.md`](blockers_and_conflicts.md): Investigation and
     resolution logs for critical blockers (timer drift, maze marker topology,
@@ -315,10 +316,19 @@ the end of the gameplay-review phase.
     download as well as 1-click install and launch through the official Itch.io
     desktop application.
 
-Phase 8 is in progress, with clean-machine acceptance (P8-08, P8-10) and final release rebuild (P8-09) scheduled next.
-Phase 8 documentation and packaging work is complete through PK-101.
-Platform publishing, clean-machine acceptance testing, release rebuild, and
-the joint documentation and release review remain planned. These outcomes
-will be recorded after the corresponding Jira tasks are created and delivered.
+### Clean-Machine Packaged-Game Acceptance (PK-103)
 
+* **Team Acceptance:** Rebuilt and extracted the standalone Linux package in a
+  clean temporary location outside the repository, verified startup without the
+  project environment, and jointly reviewed the complete packaged-game loop.
+* **Defect Resolution:** Found and fixed high-speed buffered-turn skipping,
+  frightened state loss under ghost freeze, and freeze/respawn transition
+  inconsistencies. Recorded them as BUG-08 through BUG-10.
+* **Regression Evidence:** Added focused movement, rendering, collision, timer,
+  respawn, and complete coordinator tests. All 464 tests, flake8, and strict mypy
+  passed before the final package rebuild and repeated manual review.
+
+Phase 8 is complete through PK-103. The final release rebuild and joint
+documentation/release review remain planned and will be recorded after their
+Jira tasks are created and delivered.
 

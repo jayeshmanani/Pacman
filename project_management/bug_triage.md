@@ -1,10 +1,11 @@
-# Defect Triage Register (PK-93)
+# Defect Triage Register (PK-93 and PK-103)
 
 This register records defects, regressions, and boundary anomalies discovered
 during robustness testing (PK-89, PK-90), live configuration testing (PK-91),
-and long-play multi-level soak testing (PK-92). It documents reproduction steps,
-severity classification, root-cause analysis, and final disposition in
-accordance with Chapter VIII of the 42 Pacman subject.
+long-play multi-level soak testing (PK-92), and clean-machine packaged-game
+acceptance (PK-103). It documents reproduction steps, severity classification,
+root-cause analysis, and final disposition in accordance with Chapter VIII of
+the 42 Pacman subject.
 
 ---
 
@@ -19,6 +20,9 @@ accordance with Chapter VIII of the 42 Pacman subject.
 | **BUG-05** | Configured `pacgum` count ignored by level generator | PK-91 | Medium | Mariia | Fixed Immediately | Dual-mode support (`pacgum_configured`) in `LevelGenerator` |
 | **BUG-06** | Victory progression desynchronized from `levels` count | PK-91 | High | Mariia | Fixed Immediately | Dynamically bind `session.total_levels = len(config.levels)` |
 | **BUG-07** | External maze package stdout warning on small mazes | PK-89/92 | Low | Team | Accepted | Upstream wheel behavior; harmless per Chapter V.4 |
+| **BUG-08** | Speed boost could skip buffered turns | PK-103 | High | Team | Fixed Immediately | Collision-safe movement substeps and a boosted-crossroads regression test |
+| **BUG-09** | Frozen ghosts ignored frightened mode | PK-103 | High | Team | Fixed Immediately | Freeze now preserves edible state, rendering, and collision behaviour |
+| **BUG-10** | Respawned ghost missed a newer power mode | PK-103 | High | Team | Fixed Immediately | New frightened activation is deferred until the inactive ghost returns |
 
 ---
 
@@ -138,7 +142,7 @@ Covered in `tests/integration/test_lifecycle_cleanup.py` and
 
 - **Component:** `pacman.application.runtime`
 - **Severity:** Low (UI usability)
-- **Owner:** Mariia
+- **Owner:** Team
 - **Status:** Fixed Immediately
 - **Discovered In:** PK-90 Lifecycle Audit
 
@@ -171,7 +175,7 @@ Covered in `tests/application/test_app_window.py` and
 
 - **Component:** `pacman.maze.level_generator`, `pacman.infrastructure.config`
 - **Severity:** Medium (Configuration compliance)
-- **Owner:** Mariia
+- **Owner:** Team
 - **Status:** Fixed Immediately
 - **Discovered In:** PK-91 Live Config Testing
 
@@ -204,7 +208,7 @@ Covered in `tests/integration/test_live_configuration.py`
 
 - **Component:** `pacman.application.context`, `pacman.gameplay.progression`
 - **Severity:** High (Progression defect)
-- **Owner:** Mariia
+- **Owner:** Team
 - **Status:** Fixed Immediately
 - **Discovered In:** PK-91 Live Config Testing
 
@@ -255,3 +259,115 @@ Chapter V.4 of the subject states: *"You must use their package as-is, without
 modifying it. Your loader must adapt to their interface, not the opposite."*
 Because modifying upstream wheel source code is prohibited and the warning does
 not cause runtime errors, this behavior is accepted.
+
+---
+
+### BUG-08: Speed Boost Could Skip Buffered Turns
+
+- **Component:** `pacman.gameplay.player`
+- **Severity:** High (Player movement / packaged-game playability)
+- **Owner:** Mariia
+- **Status:** Fixed Immediately
+- **Discovered In:** PK-103 Clean-Machine Acceptance Testing
+
+#### Description
+With the 2x speed cheat enabled, one frame could move Pac-Man beyond the centre
+of an intersection before the buffered perpendicular direction was checked.
+Once offset from the corridor centre, wall collision correctly rejected the
+turn from that invalid alignment. Pac-Man could then reach a wall and appear
+stuck, with only the reverse direction available.
+
+#### Reproduction Steps
+1. Enable Cheat Mode with `F1`, then enable 2x speed with `5`.
+2. Move toward a crossroads and buffer a perpendicular turn before reaching it.
+3. Repeat near a corridor end or with a longer frame interval.
+4. *Observed:* Pac-Man crossed the tile centre, did not turn, and could become
+   limited to the opposite direction.
+
+#### Root Cause
+`Player.update()` applied the entire frame distance in one collision query. At
+boosted speed, that distance was large enough to skip the valid turning window
+inside the crossed tile.
+
+#### Resolution
+Split each frame's travel into collision-safe movement substeps. Buffered turns
+are now retried throughout the frame, so an intersection cannot be skipped while
+the existing wall checks, speed multiplier, and corner alignment remain intact.
+
+#### Verification
+Covered by `test_speed_multiplier_does_not_skip_buffered_crossroads_turn` in
+`tests/gameplay/test_player.py`, together with the existing movement, wall
+collision, cheat-action, evaluation-flow, and high-speed soak tests.
+
+---
+
+### BUG-09: Frozen Ghosts Ignored Frightened Mode
+
+- **Component:** `pacman.gameplay.ghost`, `pacman.gameplay.ghost_collision`,
+  `pacman.application.rendering.game`
+- **Severity:** High (Power-mode rules / acceptance playability)
+- **Owner:** Mariia
+- **Status:** Fixed Immediately
+- **Discovered In:** PK-103 Clean-Machine Acceptance Testing
+
+#### Description
+When ghost freeze was already active, collecting a super-pacgum left every
+ghost stationary but did not make the ghosts visibly edible or allow Pac-Man
+to eat them.
+
+#### Root Cause
+Movement freeze was represented by `GhostState.FROZEN`, and frightened
+activation treated that state as ineligible. Rendering and collision handling
+also inspected only the outer state, so they could not represent frightened
+mode underneath the independent freeze effect.
+
+#### Resolution
+Frozen ghosts now preserve `FRIGHTENED` as their underlying state while their
+outer `FROZEN` state continues to stop movement. The edible state is used by
+rendering and collision resolution, and expiration still clears it safely.
+Eaten and actively respawning ghosts remain collision-ineligible.
+
+#### Verification
+Focused tests cover activation during freeze, unchanged positions, frightened
+rendering, edible collision and scoring, respawn, unfreezing, and timer expiry.
+
+---
+
+### BUG-10: Respawned Ghost Missed a Newer Power Mode
+
+- **Component:** `pacman.gameplay.ghost`, `pacman.gameplay.ghost_gameplay`,
+  `pacman.gameplay.power_state`
+- **Severity:** High (Repeated power-mode activation / state transition)
+- **Owner:** Mariia
+- **Status:** Fixed Immediately
+- **Discovered In:** PK-103 Clean-Machine Acceptance Testing
+
+#### Description
+If another super-pacgum was collected while an eaten ghost was waiting in its
+corner, that ghost correctly remained inactive during respawn but returned as
+a normal full-colour ghost even though the newer power period was still active.
+With ghost freeze enabled, the respawning ghost could also be wrapped in
+`FROZEN`, making the eyes appear as a full-colour stationary ghost and pausing
+the respawn timer indefinitely.
+
+#### Root Cause
+Frightened activation ignored `RESPAWNING` completely, so the ghost had no way
+to remember that a newer power period started while it was inactive. The freeze
+transition also treated inactive `EATEN` and `RESPAWNING` states as ordinary
+moving ghosts.
+
+#### Resolution
+A new frightened activation is now deferred for a respawning ghost without
+interrupting its safe, eyes-only respawn state. When the delay finishes, the
+ghost becomes frightened for the shared power timer's remaining duration. If
+that timer expires first, the deferred state is cleared and the ghost returns
+normally. Freeze now applies only to active normal or frightened ghosts; eaten
+and respawning ghosts remain eyes-only and continue their safe return timer.
+The respawn completion frame no longer applies a full frame of movement from
+the corner.
+
+#### Verification
+Focused tests cover a second power activation during respawn, frightened return
+with the remaining shared duration, expiry before return, and preservation of
+the existing collision and score protections while the ghost is inactive. They
+also verify that freeze cannot pause or visually overwrite respawn.
