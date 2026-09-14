@@ -69,6 +69,12 @@ To run the packaged binary directly on a clean machine without Python or `uv`:
 cd dist/pacman && ./pacman config.json
 ```
 
+### Platform Distribution (Itch.io)
+
+In compliance with Chapter IV and Chapter VII, the game is deployed and publicly accessible on Itch.io:
+- **Release URL:** [https://jayeshmanani.itch.io/42-pac-man](https://jayeshmanani.itch.io/42-pac-man)
+- **Install & Launch:** Download and extract `pacman-linux-x86_64.zip` from Itch.io, or install directly using the official [Itch.io desktop app](https://itch.io/app). Run `./pacman config.json` to launch.
+
 ### Controls
 
 The current application supports the state controls below:
