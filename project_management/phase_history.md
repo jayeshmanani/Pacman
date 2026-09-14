@@ -240,15 +240,41 @@ the end of the gameplay-review phase.
 
 ## Phase 8 - Documentation, Packaging, and Release
 
-### Planned Ownership
+### Delivered & Planned Ownership
 
-| Owner | Work items | Planned focus |
-| --- | --- | --- |
-| Mariia | P8-01, P8-02, P8-03 | README; configuration and gameplay-system documentation; software architecture |
-| Jayesh | P8-05, P8-06, P8-07, P8-09 | Reproducible packaging; packaged-game instructions; platform publishing; release rebuild |
-| Team | P8-04 | Project timeline; progress evidence; decisions; risks; team organisation; blockers and conflicts |
-| Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release-evidence review |
+| Owner | Jira tasks / Work items | Focus Area | Status |
+| --- | --- | --- | :---: |
+| Mariia | PK-96 (P8-01) | Root README with 42 curriculum metadata, controls, and instructions | Delivered |
+| Mariia | PK-97 (P8-02) | Configuration model, commented JSON parsing, and storage documentation | Delivered |
+| Mariia | PK-98 (P8-03) | General software architecture, package boundaries, and Mermaid flow diagrams | Delivered |
+| Team | PK-99 (P8-04) | Project timeline, ADR decisions, risk register, team organisation, acceptance tests, blockers | Delivered |
+| Jayesh | P8-05, P8-06, P8-07, P8-09 | Reproducible packaging script; packaged-game instructions; platform publishing | Planned |
+| Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release review | Planned |
 
-Phase 8 is in progress. Completed outcomes and their verification evidence
-will be recorded here as the corresponding work items are reviewed and
-merged.
+### Delivered Outcomes (PK-96 to PK-99)
+
+* **Repository Documentation (PK-96 to PK-98):** Completed root [`README.md`](../README.md)
+  featuring 42 author login headers, clear CLI execution syntax, complete controls
+  and evaluation cheat maps, documented configuration schema with default values,
+  persistent highscores, and architectural diagrams showing decoupled packages.
+* **Project Management & Progress Evidence (PK-99):** Established comprehensive,
+  dated project management records in [`project_management/`](README.md):
+  - [`timeline.md`](timeline.md): Planned vs. actual timeline, Gantt chart, and
+    variance analysis for all 9 milestones.
+  - [`decisions.md`](decisions.md): Formal Architecture Decision Records
+    (ADR-01 through ADR-08) covering external adapter boundaries, headless
+    `AppContext`, vector rendering, and floating-point timer precision.
+  - [`risks.md`](risks.md): Risk management matrix and mitigation tracking
+    across technical, dependency, and platform categories.
+  - [`team_organization.md`](team_organization.md): Two-person progressive pairing
+    model, trunk-based PR workflow, quality gates, and Definition of Done.
+  - [`acceptance_tests.md`](acceptance_tests.md): Traceability matrix mapping all
+    subject chapters to the 456 automated test suite and defense evaluation
+    procedures.
+  - [`blockers_and_conflicts.md`](blockers_and_conflicts.md): Investigation and
+    resolution logs for critical blockers (timer drift, maze marker topology,
+    monolith refactoring, and Cyrillic keyboard handling).
+
+Phase 8 is in progress, with remaining packaging (P8-05) and platform deployment
+(P8-07) scheduled next.
+
