@@ -32,24 +32,27 @@ $RUNNER pyinstaller --clean --noconfirm pacman.spec
 echo "[3/4] Preparing package directory..."
 chmod +x dist/pacman/pacman
 cp config.json dist/pacman/config.json
-if [ -f highscores.json ]; then
-    cp highscores.json dist/pacman/highscores.json
-fi
+# Note: highscores.json is omitted from release packages so fresh installs
+# start with an empty leaderboard and automatically generate a new highscores.json
+# upon the player's first completed game.
 
 # If INSTRUCTIONS.txt exists at root, copy it; otherwise create minimal instructions
 if [ -f INSTRUCTIONS.txt ]; then
     cp INSTRUCTIONS.txt dist/pacman/INSTRUCTIONS.txt
 fi
 
-# Create compressed release archive
-echo "[4/4] Creating distribution archive..."
+# Create compressed release archives (tar.gz and zip for Itch.io)
+echo "[4/4] Creating distribution archives..."
 ARCHIVE_NAME="pacman-linux-x86_64.tar.gz"
+ZIP_NAME="pacman-linux-x86_64.zip"
 tar -czf "dist/$ARCHIVE_NAME" -C dist pacman
+python3 -c "import shutil; shutil.make_archive('dist/pacman-linux-x86_64', 'zip', 'dist', 'pacman')"
 
 echo "=================================================="
 echo " [SUCCESS] Distributable built successfully!"
 echo " Directory: dist/pacman/"
-echo " Archive:   dist/$ARCHIVE_NAME"
+echo " Archives:  dist/$ARCHIVE_NAME"
+echo "            dist/$ZIP_NAME (Recommended for Itch.io)"
 echo ""
 echo " To run the packaged game:"
 echo "   cd dist/pacman && ./pacman config.json"

@@ -250,7 +250,8 @@ the end of the gameplay-review phase.
 | Team | PK-99 (P8-04) | Project timeline, ADR decisions, risk register, team organisation, acceptance tests, blockers | Delivered |
 | Jayesh | PK-100 (P8-05) | Root packaging script and spec; standalone distributable | Delivered |
 | Jayesh | PK-101 (P8-06) | Packaged-game controls and configuration instructions; in-game guidance | Delivered |
-| Jayesh | P8-07, P8-09 | Platform publishing; release rebuild | Planned |
+| Jayesh | PK-102 (P8-07) | Public platform release on Itch.io; download and launch demonstration | Delivered |
+| Jayesh | P8-09 | Release rebuild | Planned |
 | Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release review | Planned |
 
 ### Delivered Outcomes (PK-96 to PK-99)
@@ -302,6 +303,19 @@ the end of the gameplay-review phase.
 - **In-Game Configuration Discovery:** Updated [information.py](../pacman/application/rendering/information.py)
   to render dynamic configuration discovery guidance directly on the in-game Instructions screen.
 
+### Public Platform Release on Itch.io (PK-102)
+
+* **Deployment Demonstration:** Deployed a public downloadable Linux release of
+  42 Pac-Man to Itch.io in compliance with Chapter IV and Chapter VII:
+  - **Release URL:** [https://jayeshmanani.itch.io/42-pac-man](https://jayeshmanani.itch.io/42-pac-man)
+  - **Distribution Artifact:** Uploaded `pacman-linux-x86_64.zip` containing the
+    frozen standalone binary, configuration schema, highscores template, and
+    embedded `INSTRUCTIONS.txt`.
+  - **Platform Integration:** Configured as a Linux executable supporting direct
+    download as well as 1-click install and launch through the official Itch.io
+    desktop application.
+
+Phase 8 is in progress, with clean-machine acceptance (P8-08, P8-10) and final release rebuild (P8-09) scheduled next.
 Phase 8 documentation and packaging work is complete through PK-101.
 Platform publishing, clean-machine acceptance testing, release rebuild, and
 the joint documentation and release review remain planned. These outcomes
