@@ -1,50 +1,189 @@
 ================================================================================
                                 42 PAC-MAN
+                  PACKAGED GAME USER & CONFIGURATION MANUAL
 ================================================================================
 
-This package contains the standalone distribution of the 42 Pac-Man arcade game,
-built with Python 3.10+ and Pygame as part of the 42 curriculum.
+Welcome to 42 Pac-Man! This standalone game package is completely self-contained.
+It includes all necessary runtime libraries, configurations, and assets. No
+system Python installation, virtual environment, or external package manager is
+required to run the game.
 
---------------------------------------------------------------------------------
-1. HOW TO LAUNCH
---------------------------------------------------------------------------------
+================================================================================
+1. HOW TO START THE GAME
+================================================================================
 
-From this directory in a terminal, run:
+1. Open a terminal and navigate to the directory where this package was extracted:
+       cd /path/to/dist/pacman
 
-    ./pacman config.json
+2. Launch the application by executing the 'pacman' binary with the configuration
+   file argument:
+       ./pacman config.json
 
-No Python installation, package manager, or virtual environment is required.
+3. The game window will open to the Main Menu (900x800 resolution).
+4. Press 'Enter' or 'Space' with '> Start Game <' highlighted to begin playing.
 
---------------------------------------------------------------------------------
-2. CONTROLS
---------------------------------------------------------------------------------
+Note: The game requires exactly one configuration file argument. If the file is
+missing or unreadable, the game will safely display a warning and boot using
+safe default settings without crashing.
 
-- Move Pac-Man:      Arrow Keys or W, A, S, D (also supports Cyrillic Ц, Ф, Ы, В)
-- Start Game:        Enter or Space
-- Pause / Resume:    P
-- Return to Menu:    Esc (from gameplay, pause, or end screens)
-- Exit Game:         Esc (from main menu) or close window
+================================================================================
+2. HOW TO PLAY
+================================================================================
 
---------------------------------------------------------------------------------
-3. EVALUATION CHEAT MODE (PEER REVIEW)
---------------------------------------------------------------------------------
+OBJECTIVE:
+- Guide Pac-Man through the maze corridors to eat all the pacgums (dots).
+- Clear every pacgum in the maze to advance to the next level.
+- Complete all 10 levels to achieve Victory and register your highscore!
 
-Cheat mode facilitates peer review and evaluation of hard-to-reach states:
+CONTROLS & MOVEMENT:
+- Move Pac-Man:
+    * Arrow Keys:  Up, Down, Left, Right
+    * WASD Keys:   W (Up), A (Left), S (Down), D (Right)
+    * Cyrillic:    Ц (Up), Ф (Left), Ы (Down), В (Right) for Russian keyboard layouts
+- Turn Buffering:
+    You can press a turn direction slightly before reaching an intersection;
+    Pac-Man will remember your input and turn into the corridor smoothly as soon
+    as the corner is reached.
+- Walls:
+    Corridors are wall-safe. Pac-Man cannot walk into or pass through blue walls.
 
-- F1: Toggle Cheat Mode On / Off (displays HUD indicator)
-- 1:  Toggle Invincibility (Pac-Man cannot lose lives)
-- 2:  Skip Level (immediately advance to next level)
-- 3:  Toggle Ghost Freeze (freeze all 4 ghosts in place)
+GHOSTS & DANGERS:
+- 4 autonomous ghosts roam the maze with unique AI behaviors:
+    * Blinky (Red):    Aggressive chaser, directly targets Pac-Man's tile.
+    * Pinky (Pink):    Ambush tactician, targets ahead of Pac-Man's direction.
+    * Inky (Cyan):     Unpredictable flanker, combines Blinky's and player's coordinates.
+    * Clyde (Orange):  Shy rover, approaches when distant but flees when close.
+- Colliding with any normal (dangerous) ghost costs 1 life. Pac-Man and all ghosts
+  safely respawn at their starting positions.
+- Starting Lives: You start with 3 lives. If all lives are lost, the game ends (Game Over).
+
+SUPER-PACGUMS (POWER MODE):
+- Four flashing Super-Pacgums (power pellets) are located in the 4 corners of the maze.
+- Eating a Super-Pacgum grants +50 points and activates Frightened Power Mode for 7 seconds.
+- In Power Mode:
+    * Ghosts turn dark blue, flash white when power is ending, and flee from Pac-Man.
+    * Pac-Man can eat frightened ghosts for massive bonus points:
+        - 1st Ghost: +200 points
+        - 2nd Ghost: +400 points
+        - 3rd Ghost: +800 points
+        - 4th Ghost: +1600 points
+    * Eaten ghosts return to their corner house to regenerate before returning to the hunt.
+
+SCORING:
+- Normal Pacgum:         +10 points
+- Super-Pacgum:          +50 points
+- Frightened Ghosts:     +200, +400, +800, +1600 points (chain resets each power pellet)
+- Score never decreases and carries over across all levels.
+
+================================================================================
+3. HOW TO PAUSE AND RESUME
+================================================================================
+
+- Pause Game:   Press 'P' at any time during active gameplay.
+- When Paused:
+    * The game action freezes immediately.
+    * Pac-Man and all 4 ghosts stop moving.
+    * The level countdown timer stops ticking.
+    * A clear 'PAUSED' overlay appears on the screen.
+- Resume Game:  Press 'P' again to resume gameplay seamlessly from the exact same frame.
+- Return to Menu: Press 'Esc' while paused to safely abandon the current game session
+  and return to the Main Menu.
+
+================================================================================
+4. HOW TO USE OPTIONS & MENUS
+================================================================================
+
+The Main Menu provides 4 interactive options:
+  > Start Game <
+    Highscores
+    Instructions
+    Exit
+
+NAVIGATION:
+- Use 'Up' / 'Down' Arrow Keys (or 'W' / 'S') to move the cursor between options.
+- Press 'Enter' or 'Space' to activate the selected option.
+
+AVAILABLE SCREENS:
+1. Start Game:
+   Launches a new gameplay session starting at Level 1 with 3 lives and 0 score.
+2. Highscores:
+   Displays the persistent Top 10 Leaderboard showing rank, player name, and score.
+   Press 'Esc', 'Enter', or 'Space' to return to the Main Menu.
+3. Instructions:
+   Displays the in-game graphical rules, control mappings, and point values.
+   Press 'Esc', 'Enter', or 'Space' to return to the Main Menu.
+4. Exit:
+   Exits the game cleanly and closes the window (you can also press 'Esc' on the
+   Main Menu or close the window).
+
+HIGHSCORE SUBMISSION (GAME OVER & VICTORY):
+- When you win (clear all 10 levels) or lose (run out of lives or time), you are
+  prompted to enter your name.
+- Type your name (1 to 10 characters, letters, numbers, and spaces allowed).
+- Press 'Backspace' to correct letters.
+- Press 'Enter' to submit your score and save it to the Top 10 leaderboard.
+- Press 'Esc' to skip saving and return directly to the Main Menu.
+
+================================================================================
+5. HOW TO FIND & CUSTOMIZE CONFIGURATION
+================================================================================
+
+LOCATION:
+The configuration file 'config.json' is located in the root of this game folder,
+directly beside the 'pacman' executable:
+    dist/pacman/config.json
+
+EDITING CONFIGURATION:
+You can open 'config.json' with any text editor (e.g. nano, vim, gedit, VS Code).
+The file supports full-line and trailing comments using '#' and '//' syntax.
+
+CONFIGURABLE PARAMETERS:
+- "highscore_filename": (string)
+    Filename where highscores are stored (default: "highscores.json").
+- "lives": (integer >= 1)
+    Number of starting lives for Pac-Man (default: 3).
+- "pacgum": (integer or null)
+    Optional exact number of pacgums per level. If omitted (or null), the game
+    automatically fills all eligible corridors with pacgums.
+- "points_per_pacgum": (integer >= 0)
+    Points awarded per normal dot eaten (default: 10).
+- "points_per_super_pacgum": (integer >= 0)
+    Points awarded per power pellet eaten (default: 50).
+- "points_per_ghost": (integer >= 0)
+    Base score awarded for eating a frightened ghost (default: 200).
+- "frightened_duration": (float >= 0.0)
+    Duration in seconds that ghosts remain edible after eating a super-pacgum (default: 7.0).
+- "level_max_time": (float >= 10.0)
+    Maximum countdown time in seconds allocated per level (default: 90.0).
+- "seed": (integer)
+    Random seed used for deterministic Level 1 generation (default: 43).
+- "levels": (array of objects)
+    List of level configurations. Each level object can define "width", "height",
+    and custom parameters. The default config provides ten 14x14 maze levels.
+
+FAULT-TOLERANT SAFE DEFAULTS:
+If you enter an invalid value (such as negative lives or corrupt formatting), the
+game will never crash. It logs a friendly warning and automatically clamps the
+setting to its safe default value.
+
+================================================================================
+6. EVALUATION CHEAT MODE (FOR PEER REVIEW)
+================================================================================
+
+Cheat mode is included to assist 42 peer evaluators in reaching and testing
+advanced states (e.g., higher levels, ghost eating, victory conditions) without
+requiring a full playthrough:
+
+- F1: Toggle Cheat Mode ON / OFF (displays the cheat HUD below the game area)
+- 1:  Toggle Invincibility (Pac-Man cannot lose lives to ghosts)
+- 2:  Skip Current Level (immediately advances to the next level)
+- 3:  Toggle Ghost Freeze (freezes all 4 ghosts in place)
 - 4:  Add Extra Life (+1 life on demand)
-- 5:  Toggle 2x Speed (reversible player speed boost)
+- 5:  Toggle 2x Speed (doubles player movement speed; toggle again to restore)
 
---------------------------------------------------------------------------------
-4. CONFIGURATION & HIGHSCORES
---------------------------------------------------------------------------------
+Cheats are non-mutating and automatically reset whenever a session ends,
+ensuring subsequent playthroughs remain completely clean.
 
-- Game settings are loaded from 'config.json' located in this directory. You may
-  edit level parameters, timer, pellet counts, or points directly.
-- The Top 10 highscores are persisted locally in 'highscores.json'.
-
-Enjoy the game! Waka-waka!
+================================================================================
+Enjoy playing 42 Pac-Man! Waka-waka!
 ================================================================================

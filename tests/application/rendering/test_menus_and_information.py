@@ -110,6 +110,9 @@ def test_instructions_render_active_configuration() -> None:
     assert "Power pellet: +60" in texts
     assert "Ghost: +250 to +2000" in texts
     assert "Lasts 8 seconds" in texts
+    assert (
+        "Config: edit 'config.json' in game folder to customize rules" in texts
+    )
     assert pygame.surface.blit_destinations[0] == {
         "center": (450, 223),
     }
@@ -119,8 +122,11 @@ def test_instructions_render_active_configuration() -> None:
     assert pygame.surface.blit_destinations[8] == {
         "center": (663, 279),
     }
-    assert pygame.surface.blit_destinations[-1] == {
+    assert pygame.surface.blit_destinations[-2] == {
         "center": (450, 589),
+    }
+    assert pygame.surface.blit_destinations[-1] == {
+        "center": (450, 623),
     }
 
 

@@ -248,7 +248,8 @@ the end of the gameplay-review phase.
 | Mariia | PK-97 (P8-02) | Configuration model, commented JSON parsing, and storage documentation | Delivered |
 | Mariia | PK-98 (P8-03) | General software architecture, package boundaries, and Mermaid flow diagrams | Delivered |
 | Team | PK-99 (P8-04) | Project timeline, ADR decisions, risk register, team organisation, acceptance tests, blockers | Delivered |
-| Jayesh | PK-100 (P8-05, P8-06) | Root packaging script and spec; standalone distributable; in-package instructions | Delivered |
+| Jayesh | PK-100 (P8-05) | Root packaging script and spec; standalone distributable | Delivered |
+| Jayesh | PK-101 (P8-06) | Packaged-game controls and configuration instructions; in-game guidance | Delivered |
 | Jayesh | P8-07, P8-09 | Platform publishing; release rebuild | Planned |
 | Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release review | Planned |
 
@@ -288,6 +289,22 @@ the end of the gameplay-review phase.
   and automatic `build/` & `dist/` cleanup on `make clean`. Verified execution in a clean
   environment outside of virtual environments.
 
-Phase 8 is in progress, with remaining platform deployment (P8-07) and clean-machine acceptance (P8-08, P8-10) scheduled next.
+### Packaged-Game Controls & Configuration Instructions (PK-101)
+
+- **Comprehensive In-Package Manual:** Expanded [INSTRUCTIONS.txt](../INSTRUCTIONS.txt)
+  bundled in the game package to document all required operational areas:
+  - How to start: terminal launch, configuration file argument, and safe fallbacks.
+  - How to play: Arrow/WASD/ЦФЫВ movement, turn buffering, ghost personalities, and scoring.
+  - How to pause: `P` key toggle, timer/AI freeze, and `Esc` abort to menu.
+  - How to use options: Main menu navigation, Highscores Top 10 viewer, and Instructions.
+  - How to find & customize configuration: Location of `config.json`, parameter schema,
+    comment syntax, and automatic error clamping.
+- **In-Game Configuration Discovery:** Updated [information.py](../pacman/application/rendering/information.py)
+  to render dynamic configuration discovery guidance directly on the in-game Instructions screen.
+
+Phase 8 documentation and packaging work is complete through PK-101.
+Platform publishing, clean-machine acceptance testing, release rebuild, and
+the joint documentation and release review remain planned. These outcomes
+will be recorded after the corresponding Jira tasks are created and delivered.
 
 
