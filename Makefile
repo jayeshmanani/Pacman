@@ -7,7 +7,7 @@ PYTEST ?= $(UV) run pytest
 MAIN ?= pac-man.py
 CONFIG ?= config.json
 
-.PHONY: install run debug clean lint lint-strict test preview-mazes check-python-version
+.PHONY: install run debug clean lint lint-strict test preview-mazes check-python-version package
 
 install:
 	$(UV) sync
@@ -24,7 +24,7 @@ debug:
 
 clean:
 	find . -type d -name "__pycache__" -not -path "./$(VENV)/*" -prune -exec rm -rf {} +
-	rm -rf .mypy_cache .pytest_cache
+	rm -rf .mypy_cache .pytest_cache build dist
 	find . -type f -name "*.py[co]" -not -path "./$(VENV)/*" -delete
 
 lint: check-python-version
@@ -40,3 +40,7 @@ test: check-python-version
 
 preview-mazes: check-python-version
 	$(PYTHON) -m scripts.preview_mazes
+
+package: check-python-version
+	bash package.sh
+

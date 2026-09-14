@@ -49,6 +49,26 @@ source .venv/bin/activate
 python3 pac-man.py config.json
 ```
 
+### Packaging and Standalone Execution
+
+Build the reproducible standalone distributable:
+```bash
+make package
+```
+or execute the root packaging script:
+```bash
+bash package.sh
+```
+
+This generates:
+- `dist/pacman/`: Standalone game folder containing the frozen `pacman` binary, runtime libraries, `config.json`, and `INSTRUCTIONS.txt`.
+- `dist/pacman-linux-x86_64.tar.gz`: Self-contained release archive ready for distribution and platform publishing (Itch.io / Steam).
+
+To run the packaged binary directly on a clean machine without Python or `uv`:
+```bash
+cd dist/pacman && ./pacman config.json
+```
+
 ### Controls
 
 The current application supports the state controls below:
@@ -88,6 +108,7 @@ regular player instructions screen.
 | `make lint` | Run flake8 and standard mypy checks |
 | `make lint-strict` | Run flake8 and mypy strict mode |
 | `make preview-mazes` | Display three generated levels in terminal |
+| `make package` | Build standalone distribution bundle and release archive |
 | `make clean` | Remove temporary cache files |
 
 ## Configuration

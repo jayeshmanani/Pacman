@@ -248,7 +248,8 @@ the end of the gameplay-review phase.
 | Mariia | PK-97 (P8-02) | Configuration model, commented JSON parsing, and storage documentation | Delivered |
 | Mariia | PK-98 (P8-03) | General software architecture, package boundaries, and Mermaid flow diagrams | Delivered |
 | Team | PK-99 (P8-04) | Project timeline, ADR decisions, risk register, team organisation, acceptance tests, blockers | Delivered |
-| Jayesh | P8-05, P8-06, P8-07, P8-09 | Reproducible packaging script; packaged-game instructions; platform publishing | Planned |
+| Jayesh | PK-100 (P8-05, P8-06) | Root packaging script and spec; standalone distributable; in-package instructions | Delivered |
+| Jayesh | P8-07, P8-09 | Platform publishing; release rebuild | Planned |
 | Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release review | Planned |
 
 ### Delivered Outcomes (PK-96 to PK-99)
@@ -275,6 +276,18 @@ the end of the gameplay-review phase.
     resolution logs for critical blockers (timer drift, maze marker topology,
     monolith refactoring, and Cyrillic keyboard handling).
 
-Phase 8 is in progress, with remaining packaging (P8-05) and platform deployment
-(P8-07) scheduled next.
+### Reproducible Packaging & Distributables (PK-100)
+
+* **Root Packaging Specification & Runner:** Created declarative [`pacman.spec`](../pacman.spec)
+  and [`package.sh`](../package.sh) at the repository root. Freezes the application
+  using PyInstaller with explicit hidden imports for `mazegenerator`, `pygame`, and
+  internal packages.
+* **Minimal In-Package Instructions:** Created [`INSTRUCTIONS.txt`](../INSTRUCTIONS.txt)
+  per Chapter VII, bundled into `dist/pacman/` and the release tarball.
+* **Build Automation & Clean Execution:** Added `make package` target in [`Makefile`](../Makefile)
+  and automatic `build/` & `dist/` cleanup on `make clean`. Verified execution in a clean
+  environment outside of virtual environments.
+
+Phase 8 is in progress, with remaining platform deployment (P8-07) and clean-machine acceptance (P8-08, P8-10) scheduled next.
+
 

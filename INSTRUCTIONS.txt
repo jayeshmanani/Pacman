@@ -1,0 +1,50 @@
+================================================================================
+                                42 PAC-MAN
+================================================================================
+
+This package contains the standalone distribution of the 42 Pac-Man arcade game,
+built with Python 3.10+ and Pygame as part of the 42 curriculum.
+
+--------------------------------------------------------------------------------
+1. HOW TO LAUNCH
+--------------------------------------------------------------------------------
+
+From this directory in a terminal, run:
+
+    ./pacman config.json
+
+No Python installation, package manager, or virtual environment is required.
+
+--------------------------------------------------------------------------------
+2. CONTROLS
+--------------------------------------------------------------------------------
+
+- Move Pac-Man:      Arrow Keys or W, A, S, D (also supports Cyrillic Ц, Ф, Ы, В)
+- Start Game:        Enter or Space
+- Pause / Resume:    P
+- Return to Menu:    Esc (from gameplay, pause, or end screens)
+- Exit Game:         Esc (from main menu) or close window
+
+--------------------------------------------------------------------------------
+3. EVALUATION CHEAT MODE (PEER REVIEW)
+--------------------------------------------------------------------------------
+
+Cheat mode facilitates peer review and evaluation of hard-to-reach states:
+
+- F1: Toggle Cheat Mode On / Off (displays HUD indicator)
+- 1:  Toggle Invincibility (Pac-Man cannot lose lives)
+- 2:  Skip Level (immediately advance to next level)
+- 3:  Toggle Ghost Freeze (freeze all 4 ghosts in place)
+- 4:  Add Extra Life (+1 life on demand)
+- 5:  Toggle 2x Speed (reversible player speed boost)
+
+--------------------------------------------------------------------------------
+4. CONFIGURATION & HIGHSCORES
+--------------------------------------------------------------------------------
+
+- Game settings are loaded from 'config.json' located in this directory. You may
+  edit level parameters, timer, pellet counts, or points directly.
+- The Top 10 highscores are persisted locally in 'highscores.json'.
+
+Enjoy the game! Waka-waka!
+================================================================================
