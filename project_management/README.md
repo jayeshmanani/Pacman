@@ -42,9 +42,25 @@ and delivery evidence.
 - Review architecture progressively as the project grows instead of waiting
   until the final phase for one large rewrite.
 
-## Evidence
+## Project Management Artifacts & Evidence
 
-- [`phase_history.md`](phase_history.md) records delivered results and phase
-  reviews.
-- [`bug_triage.md`](bug_triage.md) records defects discovered during robustness
-  and soak testing, reproduction steps, severity, and resolutions (PK-93).
+The following documents record dated evidence, engineering decisions, and
+acceptance tracking in accordance with Chapter VIII of the 42 subject:
+
+- [`phase_history.md`](phase_history.md): Comprehensive phase-by-phase delivery
+  history, sprint ownership, and verified outcomes (Phase 0 through Phase 8).
+- [`timeline.md`](timeline.md): Planned vs. actual project timeline, Mermaid
+  Gantt chart, milestone schedule, and variance analysis.
+- [`decisions.md`](decisions.md): Architecture Decision Records (ADRs) tracking
+  technical choices, design rationale, and consequences.
+- [`risks.md`](risks.md): Risk management register, likelihood/impact matrix,
+  and technical mitigations.
+- [`team_organization.md`](team_organization.md): Team roles, pairing model,
+  Definition of Done (DoD), and full ownership matrix.
+- [`acceptance_tests.md`](acceptance_tests.md): Acceptance Test Plan and
+  traceability matrix mapping subject specifications to the 456 automated tests.
+- [`blockers_and_conflicts.md`](blockers_and_conflicts.md): Technical obstacles,
+  investigation details, and team conflict resolution records.
+- [`bug_triage.md`](bug_triage.md): Defect triage register recording bugs
+  discovered during robustness/soak tests, severity, and fixes (PK-93).
+

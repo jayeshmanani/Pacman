@@ -244,11 +244,37 @@ the end of the gameplay-review phase.
 
 | Owner | Jira tasks / Work items | Focus Area | Status |
 | --- | --- | --- | :---: |
-| Mariia | PK-96 (P8-01), PK-97 (P8-02), PK-98 (P8-03) | README; configuration and gameplay-system docs; software architecture | Delivered |
+| Mariia | PK-96 (P8-01) | Root README with 42 curriculum metadata, controls, and instructions | Delivered |
+| Mariia | PK-97 (P8-02) | Configuration model, commented JSON parsing, and storage documentation | Delivered |
+| Mariia | PK-98 (P8-03) | General software architecture, package boundaries, and Mermaid flow diagrams | Delivered |
+| Team | PK-99 (P8-04) | Project timeline, ADR decisions, risk register, team organisation, acceptance tests, blockers | Delivered |
 | Jayesh | PK-100 (P8-05, P8-06) | Root packaging script and spec; standalone distributable; in-package instructions | Delivered |
-| Team | PK-99 (P8-04) | Project timeline; progress evidence; ADRs; risks; team organisation; blockers | Delivered |
 | Jayesh | P8-07, P8-09 | Platform publishing; release rebuild | Planned |
 | Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release review | Planned |
+
+### Delivered Outcomes (PK-96 to PK-99)
+
+* **Repository Documentation (PK-96 to PK-98):** Completed root [`README.md`](../README.md)
+  featuring 42 author login headers, clear CLI execution syntax, complete controls
+  and evaluation cheat maps, documented configuration schema with default values,
+  persistent highscores, and architectural diagrams showing decoupled packages.
+* **Project Management & Progress Evidence (PK-99):** Established comprehensive,
+  dated project management records in [`project_management/`](README.md):
+  - [`timeline.md`](timeline.md): Planned vs. actual timeline, Gantt chart, and
+    variance analysis for all 9 milestones.
+  - [`decisions.md`](decisions.md): Formal Architecture Decision Records
+    (ADR-01 through ADR-08) covering external adapter boundaries, headless
+    `AppContext`, vector rendering, and floating-point timer precision.
+  - [`risks.md`](risks.md): Risk management matrix and mitigation tracking
+    across technical, dependency, and platform categories.
+  - [`team_organization.md`](team_organization.md): Two-person progressive pairing
+    model, trunk-based PR workflow, quality gates, and Definition of Done.
+  - [`acceptance_tests.md`](acceptance_tests.md): Traceability matrix mapping all
+    subject chapters to the 456 automated test suite and defense evaluation
+    procedures.
+  - [`blockers_and_conflicts.md`](blockers_and_conflicts.md): Investigation and
+    resolution logs for critical blockers (timer drift, maze marker topology,
+    monolith refactoring, and Cyrillic keyboard handling).
 
 ### Reproducible Packaging & Distributables (PK-100)
 
@@ -261,4 +287,7 @@ the end of the gameplay-review phase.
 * **Build Automation & Clean Execution:** Added `make package` target in [`Makefile`](../Makefile)
   and automatic `build/` & `dist/` cleanup on `make clean`. Verified execution in a clean
   environment outside of virtual environments.
+
+Phase 8 is in progress, with remaining platform deployment (P8-07) and clean-machine acceptance (P8-08, P8-10) scheduled next.
+
 
