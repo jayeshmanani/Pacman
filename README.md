@@ -42,6 +42,13 @@ Direct CLI invocation:
 uv run python pac-man.py config.json
 ```
 
+Alternatively, after activating the project environment, use the exact
+subject-compatible command:
+```bash
+source .venv/bin/activate
+python3 pac-man.py config.json
+```
+
 ### Controls
 
 The current application supports the state controls below:
@@ -181,7 +188,7 @@ Detailed project management records, engineering decision logs, sprint ownership
 - [`bug_triage.md`](project_management/bug_triage.md): Acceptance defect triage register, reproduction evidence, severity classifications, and resolutions (PK-93).
 - [`README.md`](project_management/README.md): Team workflow, branch protection rules, and shared engineering standards.
 
-## Resources and AI Usage
+## Resources
 
 ### References
 - [Python 3 Documentation](https://docs.python.org/3/)
@@ -190,10 +197,13 @@ Detailed project management records, engineering decision logs, sprint ownership
 - [pytest Documentation](https://docs.pytest.org/)
 - [mypy Documentation](https://mypy.readthedocs.io/)
 
-### AI Usage
-Artificial Intelligence tools were utilized throughout development to:
-- Formulate automated test suites and identify tricky edge cases (e.g. multi-ghost collision in the same frame, timer boundary expirations).
-- Support code reviews, static type verification, and architecture boundary refactoring.
-- Draft documentation and verify compliance with PEP 257 docstring standards.
+### AI Usage Disclosure
 
-All AI-suggested code and documentation were systematically reviewed, refactored, and verified by the project authors through comprehensive test suites.
+AI was used as a collaborative learning and review tool to discuss the subject,
+identify implementation risks, propose tests, and improve documentation. It
+also supported analysis of gameplay edge cases, code reviews, static type
+verification, and discussions about modular architecture.
+
+Every accepted change was reviewed, discussed, and tested before it was
+committed. The project authors remain responsible for understanding,
+explaining, and maintaining all submitted code and documentation.
