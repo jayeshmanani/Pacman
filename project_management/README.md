@@ -17,6 +17,10 @@ and delivery evidence.
 - **Documentation:** Completed phase history and engineering decisions are
   documented here. Sprint status, assignments, and active planning remain in
   Jira and the progressive planner.
+- **Ownership:** Phase ownership follows the agreed Jira and progressive
+  planner assignments, not the author of an individual commit. `Team` marks
+  work that was discussed, reviewed, and delivered collaboratively even when
+  one member created the commit or pull request.
 
 ## Shared Engineering Rules
 
