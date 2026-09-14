@@ -194,3 +194,10 @@ def render_instructions_screen(
         (255, 230, 0),
         (center_x, footer_y),
     )
+    draw_centered_text(
+        screen,
+        fonts.body,
+        "Config: edit 'config.json' in game folder to customize rules",
+        (160, 185, 255),
+        (center_x, footer_y + 34),
+    )
