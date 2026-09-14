@@ -240,15 +240,25 @@ the end of the gameplay-review phase.
 
 ## Phase 8 - Documentation, Packaging, and Release
 
-### Planned Ownership
+### Delivered & Planned Ownership
 
-| Owner | Work items | Planned focus |
-| --- | --- | --- |
-| Mariia | P8-01, P8-02, P8-03 | README; configuration and gameplay-system documentation; software architecture |
-| Jayesh | P8-05, P8-06, P8-07, P8-09 | Reproducible packaging; packaged-game instructions; platform publishing; release rebuild |
-| Team | P8-04 | Project timeline; progress evidence; decisions; risks; team organisation; blockers and conflicts |
-| Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release-evidence review |
+| Owner | Jira tasks / Work items | Focus Area | Status |
+| --- | --- | --- | :---: |
+| Mariia | PK-96 (P8-01), PK-97 (P8-02), PK-98 (P8-03) | README; configuration and gameplay-system docs; software architecture | Delivered |
+| Jayesh | PK-100 (P8-05, P8-06) | Root packaging script and spec; standalone distributable; in-package instructions | Delivered |
+| Team | PK-99 (P8-04) | Project timeline; progress evidence; ADRs; risks; team organisation; blockers | Delivered |
+| Jayesh | P8-07, P8-09 | Platform publishing; release rebuild | Planned |
+| Team | P8-08, P8-10 | Clean-machine acceptance testing; joint documentation and release review | Planned |
 
-Phase 8 is in progress. Completed outcomes and their verification evidence
-will be recorded here as the corresponding work items are reviewed and
-merged.
+### Reproducible Packaging & Distributables (PK-100)
+
+* **Root Packaging Specification & Runner:** Created declarative [`pacman.spec`](../pacman.spec)
+  and [`package.sh`](../package.sh) at the repository root. Freezes the application
+  using PyInstaller with explicit hidden imports for `mazegenerator`, `pygame`, and
+  internal packages.
+* **Minimal In-Package Instructions:** Created [`INSTRUCTIONS.txt`](../INSTRUCTIONS.txt)
+  per Chapter VII, bundled into `dist/pacman/` and the release tarball.
+* **Build Automation & Clean Execution:** Added `make package` target in [`Makefile`](../Makefile)
+  and automatic `build/` & `dist/` cleanup on `make clean`. Verified execution in a clean
+  environment outside of virtual environments.
+
