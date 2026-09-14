@@ -292,7 +292,7 @@ the end of the gameplay-review phase.
 
 ### Packaged-Game Controls & Configuration Instructions (PK-101)
 
-* **Comprehensive In-Package Manual:** Expanded [`INSTRUCTIONS.txt`](../INSTRUCTIONS.txt)
+- **Comprehensive In-Package Manual:** Expanded [INSTRUCTIONS.txt](../INSTRUCTIONS.txt)
   bundled in the game package to document all required operational areas:
   - How to start: terminal launch, configuration file argument, and safe fallbacks.
   - How to play: Arrow/WASD/ЦФЫВ movement, turn buffering, ghost personalities, and scoring.
@@ -300,7 +300,7 @@ the end of the gameplay-review phase.
   - How to use options: Main menu navigation, Highscores Top 10 viewer, and Instructions.
   - How to find & customize configuration: Location of `config.json`, parameter schema,
     comment syntax, and automatic error clamping.
-* **In-Game Configuration Discovery:** Updated [`information.py`](../pacman/application/rendering/information.py)
+- **In-Game Configuration Discovery:** Updated [information.py](../pacman/application/rendering/information.py)
   to render dynamic configuration discovery guidance directly on the in-game Instructions screen.
 
 ### Public Platform Release on Itch.io (PK-102)
@@ -316,5 +316,9 @@ the end of the gameplay-review phase.
     desktop application.
 
 Phase 8 is in progress, with clean-machine acceptance (P8-08, P8-10) and final release rebuild (P8-09) scheduled next.
+Phase 8 documentation and packaging work is complete through PK-101.
+Platform publishing, clean-machine acceptance testing, release rebuild, and
+the joint documentation and release review remain planned. These outcomes
+will be recorded after the corresponding Jira tasks are created and delivered.
 
 
