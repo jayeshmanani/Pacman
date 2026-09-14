@@ -8,7 +8,12 @@ import random
 from pacman.application.state import GameStateController
 from pacman.infrastructure.config import GameConfig
 from pacman.application.context import GameSession
-from pacman.gameplay.ghost import Ghost, GhostIdentity, create_ghost_group
+from pacman.gameplay.ghost import (
+    Ghost,
+    GhostIdentity,
+    GhostState,
+    create_ghost_group,
+)
 from pacman.gameplay.ghost_collision import (
     GhostCollisionFrameResult,
     GhostCollisionGuard,
@@ -82,6 +87,7 @@ class GhostGameplay:
         blinky_tile = self._blinky_tile(world)
 
         for ghost in self.ghosts:
+            was_respawning = ghost.state is GhostState.RESPAWNING
             ghost.update(
                 dt=dt,
                 world=world,
@@ -91,6 +97,16 @@ class GhostGameplay:
                 player_direction=player_direction,
                 blinky_tile=blinky_tile,
             )
+            if (
+                was_respawning
+                and ghost.state is GhostState.NORMAL
+                and self.power_state.is_active
+                and ghost.frightened_timer > 0.0
+            ):
+                ghost.frighten(
+                    self.power_state.remaining_time,
+                    reverse_direction=False,
+                )
 
     def resolve_collisions(
         self,

@@ -61,6 +61,22 @@ def test_expiry_preserves_non_frightened_states() -> None:
     assert ghosts[3].state == GhostState.NORMAL
 
 
+def test_expiry_clears_deferred_power_from_respawning_ghost() -> None:
+    """Verify an inactive ghost cannot restore an expired power period."""
+    ghosts = _ghosts()
+    ghosts[0].start_respawn(5.0)
+    power_state = PowerState()
+
+    power_state.activate(1.0, ghosts)
+    assert ghosts[0].state is GhostState.RESPAWNING
+    assert ghosts[0].frightened_timer == 1.0
+
+    power_state.update(1.0, ghosts)
+
+    assert ghosts[0].state is GhostState.RESPAWNING
+    assert ghosts[0].frightened_timer == 0.0
+
+
 def test_expiry_clears_saved_frightened_state_from_frozen_ghost() -> None:
     """Verify unfreezing cannot restore an expired frightened state."""
     ghosts = _ghosts()

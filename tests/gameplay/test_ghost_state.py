@@ -35,12 +35,15 @@ def test_ghost_frighten_transition() -> None:
     assert ghost.frightened_timer == 8.0
 
 
-def test_ghost_frighten_rejected_when_frozen() -> None:
-    """Verify frighten is rejected when ghost is frozen."""
+def test_frozen_ghost_becomes_edible_without_resuming_movement() -> None:
+    """Verify power mode is stored while movement remains frozen."""
     ghost = Ghost.from_spawn(GhostIdentity.INKY, (1, 1))
     ghost.freeze()
-    assert ghost.frighten(5.0) is False
+
+    assert ghost.frighten(5.0) is True
     assert ghost.state == GhostState.FROZEN
+    assert ghost.previous_state == GhostState.FRIGHTENED
+    assert ghost.frightened_timer == 5.0
 
 
 def test_ghost_frighten_rejected_when_eaten() -> None:
@@ -52,12 +55,14 @@ def test_ghost_frighten_rejected_when_eaten() -> None:
     assert ghost.frighten(5.0) is False
 
 
-def test_ghost_frighten_rejected_when_respawning() -> None:
-    """Verify frighten is rejected when ghost is respawning."""
+def test_ghost_frighten_is_deferred_while_respawning() -> None:
+    """Verify a new power mode waits for an inactive ghost to return."""
     ghost = Ghost.from_spawn(GhostIdentity.INKY, (1, 1))
     ghost.start_respawn(3.0)
     assert ghost.state == GhostState.RESPAWNING
-    assert ghost.frighten(5.0) is False
+    assert ghost.frighten(5.0) is True
+    assert ghost.state == GhostState.RESPAWNING
+    assert ghost.frightened_timer == 5.0
 
 
 def test_ghost_eat_transition_success() -> None:

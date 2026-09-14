@@ -22,7 +22,7 @@ from pacman.application.sprites import (
     draw_pacman,
     draw_super_pacgum,
 )
-from pacman.gameplay.ghost import Ghost
+from pacman.gameplay.ghost import Ghost, GhostState
 from pacman.gameplay.player import Player
 from pacman.maze.level_generator import LevelData
 
@@ -253,7 +253,11 @@ def _render_level_entities(
             viewport.world_to_screen(*ghost.position),
             viewport.tile_size * GHOST_RADIUS_RATIO,
             identity=ghost.identity,
-            state=ghost.state,
+            state=(
+                GhostState.FRIGHTENED
+                if ghost.is_frightened
+                else ghost.state
+            ),
             direction=ghost.direction,
             flash_white=is_frightened_flashing(ghost.frightened_timer),
             background_color=(0, 0, 0),
