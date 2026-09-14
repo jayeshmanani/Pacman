@@ -9,6 +9,9 @@ from pacman.maze.grid import TileCoordinate
 from pacman.maze.world import WorldPosition, WorldSize, WorldMap
 
 
+_MAX_MOVEMENT_STEP = 0.2
+
+
 class Direction(Enum):
     """Represent 4-directional movement vectors (dx, dy)."""
 
@@ -104,15 +107,28 @@ class Player:
 
     def update(self, dt: float, world: WorldMap) -> None:
         """Update player position and handle turn buffer & wall collisions."""
-        if dt <= 0:
+        if dt <= 0 or not math.isfinite(dt):
             return
 
+        remaining_distance = self.movement_speed * dt
+        while remaining_distance > 0:
+            step_distance = min(remaining_distance, _MAX_MOVEMENT_STEP)
+            self._update_movement_step(step_distance, world)
+            remaining_distance -= step_distance
+            if self.direction == Direction.NONE:
+                break
+
+    def _update_movement_step(
+        self,
+        distance: float,
+        world: WorldMap,
+    ) -> None:
+        """Move one collision-safe step and apply a buffered turn."""
         if self.queued_direction != Direction.NONE:
-            movement_speed = self.movement_speed
             q_dx, q_dy = self.queued_direction.vector
             q_target = (
-                self.position[0] + q_dx * movement_speed * dt,
-                self.position[1] + q_dy * movement_speed * dt,
+                self.position[0] + q_dx * distance,
+                self.position[1] + q_dy * distance,
             )
             if world.can_occupy(q_target, self.half_size):
                 if self.direction.is_perpendicular(
@@ -128,14 +144,16 @@ class Player:
                 self.queued_direction = Direction.NONE
 
         if self.direction != Direction.NONE:
-            movement_speed = self.movement_speed
             dx, dy = self.direction.vector
             target = (
-                self.position[0] + dx * movement_speed * dt,
-                self.position[1] + dy * movement_speed * dt,
+                self.position[0] + dx * distance,
+                self.position[1] + dy * distance,
             )
             if world.can_occupy(target, self.half_size):
-                self.position = target
+                self.position = (
+                    round(target[0], 12),
+                    round(target[1], 12),
+                )
             else:
                 self.direction = Direction.NONE
 
