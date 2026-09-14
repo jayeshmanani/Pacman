@@ -18,6 +18,7 @@ hidden_imports = [
 datas = [
     ("config.json", "."),
     ("highscores.json", "."),
+    ("INSTRUCTIONS.txt", "."),
 ]
 
 a = Analysis(
