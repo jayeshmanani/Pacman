@@ -14,10 +14,9 @@ hidden_imports = [
     "mazegenerator.mazegenerator",
 ]
 
-# Bundle default configuration and clean highscore template
+# Bundle default configuration and user manual
 datas = [
     ("config.json", "."),
-    ("highscores.json", "."),
     ("INSTRUCTIONS.txt", "."),
 ]
 

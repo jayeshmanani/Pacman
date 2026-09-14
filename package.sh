@@ -32,9 +32,9 @@ $RUNNER pyinstaller --clean --noconfirm pacman.spec
 echo "[3/4] Preparing package directory..."
 chmod +x dist/pacman/pacman
 cp config.json dist/pacman/config.json
-if [ -f highscores.json ]; then
-    cp highscores.json dist/pacman/highscores.json
-fi
+# Note: highscores.json is omitted from release packages so fresh installs
+# start with an empty leaderboard and automatically generate a new highscores.json
+# upon the player's first completed game.
 
 # If INSTRUCTIONS.txt exists at root, copy it; otherwise create minimal instructions
 if [ -f INSTRUCTIONS.txt ]; then
