@@ -13,7 +13,11 @@ from pacman.application.rendering.game import (
     PACMAN_RADIUS_RATIO,
 )
 from pacman.application.scaling import calculate_maze_viewport
-from pacman.application.sprites import GHOST_PALETTES, PACMAN_YELLOW
+from pacman.application.sprites import (
+    FRIGHTENED_BLUE,
+    GHOST_PALETTES,
+    PACMAN_YELLOW,
+)
 from pacman.infrastructure.config import GameConfig
 from pacman.maze.level_generator import LevelGenerator
 from tests.support.app_fakes import _FakeFont, _FakePygame
@@ -93,6 +97,39 @@ def test_game_view_renders_generated_level_and_entities() -> None:
     assert all(
         circle[2] == viewport.tile_size * GHOST_RADIUS_RATIO
         for circle in ghost_circles
+    )
+
+
+def test_game_view_renders_frozen_frightened_ghost_as_edible() -> None:
+    """Verify freeze does not hide a ghost's frightened appearance."""
+    pygame = _FakePygame([])
+    context = AppContext(config=GameConfig())
+    context.level_generator = LevelGenerator(
+        config=context.config,
+        adapter=FixedMazeAdapter(),
+    )
+    context.start_new_game()
+    assert context.active_level is not None
+    assert context.player is not None
+    assert context.ghost_gameplay is not None
+    ghost = context.ghost_gameplay.ghosts[0]
+    ghost.freeze()
+    ghost.frighten(5.0)
+
+    render_game_view(
+        pygame.surface,
+        _fonts(),
+        WindowSettings(),
+        context.session,
+        draw=pygame.draw,
+        active_level=context.active_level,
+        player=context.player,
+        ghosts=(ghost,),
+    )
+
+    assert any(
+        circle[0] == FRIGHTENED_BLUE
+        for circle in pygame.draw.circles
     )
 
 

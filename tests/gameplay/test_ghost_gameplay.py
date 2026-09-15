@@ -222,18 +222,66 @@ def test_invincibility_prevents_life_loss_through_coordinator() -> None:
 
 
 def test_ghost_freeze_restores_each_previous_state() -> None:
-    """Verify group freeze preserves independent ghost state transitions."""
+    """Verify group freeze preserves active and inactive ghost states."""
     gameplay = GhostGameplay.create(_spawns(), GameConfig(seed=42))
     gameplay.ghosts[0].frighten(5.0)
     gameplay.ghosts[1].start_respawn(3.0)
 
     gameplay.set_ghosts_frozen(True)
 
-    assert all(ghost.state is GhostState.FROZEN for ghost in gameplay.ghosts)
+    assert gameplay.ghosts[0].state is GhostState.FROZEN
+    assert gameplay.ghosts[1].state is GhostState.RESPAWNING
+    assert gameplay.ghosts[2].state is GhostState.FROZEN
+    assert gameplay.ghosts[3].state is GhostState.FROZEN
 
     gameplay.set_ghosts_frozen(False)
 
-    assert gameplay.ghosts[0].state is GhostState.FRIGHTENED
-    assert gameplay.ghosts[1].state is GhostState.RESPAWNING
-    assert gameplay.ghosts[2].state is GhostState.NORMAL
-    assert gameplay.ghosts[3].state is GhostState.NORMAL
+    restored_states = [ghost.state for ghost in gameplay.ghosts]
+    assert restored_states == [
+        GhostState.FRIGHTENED,
+        GhostState.RESPAWNING,
+        GhostState.NORMAL,
+        GhostState.NORMAL,
+    ]
+
+
+def test_ghost_freeze_does_not_pause_safe_respawn() -> None:
+    """Verify eaten ghost eyes finish respawn while active ghosts freeze."""
+    gameplay = GhostGameplay.create(_spawns(), GameConfig(seed=42))
+    ghost = gameplay.ghosts[0]
+    ghost.start_respawn(1.0)
+
+    gameplay.set_ghosts_frozen(True)
+    gameplay.update(
+        dt=1.0,
+        world=_world(),
+        player_position=(2.5, 2.5),
+    )
+
+    assert ghost.state is GhostState.NORMAL
+    assert ghost.respawn_timer == 0.0
+    assert all(
+        other.state is GhostState.FROZEN
+        for other in gameplay.ghosts[1:]
+    )
+
+
+def test_respawned_ghost_joins_power_mode_still_in_progress() -> None:
+    """Verify a returned ghost is edible for remaining shared power time."""
+    gameplay = GhostGameplay.create(
+        _spawns(),
+        GameConfig(seed=42, frightened_duration=7.0),
+    )
+    ghost = gameplay.ghosts[0]
+    ghost.start_respawn(1.0)
+    gameplay.activate_frightened()
+
+    gameplay.update(
+        dt=1.0,
+        world=_world(),
+        player_position=(2.5, 2.5),
+    )
+
+    assert gameplay.power_state.remaining_time == 6.0
+    assert ghost.state is GhostState.FRIGHTENED
+    assert ghost.frightened_timer == 6.0

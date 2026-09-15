@@ -21,6 +21,21 @@ def _create_test_world() -> WorldMap:
     return WorldMap(maze)
 
 
+def _create_crossroads_world() -> WorldMap:
+    """Create a crossroads where a fast player can miss the tile centre."""
+    wall = Tile.WALL
+    corridor = Tile.CORRIDOR
+    tiles = (
+        (wall, wall, wall, wall, wall),
+        (wall, wall, corridor, wall, wall),
+        (wall, corridor, corridor, corridor, wall),
+        (wall, wall, corridor, wall, wall),
+        (wall, wall, wall, wall, wall),
+    )
+    maze = MazeGrid(tiles=tiles, entry=(1, 2), exit=(3, 2))
+    return WorldMap(maze)
+
+
 def test_player_spawns_at_tile_center() -> None:
     """Verify player spawns centered at tile coordinates."""
     player = Player.from_spawn((1, 1))
@@ -148,6 +163,22 @@ def test_speed_multiplier_preserves_wall_collision() -> None:
 
     assert player.position == (1.5, 1.5)
     assert player.direction is Direction.NONE
+
+
+def test_speed_multiplier_does_not_skip_buffered_crossroads_turn() -> None:
+    """Verify a boosted player can take a turn crossed within one frame."""
+    world = _create_crossroads_world()
+    player = Player.from_spawn((1, 2), speed=7.0)
+    player.direction = Direction.RIGHT
+    player.queued_direction = Direction.DOWN
+    player.set_speed_multiplier(2.0)
+
+    player.update(dt=0.1, world=world)
+
+    assert player.direction is Direction.DOWN
+    assert player.queued_direction is Direction.NONE
+    assert player.position[0] == pytest.approx(2.5)
+    assert player.position[1] > 2.5
 
 
 @pytest.mark.parametrize("multiplier", (0, -1, float("inf"), float("nan")))

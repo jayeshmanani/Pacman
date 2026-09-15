@@ -92,6 +92,21 @@ def test_invincible_player_can_still_eat_frightened_ghost() -> None:
     assert frightened_ghost.state is GhostState.RESPAWNING
 
 
+def test_frozen_frightened_ghost_is_still_edible() -> None:
+    """Verify movement freeze does not block power-mode collision rules."""
+    session = GameSession()
+    ghost = _ghost(GhostState.NORMAL)
+    ghost.freeze()
+    ghost.frighten(5.0)
+    power_state = PowerState(remaining_time=5.0)
+
+    outcome = handle_ghost_collision(session, ghost, power_state)
+
+    assert outcome is GhostCollisionOutcome.GHOST_EATEN
+    assert session.score == 200
+    assert ghost.state is GhostState.RESPAWNING
+
+
 def test_inactive_ghost_collision_is_ignored() -> None:
     """Verify eaten and respawning ghosts cannot harm the player."""
     for state in (GhostState.EATEN, GhostState.RESPAWNING):

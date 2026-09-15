@@ -28,7 +28,7 @@ Risks are evaluated by multiplying Likelihood and Impact:
 | **RISK-04** | State Contamination Across Sessions | Architecture | High | Mitigated (Lifecycle Reset) | Low | Jayesh |
 | **RISK-05** | Non-QWERTY Keyboard Incompatibility | User Experience | Medium | Mitigated (Cyrillic WASD Support)| Low | Mariia |
 | **RISK-06** | Pygame Rendering / Rule Coupling | Architecture | High | Mitigated (`AppContext` Decoupling)| Low | Team |
-| **RISK-07** | Packaging Failures on Clean Environments| Deployment | High | In Progress (Phase 8 Testing) | Medium | Jayesh |
+| **RISK-07** | Packaging Failures on Clean Environments | Deployment | High | Mitigated (PK-100 to PK-103) | Low | Team |
 | **RISK-08** | Ghost AI Corner Oscillation & Trapping | Gameplay AI | Medium | Mitigated (Reverse-Turn Prohibition)| Low | Jayesh |
 
 ---
@@ -99,7 +99,7 @@ Risks are evaluated by multiplying Likelihood and Impact:
 - **Mitigations:**
   1. Refactored domain rules out of `pacman/app.py` into `pacman/gameplay/` and `pacman/application/`.
   2. Rendering components strictly receive read-only state copies or properties.
-  3. Verified by 456 headless automated tests passing in under 2 seconds.
+  3. Verified by the current 464-test headless automated suite.
 - **Status:** Closed / Resolved in PK-60.
 
 ---
@@ -109,9 +109,11 @@ Risks are evaluated by multiplying Likelihood and Impact:
 - **Context:** Packaging the application into a standalone executable or release archive may fail due to hidden dynamic imports (Pygame SDL libraries, embedded wheel).
 - **Impact:** High (Violates Chapter VII: project must be packaged and launchable on clean machines).
 - **Mitigations:**
-  1. Creating a reproducible packaging specification (PyInstaller / standalone bundle) in Phase 8 (P8-05).
-  2. Testing on clean virtual environments and recording verification steps (P8-08).
-- **Status:** In Progress / Active in Phase 8.
+  1. Created a reproducible PyInstaller specification and standalone archives in PK-100.
+  2. Documented packaged operation in PK-101 and published the Linux release in PK-102.
+  3. Extracted and launched a rebuilt package outside the repository and virtual environment in PK-103.
+  4. Completed team gameplay acceptance, corrected BUG-08 through BUG-10, and repeated the package verification.
+- **Status:** Closed / Verified by PK-103 clean-machine acceptance.
 
 ---
 

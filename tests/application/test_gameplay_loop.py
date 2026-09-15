@@ -124,6 +124,37 @@ def test_frame_activates_frightened_ghosts_from_super_pacgum() -> None:
     )
 
 
+def test_super_pacgum_keeps_frozen_ghosts_still_but_edible() -> None:
+    """Verify freeze and frightened mode remain independently active."""
+    context = _context()
+    controller = GameStateController(GameState.PLAYING)
+    assert context.player is not None
+    assert context.ghost_gameplay is not None
+    player_tile = (
+        int(context.player.position[0]),
+        int(context.player.position[1]),
+    )
+    context.cheat_mode.enabled = True
+    context.cheat_mode.ghost_freeze_enabled = True
+    _set_pellets(context, {(0, 0)}, set())
+    update_gameplay_frame(context, controller, 0.0)
+    frozen_positions = tuple(
+        ghost.position for ghost in context.ghost_gameplay.ghosts
+    )
+
+    _set_pellets(context, {(0, 0)}, {player_tile})
+    update_gameplay_frame(context, controller, 0.1)
+
+    assert all(
+        ghost.state is GhostState.FROZEN
+        and ghost.is_frightened
+        for ghost in context.ghost_gameplay.ghosts
+    )
+    assert tuple(
+        ghost.position for ghost in context.ghost_gameplay.ghosts
+    ) == frozen_positions
+
+
 def test_normal_ghost_collision_removes_life_and_respawns_player() -> None:
     """Verify collision consequences run inside the live frame pipeline."""
     context = _context()

@@ -84,7 +84,7 @@ def handle_ghost_collision(
     if ghost.state is GhostState.NORMAL:
         return GhostCollisionOutcome.PLAYER_HIT
 
-    if ghost.state is not GhostState.FRIGHTENED:
+    if not ghost.is_frightened:
         return GhostCollisionOutcome.IGNORED
 
     if not ghost.eat():

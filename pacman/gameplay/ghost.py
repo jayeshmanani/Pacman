@@ -77,12 +77,22 @@ class Ghost:
         if duration < 0:
             raise ValueError("frightened duration cannot be negative")
 
-        ineligible_states = (
-            GhostState.FROZEN,
-            GhostState.EATEN,
-            GhostState.RESPAWNING,
-        )
-        if self.state in ineligible_states:
+        if self.state == GhostState.FROZEN:
+            if self.previous_state is GhostState.EATEN:
+                return False
+            if self.previous_state is GhostState.RESPAWNING:
+                self.frightened_timer = float(duration)
+                return True
+            self.previous_state = GhostState.FRIGHTENED
+            self.frightened_timer = float(duration)
+            if reverse_direction and self.direction != Direction.NONE:
+                self.direction = self.direction.opposite
+            return True
+
+        if self.state is GhostState.RESPAWNING:
+            self.frightened_timer = float(duration)
+            return True
+        if self.state is GhostState.EATEN:
             return False
 
         self.state = GhostState.FRIGHTENED
@@ -93,12 +103,24 @@ class Ghost:
 
     def eat(self) -> bool:
         """Transition frightened ghost to EATEN state when caught."""
-        if self.state != GhostState.FRIGHTENED:
+        if not self.is_frightened:
             return False
 
         self.state = GhostState.EATEN
+        self.previous_state = None
         self.frightened_timer = 0.0
         return True
+
+    @property
+    def is_frightened(self) -> bool:
+        """Return whether the ghost is edible, including while frozen."""
+        return (
+            self.state == GhostState.FRIGHTENED
+            or (
+                self.state == GhostState.FROZEN
+                and self.previous_state == GhostState.FRIGHTENED
+            )
+        )
 
     def recover_from_frightened(self) -> bool:
         """Clear frightened state without disturbing other ghost states.
@@ -116,6 +138,21 @@ class Ghost:
             and self.previous_state == GhostState.FRIGHTENED
         ):
             self.previous_state = GhostState.NORMAL
+            self.frightened_timer = 0.0
+            return True
+
+        if (
+            self.state == GhostState.RESPAWNING
+            and self.frightened_timer > 0.0
+        ):
+            self.frightened_timer = 0.0
+            return True
+
+        if (
+            self.state == GhostState.FROZEN
+            and self.previous_state == GhostState.RESPAWNING
+            and self.frightened_timer > 0.0
+        ):
             self.frightened_timer = 0.0
             return True
 
@@ -146,7 +183,11 @@ class Ghost:
 
     def freeze(self) -> bool:
         """Freeze ghost movement and timers for cheat mode or pause."""
-        if self.state == GhostState.FROZEN:
+        if self.state in (
+            GhostState.FROZEN,
+            GhostState.EATEN,
+            GhostState.RESPAWNING,
+        ):
             return False
 
         self.previous_state = self.state
@@ -191,6 +232,7 @@ class Ghost:
             if self.respawn_timer <= 1e-9:
                 self.respawn_timer = 0.0
                 self.state = GhostState.NORMAL
+                return
 
         if world is not None and self.state != GhostState.RESPAWNING:
             self._move(
