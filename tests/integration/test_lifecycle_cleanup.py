@@ -82,7 +82,8 @@ def test_repeated_end_screen_cancellations_do_not_leak_highscores(
         events.extend([
             # Start Game
             [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-            # Trigger Game Over
+            # Enable cheat mode, then trigger Game Over
+            [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
             [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
             # Type partial name
             *_type_string_events(name),

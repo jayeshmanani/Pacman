@@ -43,6 +43,32 @@ def skip_current_level(
     )
 
 
+def force_game_over(
+    cheat_mode: CheatMode,
+    session: GameSession,
+    state_controller: GameStateController,
+) -> bool:
+    """End the active session as a loss when evaluation cheats are active."""
+    if not cheat_mode.enabled:
+        return False
+    session.resume_gameplay()
+    state_controller.end_game(session)
+    return True
+
+
+def force_victory(
+    cheat_mode: CheatMode,
+    session: GameSession,
+    state_controller: GameStateController,
+) -> bool:
+    """End the active session as a win when evaluation cheats are active."""
+    if not cheat_mode.enabled:
+        return False
+    session.trigger_victory()
+    state_controller.end_game(session)
+    return True
+
+
 def toggle_player_speed_boost(
     cheat_mode: CheatMode,
     player: Player,

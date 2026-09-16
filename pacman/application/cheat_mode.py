@@ -13,6 +13,8 @@ class CheatControls:
     ghost_freeze_key: int
     extra_life_key: int
     speed_boost_key: int
+    force_game_over_key: int
+    force_victory_key: int
 
 
 @dataclass

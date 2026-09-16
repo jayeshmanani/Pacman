@@ -34,6 +34,8 @@ from pacman.application.highscore_flow import handle_completed_game_input
 from pacman.application.cheat_mode import CheatControls, handle_cheat_key
 from pacman.application.cheat_actions import (
     add_extra_life,
+    force_game_over,
+    force_victory,
     skip_current_level,
     synchronize_player_speed,
 )
@@ -56,10 +58,8 @@ def _create_state_controls(pygame_instance: PygameModule) -> StateControls:
             pygame_instance.K_RETURN,
             pygame_instance.K_SPACE,
         }),
-        end_screen_key=pygame_instance.K_e,
         main_menu_key=pygame_instance.K_ESCAPE,
         pause_key=pygame_instance.K_p,
-        victory_key=pygame_instance.K_v,
     )
 
 
@@ -84,6 +84,8 @@ def _create_cheat_controls(pygame_instance: PygameModule) -> CheatControls:
         ghost_freeze_key=pygame_instance.K_3,
         extra_life_key=pygame_instance.K_4,
         speed_boost_key=pygame_instance.K_5,
+        force_game_over_key=pygame_instance.K_e,
+        force_victory_key=pygame_instance.K_v,
     )
 
 
@@ -159,6 +161,16 @@ def _handle_cheat_action(
 
     if key == controls.extra_life_key and context.cheat_mode.enabled:
         return add_extra_life(context.cheat_mode, context.session)
+
+    if key == controls.force_game_over_key and context.cheat_mode.enabled:
+        return force_game_over(
+            context.cheat_mode, context.session, controller
+        )
+
+    if key == controls.force_victory_key and context.cheat_mode.enabled:
+        return force_victory(
+            context.cheat_mode, context.session, controller
+        )
 
     handled = handle_cheat_key(key, controls, context.cheat_mode)
     if handled and context.player is not None:

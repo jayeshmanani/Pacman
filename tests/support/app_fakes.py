@@ -311,8 +311,6 @@ def state_controls() -> StateControls:
             _FakePygame.K_RETURN,
             _FakePygame.K_SPACE,
         }),
-        end_screen_key=_FakePygame.K_e,
         main_menu_key=_FakePygame.K_ESCAPE,
         pause_key=_FakePygame.K_p,
-        victory_key=_FakePygame.K_v,
     )

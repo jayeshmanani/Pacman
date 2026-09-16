@@ -2,6 +2,8 @@
 
 from pacman.application.cheat_actions import (
     add_extra_life,
+    force_game_over,
+    force_victory,
     skip_current_level,
     synchronize_player_speed,
     toggle_player_speed_boost,
@@ -124,6 +126,45 @@ def test_level_skip_on_final_level_triggers_victory() -> None:
     assert session.is_victory
     assert session.score == 1200
     assert session.lives == 3
+    assert controller.state is GameState.VICTORY
+
+
+def test_force_game_over_requires_active_cheat_mode() -> None:
+    """Verify a disabled cheat cannot force an immediate Game Over."""
+    session = GameSession()
+    controller = GameStateController(GameState.PLAYING)
+
+    assert not force_game_over(CheatMode(), session, controller)
+    assert controller.state is GameState.PLAYING
+
+
+def test_force_game_over_ends_game_when_cheat_mode_enabled() -> None:
+    """Verify the evaluation cheat can force an immediate Game Over."""
+    session = GameSession()
+    controller = GameStateController(GameState.PLAYING)
+
+    assert force_game_over(CheatMode(enabled=True), session, controller)
+    assert not session.is_victory
+    assert controller.state is GameState.GAME_OVER
+
+
+def test_force_victory_requires_active_cheat_mode() -> None:
+    """Verify a disabled cheat cannot force an immediate Victory."""
+    session = GameSession()
+    controller = GameStateController(GameState.PLAYING)
+
+    assert not force_victory(CheatMode(), session, controller)
+    assert not session.is_victory
+    assert controller.state is GameState.PLAYING
+
+
+def test_force_victory_ends_game_when_cheat_mode_enabled() -> None:
+    """Verify the evaluation cheat can force an immediate Victory."""
+    session = GameSession()
+    controller = GameStateController(GameState.PLAYING)
+
+    assert force_victory(CheatMode(enabled=True), session, controller)
+    assert session.is_victory
     assert controller.state is GameState.VICTORY
 
 
