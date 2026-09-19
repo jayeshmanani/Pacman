@@ -302,7 +302,7 @@ reads the current application state without changing the gameplay rules.
 The project is developed using Jira (issue key prefix `PK-`) and GitHub pull requests following trunk-based development with peer reviews and continuous automated testing.
 
 Detailed project management records, engineering decision logs, sprint ownership, and phase delivery histories are maintained in the [`project_management/`](project_management/) directory:
-- [`phase_history.md`](project_management/phase_history.md): Delivery history and phase reviews through the completed Phase 7 gameplay review.
+- [`phase_history.md`](project_management/phase_history.md): Delivery history and phase reviews through the completed Phase 8 release review.
 - [`bug_triage.md`](project_management/bug_triage.md): Acceptance defect triage register, reproduction evidence, severity classifications, and resolutions (PK-93).
 - [`README.md`](project_management/README.md): Team workflow, branch protection rules, and shared engineering standards.
 

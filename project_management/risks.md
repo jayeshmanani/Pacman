@@ -99,7 +99,7 @@ Risks are evaluated by multiplying Likelihood and Impact:
 - **Mitigations:**
   1. Refactored domain rules out of `pacman/app.py` into `pacman/gameplay/` and `pacman/application/`.
   2. Rendering components strictly receive read-only state copies or properties.
-  3. Verified by the current 464-test headless automated suite.
+  3. Verified by the current 466-test headless automated suite.
 - **Status:** Closed / Resolved in PK-60.
 
 ---
