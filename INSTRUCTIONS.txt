@@ -180,6 +180,8 @@ requiring a full playthrough:
 - 3:  Toggle Ghost Freeze (freezes all 4 ghosts in place)
 - 4:  Add Extra Life (+1 life on demand)
 - 5:  Toggle 2x Speed (doubles player movement speed; toggle again to restore)
+- E:  Force Game Over (only while Cheat Mode is enabled)
+- V:  Force Victory (only while Cheat Mode is enabled)
 
 Cheats are non-mutating and automatically reset whenever a session ends,
 ensuring subsequent playthroughs remain completely clean.

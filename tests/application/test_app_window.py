@@ -49,6 +49,7 @@ def test_event_loop_applies_state_transitions() -> None:
     """Verify that the pygame loop routes key presses to the controller."""
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
         [_FakeEvent(type=_FakePygame.QUIT)],
     ])
@@ -57,15 +58,17 @@ def test_event_loop_applies_state_transitions() -> None:
 
     assert pygame.display.captions == [
         "Pacman - Playing",
+        "Pacman - Playing",
         "Pacman - Game Over",
         "Pacman - Game Over",
     ]
     assert pygame.surface.fill_colors == [
         (0, 0, 0),
+        (0, 0, 0),
         (72, 16, 24),
         (72, 16, 24),
     ]
-    assert pygame.clock.framerates == [60, 60, 60]
+    assert pygame.clock.framerates == [60, 60, 60, 60]
 
 
 def test_f1_toggles_visible_cheat_mode_indicator_during_gameplay() -> None:
@@ -146,6 +149,7 @@ def test_game_over_screen_accepts_text_and_backspace() -> None:
     """Verify end-screen keyboard input updates the visible player name."""
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=109, unicode="M")],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=97, unicode="a")],
@@ -173,6 +177,7 @@ def test_game_over_saves_name_and_returns_to_main_menu(
     ]
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
         *name_events,
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
@@ -197,6 +202,7 @@ def test_empty_name_stays_on_game_over_with_validation_message() -> None:
     """Verify Enter cannot leave the end screen without a valid name."""
     pygame = _FakePygame([
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
         [_FakeEvent(type=_FakePygame.QUIT)],

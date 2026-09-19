@@ -73,6 +73,8 @@ def _controls() -> CheatControls:
         ghost_freeze_key=13,
         extra_life_key=14,
         speed_boost_key=15,
+        force_game_over_key=16,
+        force_victory_key=17,
     )
 
 

@@ -21,19 +21,21 @@ def test_full_lose_journey_from_menu_to_game_over_to_highscores(
     events: list[list[_FakeEvent]] = [
         # Frame 1: Main Menu -> Start Game
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 2: Playing -> Game Over (via E)
+        # Frame 2: Playing -> Enable cheat mode
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
+        # Frame 3: Playing -> Game Over (via E)
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
-        # Frames 3-7: Game Over -> Type "ALICE"
+        # Frames 4-8: Game Over -> Type "ALICE"
         *name_events,
-        # Frame 8: Game Over -> Submit name
+        # Frame 9: Game Over -> Submit name
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 9: Main Menu -> Navigate down to View Highscores
+        # Frame 10: Main Menu -> Navigate down to View Highscores
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
-        # Frame 10: Main Menu -> Select View Highscores
+        # Frame 11: Main Menu -> Select View Highscores
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 11: Highscores Screen -> Return to Main Menu
+        # Frame 12: Highscores Screen -> Return to Main Menu
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
-        # Frame 12: Main Menu -> Exit application
+        # Frame 13: Main Menu -> Exit application
         [_FakeEvent(type=_FakePygame.QUIT)],
     ]
     pygame = _FakePygame(events)
@@ -66,19 +68,21 @@ def test_full_win_journey_from_menu_to_victory_to_highscores(
     events: list[list[_FakeEvent]] = [
         # Frame 1: Main Menu -> Start Game
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 2: Playing -> Victory (via V)
+        # Frame 2: Playing -> Enable cheat mode
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
+        # Frame 3: Playing -> Victory (via V)
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_v)],
-        # Frames 3-7: Victory Screen -> Type "CHAMP"
+        # Frames 4-8: Victory Screen -> Type "CHAMP"
         *name_events,
-        # Frame 8: Victory Screen -> Submit name
+        # Frame 9: Victory Screen -> Submit name
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 9: Main Menu -> Navigate down to View Highscores
+        # Frame 10: Main Menu -> Navigate down to View Highscores
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
-        # Frame 10: Main Menu -> Select View Highscores
+        # Frame 11: Main Menu -> Select View Highscores
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 11: Highscores Screen -> Return to Main Menu
+        # Frame 12: Highscores Screen -> Return to Main Menu
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
-        # Frame 12: Main Menu -> Exit application
+        # Frame 13: Main Menu -> Exit application
         [_FakeEvent(type=_FakePygame.QUIT)],
     ]
     pygame = _FakePygame(events)
@@ -111,19 +115,21 @@ def test_end_screen_escape_cancels_without_persisting_score(
     events: list[list[_FakeEvent]] = [
         # Frame 1: Main Menu -> Start Game
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 2: Playing -> Game Over
+        # Frame 2: Playing -> Enable cheat mode
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
+        # Frame 3: Playing -> Game Over
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
-        # Frames 3-7: Game Over -> Type "GHOST"
+        # Frames 4-8: Game Over -> Type "GHOST"
         *name_events,
-        # Frame 8: Game Over -> Press Escape to cancel
+        # Frame 9: Game Over -> Press Escape to cancel
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
-        # Frame 9: Main Menu -> Navigate down to View Highscores
+        # Frame 10: Main Menu -> Navigate down to View Highscores
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_DOWN)],
-        # Frame 10: Main Menu -> Select View Highscores
+        # Frame 11: Main Menu -> Select View Highscores
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Frame 11: Highscores Screen -> Return to Main Menu
+        # Frame 12: Highscores Screen -> Return to Main Menu
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_ESCAPE)],
-        # Frame 12: Main Menu -> Exit
+        # Frame 13: Main Menu -> Exit
         [_FakeEvent(type=_FakePygame.QUIT)],
     ]
     pygame = _FakePygame(events)
@@ -147,13 +153,15 @@ def test_consecutive_playthroughs_isolate_session_state(
     p2_events = type_text_events("PTWO")
 
     events: list[list[_FakeEvent]] = [
-        # Game 1: Start -> Lose -> Type PONE -> Save -> Menu
+        # Game 1: Start -> Enable cheats -> Lose -> Type PONE -> Save -> Menu
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_e)],
         *p1_events,
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
-        # Game 2: Start -> Win -> Type PTWO -> Save -> Menu
+        # Game 2: Start -> Enable cheats -> Win -> Type PTWO -> Save -> Menu
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],
+        [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_F1)],
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_v)],
         *p2_events,
         [_FakeEvent(type=_FakePygame.KEYDOWN, key=_FakePygame.K_RETURN)],

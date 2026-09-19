@@ -102,6 +102,8 @@ regular player instructions screen.
 | `3` | Toggle ghost freeze |
 | `4` | Add an extra life |
 | `5` | Toggle the player speed boost |
+| `E` | Force an immediate Game Over (requires cheat mode enabled) |
+| `V` | Force an immediate Victory (requires cheat mode enabled) |
 
 ### Development Commands
 
