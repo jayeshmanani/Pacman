@@ -110,4 +110,5 @@ following criteria are met:
 | | PK-99 | Project management update & progress evidence | **Team** | Team |
 | | PK-100 to PK-102 | Packaging script, packaged instructions, publishing | Jayesh | Mariia |
 | | PK-103 | Clean-machine acceptance, defect fixes, regression verification | **Team** | Team |
-| | Not yet assigned | Final release rebuild and joint release review | **Team** | Team |
+| | PK-105 | Evaluation-only Game Over and Victory cheat hardening | Jayesh | Mariia |
+| | PK-106 | Final documentation review, Phase 8 closure, and readiness verification | Mariia | Jayesh |

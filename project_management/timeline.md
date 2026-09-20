@@ -48,8 +48,8 @@ gantt
     Actual Cheats, Soak & Review :done, p7_act,  2026-09-08, 2026-09-11
 
     section Phase 8 (Docs & Release)
-    Planned Packaging & Release  :active, p8_plan, 2026-09-12, 2026-09-16
-    Actual Docs & Evidence       :active, p8_act,  2026-09-11, 2026-09-14
+    Planned Packaging & Release  :done, p8_plan, 2026-09-12, 2026-09-16
+    Actual Docs & Evidence       :done, p8_act,  2026-09-11, 2026-09-19
 ```
 
 ---
@@ -66,7 +66,7 @@ gantt
 | **M5** | **Ghost AI** | 2026-09-01 – 2026-09-06 | 2026-09-01 – 2026-09-05 | -1 day | Delivered | 4 autonomous AIs, frightened mode, delayed respawn (PK-62 to PK-70) |
 | **M6** | **UI & Full Flow** | 2026-09-06 – 2026-09-10 | 2026-09-05 – 2026-09-08 | -2 days | Delivered | Main menu, HUD, pause, game-over, victory, vector sprites (PK-76 to PK-84) |
 | **M7** | **Cheats, Soak & Triage** | 2026-09-10 – 2026-09-14 | 2026-09-08 – 2026-09-11 | -1 day | Delivered | F1 cheats, 50k soak test, timer drift fix, bug triage (PK-86 to PK-94) |
-| **M8** | **Docs, Packaging & Release** | 2026-09-12 – 2026-09-16 | 2026-09-11 – Present | On Track | In Progress | Documentation (PK-96 to PK-99), packaging/publishing (PK-100 to PK-102), clean-machine acceptance (PK-103) |
+| **M8** | **Docs, Packaging & Release** | 2026-09-12 – 2026-09-16 | 2026-09-11 – 2026-09-19 | +3 days | Delivered | Documentation (PK-96 to PK-99), packaging/publishing (PK-100 to PK-102), clean-machine acceptance (PK-103), cheat hardening (PK-105), final review (PK-106) |
 
 ---
 
@@ -109,6 +109,8 @@ Phase 8 is scheduled from September 11 to September 16, 2026:
   - PK-101: Packaged-game controls and configuration instructions.
   - PK-102: Public Itch.io deployment and launch demonstration.
   - PK-103: Team clean-machine acceptance, defect fixes, and regression verification.
-- **Upcoming (Sep 14 – 16):**
-  - Final release rebuild after accepted fixes.
-  - Joint documentation/release review and final defense rehearsal.
+- **Completed (Sep 19):**
+  - Rebuilt and rechecked the release after accepted fixes.
+  - Hardened the evaluation-only Game Over and Victory controls in PK-105.
+  - Completed the final documentation, Phase 8 closure, and readiness review
+    in PK-106.

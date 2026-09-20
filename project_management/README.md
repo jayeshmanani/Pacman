@@ -58,7 +58,7 @@ acceptance tracking in accordance with Chapter VIII of the 42 subject:
 - [`team_organization.md`](team_organization.md): Team roles, pairing model,
   Definition of Done (DoD), and full ownership matrix.
 - [`acceptance_tests.md`](acceptance_tests.md): Acceptance Test Plan and
-  traceability matrix mapping subject specifications to the 464 automated tests.
+  traceability matrix mapping subject specifications to the 466 automated tests.
 - [`blockers_and_conflicts.md`](blockers_and_conflicts.md): Technical obstacles,
   investigation details, and team conflict resolution records.
 - [`bug_triage.md`](bug_triage.md): Defect triage register recording bugs

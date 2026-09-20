@@ -252,10 +252,10 @@ the end of the gameplay-review phase.
 | Jayesh | PK-101 | Packaged-game controls and configuration instructions; in-game guidance | Delivered |
 | Jayesh | PK-102 | Public platform release on Itch.io; download and launch demonstration | Delivered |
 | Team | PK-103 | Clean-machine packaged-game acceptance, defect fixes, and regression verification | Delivered |
-| Jayesh | Not yet assigned | Final release rebuild | Planned |
-| Team | Not yet assigned | Joint documentation and release review | Planned |
+| Jayesh | PK-105 | Evaluation-only Game Over and Victory cheat hardening | Delivered |
+| Mariia | PK-106 | Final documentation review, Phase 8 closure, and readiness verification | Delivered |
 
-### Delivered Outcomes (PK-96 to PK-103)
+### Delivered Outcomes (PK-96 to PK-106)
 
 * **Repository Documentation (PK-96 to PK-98):** Completed root [`README.md`](../README.md)
   featuring 42 author login headers, clear CLI execution syntax, complete controls
@@ -328,7 +328,21 @@ the end of the gameplay-review phase.
   respawn, and complete coordinator tests. All 464 tests, flake8, and strict mypy
   passed before the final package rebuild and repeated manual review.
 
-Phase 8 is complete through PK-103. The final release rebuild and joint
-documentation/release review remain planned and will be recorded after their
-Jira tasks are created and delivered.
+### Evaluation Cheat Hardening (PK-105)
 
+* **Evaluation Safety:** Restricted the direct Game Over and Victory shortcuts
+  to enabled cheat mode so regular gameplay cannot trigger evaluation-only
+  transitions accidentally.
+* **Documentation Alignment:** Added the completion shortcuts to both root and
+  packaged instructions.
+
+### Final Documentation and Phase Closure (PK-106)
+
+* **Documentation Alignment:** Reconciled the acceptance-test count and CLI
+  expectations with the current implementation and completed the Phase 8
+  ownership, timeline, and delivery records.
+* **Final Verification:** Rebuilt the standalone package and completed the
+  repository readiness review with 466 passing tests, flake8, and strict mypy.
+
+Phase 8 is complete through PK-106. Documentation, packaging, public release,
+clean-machine acceptance, and final release review have all been delivered.

@@ -41,13 +41,13 @@ tests, manual verification procedures, and quality gates.
 
 ---
 
-## 2. Automated Test Suite Distribution (464 Tests)
+## 2. Automated Test Suite Distribution (466 Tests)
 
-All 464 tests execute headlessly and pass without failures:
+All 466 tests execute headlessly and pass without failures:
 
 ```
 tests/
-├── application/           (167 tests)
+├── application/           (169 tests)
 │   ├── rendering/         - Menu, game, completion screens, dispatcher, scaling
 │   ├── test_cheat_*.py    - Cheat controller, HUD feedback, toggles
 │   ├── test_context.py    - AppContext lifecycle, session resets
@@ -91,14 +91,14 @@ make lint-strict
 make test
 ```
 *Expected Result:* Clean virtual environment created, zero flake8/mypy errors,
-464 tests passing.
+466 tests passing.
 
 ### Step 2: Fault Tolerance Check
 ```bash
 python3 pac-man.py non_existent_file.json
 ```
-*Expected Result:* Emits a clear user-facing warning and safely boots using
-default settings without raising a Python traceback.
+*Expected Result:* Emits a clear user-facing error and exits safely without
+raising a Python traceback because the required configuration file is missing.
 
 ### Step 3: Main Menu & Highscores
 - Launch the application: `make run`
@@ -163,6 +163,6 @@ in [`bug_triage.md`](bug_triage.md), and retested:
 - **BUG-10:** Freeze could visually overwrite and indefinitely pause respawn;
   a newer power period was also lost while a ghost was inactive.
 
-Final verification completed with 464 passing tests, flake8, strict mypy, a
+Final verification completed with 466 passing tests, flake8, strict mypy, a
 successful package rebuild, and a repeated manual check of the corrected
 standalone game.
