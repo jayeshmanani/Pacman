@@ -311,7 +311,7 @@ Detailed project management records, engineering decision logs, sprint ownership
 ### References
 - [Python 3 Documentation](https://docs.python.org/3/)
 - [Pygame Documentation](https://www.pygame.org/docs/)
-- [The Pac-Man Dossier (Jamey Pittman)]([https://pacman.holycow.com/](https://cs.au.dk/~ocaprani/GameAI/PacMan/The%20Pac-Man%20Dossier.pdf)) for authentic ghost targeting rules and timing algorithms.
+- [The Pac-Man Dossier (Jamey Pittman)](https://cs.au.dk/~ocaprani/GameAI/PacMan/The%20Pac-Man%20Dossier.pdf) for authentic ghost targeting rules and timing algorithms.
 - [pytest Documentation](https://docs.pytest.org/)
 - [mypy Documentation](https://mypy.readthedocs.io/)
 
